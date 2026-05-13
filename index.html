@@ -1,11 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>RenoFebri — Game Tech & 3D Creator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles — load order matters -->
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/nav.css">
+    <link rel="stylesheet" href="styles/hero.css">
+    <!-- Add new section CSS here as project grows:
+  <link rel="stylesheet" href="styles/about.css">
+  <link rel="stylesheet" href="styles/projects.css">
+  <link rel="stylesheet" href="styles/skills.css">
+  <link rel="stylesheet" href="styles/contact.css">
+  -->
+
 </head>
+
 <body>
+
+    <!-- Background Layer -->
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow-top" aria-hidden="true"></div>
+
+
+    <!-- ==========================================
+       NAVIGATION
+  =========================================== -->
+    <nav class="nav" id="nav">
+        <a href="#" class="nav-logo">
+            <span class="nav-logo-dot"></span>
+            Reno Febri<span style="color: var(--accent-primary);">.</span>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact" class="nav-cta">Contact</a></li>
+        </ul>
+    </nav>
+
+
+    <!-- ==========================================
+       HERO SECTION
+  =========================================== -->
+    <section class="hero" id="hero">
+        <div class="hero-inner">
+
+            <!-- Status Badge -->
+            <div class="hero-status">
+                <span class="hero-status-dot"></span>
+                <span class="hero-status-text">Open for opportunities</span>
+            </div>
+
+            <!-- Heading -->
+            <h1 class="hero-heading">
+                <span class="hero-heading-line"><span>Game Tech</span></span>
+                <span class="hero-heading-line"><span>& <span class="accent">3D</span></span></span>
+                <span class="hero-heading-line"><span>Creator.</span></span>
+            </h1>
+
+            <!-- Description -->
+            <p class="hero-desc">
+                Building immersive experiences at the intersection of game technology,
+                real-time 3D, and interactive web. Turning ideas into playable, visual realities.
+            </p>
+
+            <!-- Tags -->
+            <div class="hero-tags">
+                <span class="tag">Game Dev</span>
+                <span class="tag">3D Artist</span>
+                <span class="tag">2D Artist</span>
+                <span class="tag">Designer</span>
+                <span class="tag">Progammer</span>
+                <span class="tag">Web 3</span>
+            </div>
+
+            <!-- CTA -->
+            <div class="hero-cta">
+                <a href="#projects" class="btn-primary">
+                    View Projects <span class="btn-arrow">&#8594;</span>
+                </a>
+                <a href="#about" class="btn-secondary">
+                    About Me <span class="btn-arrow">&#8594;</span>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Decorative large text -->
+        <span class="hero-number" aria-hidden="true">3D</span>
+
+        <!-- Scroll indicator (JS handles click in main.js) -->
+        <div class="hero-scroll">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+       PLACEHOLDER SECTIONS — Add HTML here later
+  =========================================== -->
+    <section id="about" style="min-height: 80px;"></section>
+    <section id="projects" style="min-height: 80px;"></section>
+    <section id="skills" style="min-height: 80px;"></section>
+    <section id="contact" style="min-height: 80px;"></section>
+
+
     
+    <script src="scripts/main.js"></script>
+    <!-- Add new scripts here:
+  <script src="scripts/webgl.js"></script>
+  <script src="scripts/animations.js"></script>
+  -->
+
 </body>
+
 </html>

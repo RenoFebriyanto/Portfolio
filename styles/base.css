@@ -1,0 +1,104 @@
+/* ================================================
+   BASE — Reset, Body, Scrollbar, BG Effects
+================================================ */
+
+/* --- Reset --- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img,
+svg {
+    display: block;
+}
+
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+
+/* --- Background: Grid --- */
+.bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--border-subtle) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 50% 0%, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+}
+
+/* --- Background: Top Glow --- */
+.bg-glow-top {
+    position: fixed;
+    top: -220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 107, 53, 0.05) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+/* --- Layout Container --- */
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+    position: relative;
+    z-index: 1;
+}
+
+
+/* --- Responsive: Mobile base --- */
+@media (max-width: 768px) {
+    :root {
+        --space-xl: 24px;
+        --space-2xl: 48px;
+        --space-3xl: 64px;
+    }
+}

@@ -1,0 +1,62 @@
+/* ================================================
+   ANIMATIONS — All @keyframes
+   Add new animations here, reference from any .css
+================================================ */
+
+/* --- Entrance: Fade up into place --- */
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Entrance: Slide up (for text line reveals) --- */
+@keyframes reveal-line {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Pulse: Dot / status indicator --- */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.82); }
+}
+
+/* --- Scroll line pulse --- */
+@keyframes scroll-pulse {
+  0%, 100% { opacity: 1;   transform: scaleY(1); transform-origin: top; }
+  50%       { opacity: 0.35; }
+}
+
+/* --- Fade in (simple, no movement) --- */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- Slide in from left --- */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* --- Slide in from right --- */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
