@@ -315,3 +315,25 @@
 
     observer.observe(el);
 })();
+
+/* ========================================
+   9. AVATAR PHOTO REVEAL
+======================================== */
+(function initAvatarReveal() {
+    const avatar = document.getElementById('avatar-wrap');
+    if (!avatar) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                // Small delay so it reveals after the card shimmer
+                setTimeout(() => {
+                    avatar.classList.add('photo-ready');
+                }, 200);
+                observer.unobserve(avatar);
+            }
+        });
+    }, { threshold: 0.6 });
+
+    observer.observe(avatar);
+})();

@@ -184,7 +184,11 @@
 
                     <!-- Identity Card -->
                     <div class="about-identity reveal reveal-delay-2">
-                        <div class="about-identity-avatar">RF</div>
+                        <div class="about-identity-avatar" id="avatar-wrap">
+                            <div class="avatar-bg-fill"></div>
+                            <img src="assets/images/Me.jpeg" alt="Reno Febri" class="avatar-photo" draggable="false">
+                            <div class="avatar-scanline"></div>
+                        </div>
                         <div class="about-identity-name">Reno Febri</div>
                         <div class="about-identity-role">Game Tech & 3D Creator</div>
 
@@ -296,7 +300,8 @@
                     <h3 class="project-title">Project Name Here</h3>
                     <p class="project-desc">
                         A brief description of what this game is about — genre, core mechanic, and what makes it
-                        unique. Keep it punchy and specific. What problem does it solve, what experience does it deliver?
+                        unique. Keep it punchy and specific. What problem does it solve, what experience does it
+                        deliver?
                     </p>
 
                     <div class="project-tags">
@@ -787,7 +792,8 @@
                             <span class="social-link-arrow">&#8594;</span>
                         </a>
 
-                        <a href="https://www.linkedin.com/in/renofebriyanto/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://www.linkedin.com/in/renofebriyanto/" target="_blank" rel="noopener"
+                            class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">in</div>
                                 <div class="social-link-info">
@@ -809,7 +815,8 @@
                             <span class="social-link-arrow">&#8594;</span>
                         </a>
 
-                        <a href="https://www.instagram.com/norigaken/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://www.instagram.com/norigaken/" target="_blank" rel="noopener"
+                            class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">◈</div>
                                 <div class="social-link-info">
@@ -838,50 +845,26 @@
                         <div class="form-row">
                             <div class="form-field row-field">
                                 <label class="form-label" for="cf-name">Name</label>
-                                <input
-                                    class="form-input"
-                                    type="text"
-                                    id="cf-name"
-                                    name="name"
-                                    placeholder="Your name"
-                                    autocomplete="name"
-                                    required
-                                >
+                                <input class="form-input" type="text" id="cf-name" name="name" placeholder="Your name"
+                                    autocomplete="name" required>
                             </div>
                             <div class="form-field row-field">
                                 <label class="form-label" for="cf-email">Email</label>
-                                <input
-                                    class="form-input"
-                                    type="email"
-                                    id="cf-email"
-                                    name="email"
-                                    placeholder="your@email.com"
-                                    autocomplete="email"
-                                    required
-                                >
+                                <input class="form-input" type="email" id="cf-email" name="email"
+                                    placeholder="your@email.com" autocomplete="email" required>
                             </div>
                         </div>
 
                         <div class="form-field">
                             <label class="form-label" for="cf-subject">Subject</label>
-                            <input
-                                class="form-input"
-                                type="text"
-                                id="cf-subject"
-                                name="subject"
-                                placeholder="Project idea, collab, game jam..."
-                            >
+                            <input class="form-input" type="text" id="cf-subject" name="subject"
+                                placeholder="Project idea, collab, game jam...">
                         </div>
 
                         <div class="form-field">
                             <label class="form-label" for="cf-message">Message</label>
-                            <textarea
-                                class="form-textarea"
-                                id="cf-message"
-                                name="message"
-                                placeholder="Tell me about your project or idea..."
-                                required
-                            ></textarea>
+                            <textarea class="form-textarea" id="cf-message" name="message"
+                                placeholder="Tell me about your project or idea..." required></textarea>
                         </div>
 
                         <button class="form-submit" type="submit" id="form-submit-btn">
