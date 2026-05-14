@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="styles/cursor.css">
     <link rel="stylesheet" href="styles/motion.css">
 
+    <!-- Three.js CDN (untuk 3D project previews) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
 </head>
 
 <body>
@@ -295,6 +297,12 @@
 
                 <!-- 01 — Featured: Game Project -->
                 <div class="project-card featured reveal" data-category="game">
+
+                    <div class="project-preview" data-scene="game">
+                        <canvas></canvas>
+                        <span class="project-preview-label">Interactive 3D</span>
+                    </div>
+
                     <span class="project-bg-num">01</span>
 
                     <div class="project-card-top">
@@ -327,6 +335,12 @@
 
                 <!-- 02 — 3D Art -->
                 <div class="project-card reveal reveal-delay-1" data-category="3d">
+
+                    <div class="project-preview" data-scene="game" data-model="Assets/models/armillary_sphere.glb">
+                        <canvas></canvas>
+                        <span class="project-preview-label">3D Preview</span>
+                    </div>
+
                     <div class="project-card-top">
                         <span class="project-num">Project 02</span>
                         <span class="project-status completed">Completed</span>
@@ -354,6 +368,12 @@
 
                 <!-- 03 — Shader -->
                 <div class="project-card reveal reveal-delay-1" data-category="shader">
+
+                    <div class="project-preview" data-scene="shader">
+                        <canvas></canvas>
+                        <span class="project-preview-label">GLSL Live</span>
+                    </div>
+
                     <div class="project-card-top">
                         <span class="project-num">Project 03</span>
                         <span class="project-status completed">Completed</span>
@@ -381,6 +401,12 @@
 
                 <!-- 04 — Game Jam -->
                 <div class="project-card reveal reveal-delay-2" data-category="game">
+
+                    <div class="project-preview" data-scene="game">
+                        <canvas></canvas>
+                        <span class="project-preview-label">Interactive 3D</span>
+                    </div>
+
                     <div class="project-card-top">
                         <span class="project-num">Project 04</span>
                         <span class="project-status completed">Completed</span>
@@ -408,6 +434,12 @@
 
                 <!-- 05 — Web Interactive -->
                 <div class="project-card reveal reveal-delay-2" data-category="web">
+
+                    <div class="project-preview" data-scene="web">
+                        <canvas></canvas>
+                        <span class="project-preview-label">WebGL Live</span>
+                    </div>
+
                     <div class="project-card-top">
                         <span class="project-num">Project 05</span>
                         <span class="project-status concept">Concept</span>
@@ -435,6 +467,12 @@
 
                 <!-- 06 — 3D Character -->
                 <div class="project-card reveal reveal-delay-3" data-category="3d">
+
+                    <div class="project-preview" data-scene="art">
+                        <canvas></canvas>
+                        <span class="project-preview-label">3D Preview</span>
+                    </div>
+
                     <div class="project-card-top">
                         <span class="project-num">Project 06</span>
                         <span class="project-status archived">Archived</span>
@@ -952,6 +990,7 @@
     <script src="scripts/main.js"></script>
     <script src="scripts/cursor.js"></script>
     <script src="scripts/motion.js"></script>
+    <script src="scripts/project3d.js"></script>
 
 </body>
 
