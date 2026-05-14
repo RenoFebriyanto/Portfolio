@@ -150,6 +150,21 @@
     flex-shrink: 0;
 }
 
+.social-link-icon svg {
+    color: var(--text-muted);
+    transition: color 0.25s ease;
+    display: block;
+    flex-shrink: 0;
+}
+
+.social-link:hover .social-link-icon svg {
+    color: var(--accent-primary);
+}
+
+.social-link-icon svg[fill="currentColor"] {
+    stroke: none;
+}
+
 .social-link-info {
     display: flex;
     flex-direction: column;

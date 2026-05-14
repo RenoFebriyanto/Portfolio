@@ -137,7 +137,6 @@
         const subject = form.querySelector('#cf-subject')?.value.trim() || '(No subject)';
         const message = form.querySelector('#cf-message').value.trim();
 
-        // Validation
         let hasError = false;
         if (!name) { setFieldError('#cf-name', true); hasError = true; }
         if (!email) { setFieldError('#cf-email', true); hasError = true; }
