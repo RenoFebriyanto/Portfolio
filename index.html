@@ -23,6 +23,9 @@
     <link rel="stylesheet" href="styles/projects.css">
     <link rel="stylesheet" href="styles/skills.css">
     <link rel="stylesheet" href="styles/contact.css">
+    <!-- Custom cursor & per-section motion — load after base styles -->
+    <link rel="stylesheet" href="styles/cursor.css">
+    <link rel="stylesheet" href="styles/motion.css">
 
 </head>
 
@@ -220,7 +223,7 @@
                             <div class="stat-label">Game Builds</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-num">∞</div>
+                            <div class="stat-num">&#8734;</div>
                             <div class="stat-label">Ideas Left</div>
                         </div>
                     </div>
@@ -771,48 +774,47 @@
                     </a>
 
                     <!-- Social Links -->
-                    <!-- Update href, handle, and icon to match your real accounts -->
                     <div class="contact-socials">
 
-                        <a href="https://github.com/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://github.com/RenoFebriyanto" target="_blank" rel="noopener" class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">⌥</div>
                                 <div class="social-link-info">
                                     <span class="social-link-platform">GitHub</span>
-                                    <span class="social-link-handle">@renofebri</span>
+                                    <span class="social-link-handle">Reno Febriyanto</span>
                                 </div>
                             </div>
                             <span class="social-link-arrow">&#8594;</span>
                         </a>
 
-                        <a href="https://linkedin.com/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://www.linkedin.com/in/renofebriyanto/" target="_blank" rel="noopener" class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">in</div>
                                 <div class="social-link-info">
                                     <span class="social-link-platform">LinkedIn</span>
-                                    <span class="social-link-handle">Reno Febri</span>
+                                    <span class="social-link-handle">Reno Febriyanto</span>
                                 </div>
                             </div>
                             <span class="social-link-arrow">&#8594;</span>
                         </a>
 
-                        <a href="https://itch.io/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://catmounth.itch.io/" target="_blank" rel="noopener" class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">🎮</div>
                                 <div class="social-link-info">
                                     <span class="social-link-platform">itch.io</span>
-                                    <span class="social-link-handle">renofebri.itch.io</span>
+                                    <span class="social-link-handle">catmounth.itch.io</span>
                                 </div>
                             </div>
                             <span class="social-link-arrow">&#8594;</span>
                         </a>
 
-                        <a href="https://instagram.com/" target="_blank" rel="noopener" class="social-link">
+                        <a href="https://www.instagram.com/norigaken/" target="_blank" rel="noopener" class="social-link">
                             <div class="social-link-left">
                                 <div class="social-link-icon">◈</div>
                                 <div class="social-link-info">
                                     <span class="social-link-platform">Instagram</span>
-                                    <span class="social-link-handle">@renofebri</span>
+                                    <span class="social-link-handle">@norigaken</span>
                                 </div>
                             </div>
                             <span class="social-link-arrow">&#8594;</span>
@@ -828,8 +830,6 @@
                 </div>
 
                 <!-- Right: Form -->
-                <!-- Wire up to Formspree / EmailJS when ready — see comment below -->
-                <!-- Formspree: change action="https://formspree.io/f/YOUR_ID" on the form element -->
                 <div class="contact-form-wrap reveal reveal-delay-2">
                     <div class="contact-form-title">Send a Message</div>
                     <p class="contact-form-sub">I usually reply within 24–48 hours.</p>
@@ -927,11 +927,10 @@
     </footer>
 
 
+    <!-- Scripts — main logic first, then enhancements -->
     <script src="scripts/main.js"></script>
-    <!-- Add new scripts here:
-  <script src="scripts/webgl.js"></script>
-  <script src="scripts/animations.js"></script>
-  -->
+    <script src="scripts/cursor.js"></script>
+    <script src="scripts/motion.js"></script>
 
 </body>
 

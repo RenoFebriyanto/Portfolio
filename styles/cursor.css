@@ -1,0 +1,116 @@
+/* ================================================
+   CUSTOM CURSOR
+   Ring + Dot system. Ring lerps behind mouse.
+   Hover states: scale up, fill, blend.
+================================================ */
+
+/* Hide default cursor globally */
+*, *::before, *::after {
+    cursor: none !important;
+}
+
+/* --- Cursor Elements --- */
+.cursor-dot,
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform;
+    transform: translate(-50%, -50%);
+}
+
+/* Small center dot */
+.cursor-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    transition:
+        width     0.18s var(--ease-smooth),
+        height    0.18s var(--ease-smooth),
+        opacity   0.18s ease,
+        background 0.18s ease;
+}
+
+/* Outer ring — transparent circle */
+.cursor-ring {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-primary);
+    background: transparent;
+    opacity: 0.55;
+    transition:
+        width     0.35s var(--ease-smooth),
+        height    0.35s var(--ease-smooth),
+        opacity   0.25s ease,
+        border-color 0.25s ease,
+        background   0.3s ease;
+}
+
+
+/* --- Hover State: Interactive element (links, buttons, filter) --- */
+body.cursor-hover .cursor-ring {
+    width: 48px;
+    height: 48px;
+    opacity: 0.8;
+    border-color: var(--accent-bright);
+    background: var(--accent-glow);
+}
+
+body.cursor-hover .cursor-dot {
+    width: 3px;
+    height: 3px;
+    opacity: 0.6;
+}
+
+
+/* --- Active/Click State --- */
+body.cursor-click .cursor-ring {
+    width: 22px;
+    height: 22px;
+    opacity: 1;
+    border-color: var(--accent-primary);
+    background: rgba(255, 107, 53, 0.2);
+}
+
+body.cursor-click .cursor-dot {
+    width: 7px;
+    height: 7px;
+}
+
+
+/* --- Hover State: Cards (larger, dim ring, no fill) --- */
+body.cursor-card .cursor-ring {
+    width: 56px;
+    height: 56px;
+    opacity: 0.28;
+    border-color: var(--text-muted);
+    background: transparent;
+}
+
+body.cursor-card .cursor-dot {
+    background: var(--accent-bright);
+}
+
+
+/* --- Hidden: when mouse leaves viewport --- */
+body.cursor-hidden .cursor-ring,
+body.cursor-hidden .cursor-dot {
+    opacity: 0;
+}
+
+
+/* --- Mobile: disable cursor --- */
+@media (hover: none), (pointer: coarse) {
+    .cursor-dot,
+    .cursor-ring {
+        display: none;
+    }
+
+    *, *::before, *::after {
+        cursor: auto !important;
+    }
+}
