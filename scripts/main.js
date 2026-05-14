@@ -86,52 +86,89 @@
   });
 })();
 
-
-// --- Contact Form: UX (validation + submit state) ---
-// NOTE: Wire up to a real service before going live.
-// Option A — Formspree: add action="https://formspree.io/f/YOUR_ID" to the <form>
-// Option B — EmailJS: call emailjs.send() inside the fetch block below
+// --- Contact Form: EmailJS Integration ---
 (function initContactForm() {
-  const form   = document.getElementById('contact-form');
-  const btn    = document.getElementById('form-submit-btn');
-  const success = document.getElementById('form-success');
+
+  const EMAILJS_SERVICE_ID  = 'service_Reno';   // ← ganti
+  const EMAILJS_TEMPLATE_ID = 'template_Reno';  // ← ganti
+  const EMAILJS_PUBLIC_KEY  = 'FNCDIzpu7wl-Zh3FB';        // ← ganti
+
+  // Init EmailJS
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  const form     = document.getElementById('contact-form');
+  const btn      = document.getElementById('form-submit-btn');
+  const success  = document.getElementById('form-success');
   if (!form) return;
+
+  // Helper: highlight field error
+  function setFieldError(selector, hasError) {
+    const el = form.querySelector(selector);
+    if (!el) return;
+    el.style.borderColor = hasError ? 'rgba(255,80,80,0.6)' : '';
+    el.style.boxShadow   = hasError ? '0 0 0 3px rgba(255,80,80,0.12)' : '';
+    if (hasError) {
+      el.addEventListener('input', () => {
+        el.style.borderColor = '';
+        el.style.boxShadow   = '';
+      }, { once: true });
+    }
+  }
+
+  // Helper: button state
+  function setBtnState(state) {
+    const states = {
+      idle:    { text: 'Send Message <span class="form-submit-arrow">&#8594;</span>', disabled: false, bg: '', color: '' },
+      loading: { text: 'Sending...', disabled: true, bg: '', color: '' },
+      error:   { text: 'Failed — Try Again', disabled: false, bg: 'rgba(220,60,60,0.85)', color: '#fff' },
+    };
+    const s = states[state];
+    btn.innerHTML = s.text;
+    btn.disabled  = s.disabled;
+    btn.style.background = s.bg;
+    btn.style.color      = s.color;
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name    = form.querySelector('#cf-name').value.trim();
     const email   = form.querySelector('#cf-email').value.trim();
+    const subject = form.querySelector('#cf-subject')?.value.trim() || '(No subject)';
     const message = form.querySelector('#cf-message').value.trim();
 
-    if (!name || !email || !message) return;
+    // Validation
+    let hasError = false;
+    if (!name)    { setFieldError('#cf-name',    true); hasError = true; }
+    if (!email)   { setFieldError('#cf-email',   true); hasError = true; }
+    if (!message) { setFieldError('#cf-message', true); hasError = true; }
+    if (hasError) return;
 
-    // Loading state
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
+    setBtnState('loading');
 
     try {
-      // --- Swap this fetch for your real endpoint ---
-      // await fetch('https://formspree.io/f/YOUR_ID', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ name, email, message }),
-      // });
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        from_name:  name,
+        from_email: email,
+        subject:    subject,
+        message:    message,
+        reply_to:   email,        // reply langsung ke pengirim dari Gmail
+      });
 
-      // Simulated delay (remove once real endpoint is wired)
-      await new Promise((r) => setTimeout(r, 1200));
-
-      // Show success
+      // ✅ Berhasil
       form.style.display = 'none';
       success.classList.add('visible');
 
-    } catch {
-      btn.disabled = false;
-      btn.innerHTML = 'Send Message <span class="form-submit-arrow">&#8594;</span>';
+    } catch (err) {
+      console.error('[EmailJS Error]', err);
+      setBtnState('error');
+
+      // Reset ke idle setelah 3 detik
+      setTimeout(() => setBtnState('idle'), 3000);
     }
   });
-})();
 
+})();
 
 
 (function initSkillBars() {
