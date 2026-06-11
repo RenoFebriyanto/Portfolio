@@ -7,21 +7,22 @@
 // --- Nav: add .scrolled class on scroll ---
 (function initNav() {
     const nav = document.getElementById('nav');
-    if (!nav) return;
+    const scroller = document.getElementById('scroll-container');
+    if (!nav || !scroller) return;
 
     let ticking = false;
 
     const onScroll = () => {
         if (!ticking) {
             requestAnimationFrame(() => {
-                nav.classList.toggle('scrolled', window.scrollY > 20);
+                nav.classList.toggle('scrolled', scroller.scrollTop > 20);
                 ticking = false;
             });
             ticking = true;
         }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
+    scroller.addEventListener('scroll', onScroll, { passive: true });
 })();
 
 
@@ -80,9 +81,10 @@
 // --- Footer: Back to top ---
 (function initBackToTop() {
     const btn = document.getElementById('back-to-top');
-    if (!btn) return;
+    const scroller = document.getElementById('scroll-container');
+    if (!btn || !scroller) return;
     btn.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scroller.scrollTo({ top: 0, behavior: 'smooth' });
     });
 })();
 

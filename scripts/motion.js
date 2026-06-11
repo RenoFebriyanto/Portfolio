@@ -110,18 +110,8 @@
         sec.appendChild(ghost);
     });
 
-    function onScroll() {
-        const scrollY = window.scrollY;
-        document.querySelectorAll('.motion-section-ghost').forEach((ghost) => {
-            const sec = ghost.parentElement;
-            const rect = sec.getBoundingClientRect();
-            // Parallax: moves up slower than the section
-            const offset = rect.top * 0.08;
-            ghost.style.transform = `translateY(calc(-50% + ${offset}px))`;
-        });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const scroller = document.getElementById('scroll-container');
+    (scroller || window).addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 })();
 

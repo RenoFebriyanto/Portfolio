@@ -13,6 +13,7 @@
 
 html {
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
@@ -23,7 +24,8 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    /* overflow-x hidden moved to snap container */
+    height: 100%;
 }
 
 a {
@@ -37,21 +39,21 @@ svg {
 }
 
 
-/* --- Scrollbar --- */
-::-webkit-scrollbar {
+/* --- Scrollbar — applies to .snap-container --- */
+.snap-container::-webkit-scrollbar {
     width: 4px;
 }
 
-::-webkit-scrollbar-track {
+.snap-container::-webkit-scrollbar-track {
     background: var(--bg-primary);
 }
 
-::-webkit-scrollbar-thumb {
+.snap-container::-webkit-scrollbar-thumb {
     background: var(--text-muted);
     border-radius: 2px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+.snap-container::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
 }
 
