@@ -73,9 +73,9 @@
     padding: 7px 16px;
     cursor: pointer;
     transition:
-        color 0.2s ease,
+        color        0.2s ease,
         border-color 0.2s ease,
-        background 0.2s ease;
+        background   0.2s ease;
 }
 
 .filter-btn:hover {
@@ -115,9 +115,9 @@
     display: flex;
     flex-direction: column;
     transition:
-        border-color 0.3s ease,
-        transform 0.3s var(--ease-smooth),
-        box-shadow 0.3s ease;
+        border-color  0.3s ease,
+        transform     0.3s var(--ease-smooth),
+        box-shadow    0.3s ease;
     cursor: default;
 }
 
@@ -343,74 +343,4 @@
         flex-direction: column;
         align-items: flex-start;
     }
-}
-
-/* ================================================
-   PROJECT PREVIEW — 3D Canvas Area
-================================================ */
-
-.project-preview {
-    position: relative;
-    overflow: hidden;
-    height: 190px;
-    /* Negative margins: cancel card padding so canvas is flush to edges */
-    margin: calc(-1 * var(--space-xl));
-    margin-bottom: var(--space-lg);
-    background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border-dim);
-    transition: border-color 0.3s ease;
-}
-
-/* Featured card gets a taller canvas */
-.project-card.featured .project-preview {
-    height: 270px;
-}
-
-.project-preview canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Gradient fade: canvas → card content */
-.project-preview::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 72px;
-    background: linear-gradient(to bottom, transparent, var(--bg-card));
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Top-right label badge */
-.project-preview-label {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-sm);
-    z-index: 2;
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(240, 240, 250, 0.45);
-    background: rgba(4, 4, 10, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    padding: 4px 10px;
-    border-radius: 2px;
-    backdrop-filter: blur(8px);
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-}
-
-/* Fade label when user interacts */
-.project-preview:hover .project-preview-label {
-    opacity: 0.15;
-}
-
-/* Highlight preview border on card hover */
-.project-card:hover .project-preview {
-    border-bottom-color: var(--border-accent);
 }
