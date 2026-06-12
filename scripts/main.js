@@ -1,33 +1,3 @@
-/* ================================================
-   MAIN.JS — Core interactions
-   
-   Note: Snap scroll logic moved to snap.js.
-   Scroll indicator click is also handled there.
-================================================ */
-
-
-/* --- Nav: add .scrolled class on scroll --- */
-(function initNav() {
-    const nav      = document.getElementById('nav');
-    const scroller = document.getElementById('scroll-container');
-    if (!nav || !scroller) return;
-
-    let ticking = false;
-
-    const onScroll = () => {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                nav.classList.toggle('scrolled', scroller.scrollTop > 20);
-                ticking = false;
-            });
-            ticking = true;
-        }
-    };
-
-    scroller.addEventListener('scroll', onScroll, { passive: true });
-})();
-
-
 /* --- Projects Filter --- */
 (function initProjectsFilter() {
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -65,20 +35,14 @@
     if (el) el.textContent = new Date().getFullYear();
 })();
 
-
 /* --- Footer: Back to top --- */
 (function initBackToTop() {
-    const btn      = document.getElementById('back-to-top');
-    const scroller = document.getElementById('scroll-container');
-    if (!btn || !scroller) return;
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
 
     btn.addEventListener('click', () => {
-        // Use snap system if available, fallback to smooth scroll
-        const heroSection = document.getElementById('hero');
-        if (heroSection) {
-            heroSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            scroller.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.PageNav) {
+            window.PageNav.goTo(0, 'prev');
         }
     });
 })();
@@ -160,49 +124,4 @@
         }
     });
 
-})();
-
-
-/* --- Skill Bars: Reveal on scroll --- */
-(function initSkillBars() {
-    const groups = document.querySelectorAll('.skill-group');
-    if (!groups.length) return;
-
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        },
-        { threshold: 0.2 }
-    );
-
-    groups.forEach((g) => observer.observe(g));
-})();
-
-
-/* --- Scroll Reveal: IntersectionObserver for .reveal elements --- */
-(function initScrollReveal() {
-    const elements = document.querySelectorAll('.reveal');
-    if (!elements.length) return;
-
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        },
-        {
-            threshold: 0.1,
-            rootMargin: '0px 0px -30px 0px',
-        }
-    );
-
-    elements.forEach((el) => observer.observe(el));
 })();

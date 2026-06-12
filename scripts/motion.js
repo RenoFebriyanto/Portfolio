@@ -81,16 +81,12 @@
     draw();
 })();
 
-
 /* ========================================
    2. GHOST TEXT PARALLAX
       Injects large watermark number per section
-      and moves it on scroll for depth.
+      and moves it based on the active panel's scroll.
 ======================================== */
 (function initGhostParallax() {
-    const scroller = document.getElementById('scroll-container');
-    if (!scroller) return;
-
     const sectionDefs = [
         { id: 'about',    label: 'ABOUT'  },
         { id: 'projects', label: 'WORK'   },
@@ -98,7 +94,6 @@
         { id: 'contact',  label: 'HELLO'  },
     ];
 
-    // Build ghost elements
     const ghosts = [];
     sectionDefs.forEach(({ id, label }) => {
         const sec = document.getElementById(id);
@@ -112,83 +107,23 @@
         ghosts.push({ ghost, sec });
     });
 
-    // Parallax on scroll — #scroll-container is the scroller
-    scroller.addEventListener('scroll', () => {
-        const scrollTop = scroller.scrollTop;
+    function updateGhosts() {
         const vh = window.innerHeight;
 
         ghosts.forEach(({ ghost, sec }) => {
             const rect   = sec.getBoundingClientRect();
-            // How far the section center is from viewport center (normalized)
             const center = rect.top + rect.height / 2 - vh / 2;
             const offset = center * 0.06; // parallax intensity
             ghost.style.transform = `translateY(calc(-50% + ${offset}px))`;
         });
-    }, { passive: true });
+    }
+
+    // pagescroll.js dispatches this on every internal panel scroll
+    window.addEventListener('panelscroll', updateGhosts, { passive: true });
+    updateGhosts();
 })();
 
 
-/* ========================================
-   3. STAT COUNTER — count-up on reveal
-======================================== */
-(function initStatCounters() {
-    const stats = document.querySelectorAll('.stat-num');
-    if (!stats.length) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const el = entry.target;
-            observer.unobserve(el);
-
-            const raw = el.textContent.replace(/[^0-9]/g, '');
-            const end = parseInt(raw, 10);
-            if (!end || isNaN(end)) return;
-
-            const accentEl = el.querySelector('.stat-accent');
-            const suffix   = accentEl ? accentEl.outerHTML : '';
-
-            const duration  = 900;
-            const startTime = performance.now();
-
-            function tick(now) {
-                const progress = Math.min((now - startTime) / duration, 1);
-                const eased    = 1 - Math.pow(1 - progress, 2);
-                const current  = Math.round(eased * end);
-                el.innerHTML   = current + suffix;
-                if (progress < 1) {
-                    requestAnimationFrame(tick);
-                } else {
-                    el.innerHTML = end + suffix;
-                    el.closest('.stat-card')?.classList.add('counted');
-                }
-            }
-            requestAnimationFrame(tick);
-        });
-    }, { threshold: 0.6 });
-
-    stats.forEach((el) => observer.observe(el));
-})();
-
-
-/* ========================================
-   4. IDENTITY CARD SHIMMER
-======================================== */
-(function initIdentityShimmer() {
-    const card = document.querySelector('.about-identity');
-    if (!card) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                card.classList.add('shimmer-ready');
-                observer.unobserve(card);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    observer.observe(card);
-})();
 
 
 /* ========================================
@@ -234,24 +169,6 @@
 })();
 
 
-/* ========================================
-   6. SECTION DIVIDER LINE DRAW
-======================================== */
-(function initDividerDraw() {
-    const dividers = document.querySelectorAll('.section-divider');
-    if (!dividers.length) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('line-drawn');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    dividers.forEach((d) => observer.observe(d));
-})();
 
 
 /* ========================================
@@ -273,60 +190,3 @@
 })();
 
 
-/* ========================================
-   8. CONTACT EYEBROW — Typed effect
-======================================== */
-(function initTypedEyebrow() {
-    const el = document.querySelector('.contact-eyebrow');
-    if (!el) return;
-
-    const fullText = el.textContent.trim();
-    el.textContent = '';
-    el.classList.add('motion-typed');
-
-    let started = false;
-    let charIdx = 0;
-
-    function type() {
-        if (charIdx < fullText.length) {
-            el.textContent = fullText.slice(0, ++charIdx);
-            setTimeout(type, 38 + Math.random() * 22);
-        } else {
-            setTimeout(() => el.classList.remove('motion-typed'), 1800);
-        }
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting && !started) {
-                started = true;
-                setTimeout(type, 400);
-                observer.unobserve(el);
-            }
-        });
-    }, { threshold: 0.8 });
-
-    observer.observe(el);
-})();
-
-
-/* ========================================
-   9. AVATAR PHOTO REVEAL
-======================================== */
-(function initAvatarReveal() {
-    const avatar = document.getElementById('avatar-wrap');
-    if (!avatar) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => {
-                    avatar.classList.add('photo-ready');
-                }, 200);
-                observer.unobserve(avatar);
-            }
-        });
-    }, { threshold: 0.6 });
-
-    observer.observe(avatar);
-})();
