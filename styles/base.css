@@ -14,6 +14,7 @@
 html {
     scroll-behavior: smooth;
     height: 100%;
+    overflow: hidden; /* body overflow handled by #scroll-container */
 }
 
 body {
@@ -24,8 +25,8 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* overflow-x hidden moved to snap container */
     height: 100%;
+    overflow: hidden;
 }
 
 a {
@@ -39,22 +40,120 @@ svg {
 }
 
 
-/* --- Scrollbar — applies to .snap-container --- */
-.snap-container::-webkit-scrollbar {
-    width: 4px;
+/* ================================================
+   SCROLL CONTAINER — Main scrollable wrapper
+   Snap scrolling is handled via JS (snap.js).
+   CSS snap is set as base; JS overrides for tall sections.
+================================================ */
+
+#scroll-container {
+    height: 100vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+
+    /* CSS snap — base behavior */
+    scroll-snap-type: y mandatory;
+
+    /* Performance */
+    will-change: scroll-position;
+    -webkit-overflow-scrolling: touch;
 }
 
-.snap-container::-webkit-scrollbar-track {
-    background: var(--bg-primary);
+/* Scrollbar styling */
+#scroll-container::-webkit-scrollbar {
+    width: 3px;
 }
 
-.snap-container::-webkit-scrollbar-thumb {
+#scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#scroll-container::-webkit-scrollbar-thumb {
     background: var(--text-muted);
     border-radius: 2px;
+    opacity: 0.5;
 }
 
-.snap-container::-webkit-scrollbar-thumb:hover {
+#scroll-container::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+
+/* ================================================
+   SNAP SECTIONS
+   Each top-level section snaps to the viewport top.
+   Sections taller than 100vh scroll freely inside
+   before snapping to the next — handled by JS.
+================================================ */
+
+/* Hero always exactly 1 viewport */
+#hero {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
+    max-height: 100vh; /* hero is locked to viewport */
+    overflow: hidden;
+}
+
+/* Other sections: snap start, allow tall content */
+#about,
+#projects,
+#skills,
+#contact {
+    scroll-snap-align: start;
+    /* no max-height — sections can be taller than viewport */
+}
+
+/* Footer lives inside #contact section, no separate snap needed */
+
+
+/* ================================================
+   SNAP PROGRESS INDICATOR (dot nav)
+   Injected by snap.js into body
+================================================ */
+
+.snap-dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.snap-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition:
+        background   0.35s var(--ease-smooth),
+        height       0.35s var(--ease-smooth),
+        border-radius 0.35s var(--ease-smooth);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.snap-dot.active {
+    background: var(--accent-primary);
+    height: 20px;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+}
+
+.snap-dot:hover:not(.active) {
+    background: var(--text-secondary);
+}
+
+/* Hide on mobile */
+@media (max-width: 768px) {
+    .snap-dots {
+        display: none;
+    }
 }
 
 
