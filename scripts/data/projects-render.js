@@ -1,6 +1,9 @@
 /* ================================================
    PROJECTS-RENDER.JS — Build filter bar & project
    grid dari window.PROJECT_CATEGORIES & window.PROJECTS_DATA.
+   
+   v2: tambah .project3d-canvas + .project3d-spinner
+       per card yang punya field `glb` di data.
 ================================================ */
 
 (function renderProjects() {
@@ -33,6 +36,7 @@
                         <span class="project-preview-placeholder-cat">${proj.categoryLabel}</span>
                     </div>
                     <div class="project-preview-noise"></div>
+                    ${buildCanvasOverlay(proj)}
                 </div>`;
         }
 
@@ -63,7 +67,26 @@
                 ${videoEl}
                 ${overlay}
                 <div class="project-preview-noise"></div>
+                ${buildCanvasOverlay(proj)}
             </div>`;
+    }
+
+    /* ---- Canvas + Spinner overlay (hanya kalau ada glb) ---- */
+    function buildCanvasOverlay(proj) {
+        if (!proj.glb) return '';
+
+        return `
+            <!-- 3D Canvas: opacity 0 by default, fade in on hover -->
+            <canvas class="project3d-canvas" aria-hidden="true"></canvas>
+
+            <!-- Spinner: muncul saat GLB loading -->
+            <div class="project3d-spinner" aria-hidden="true">
+                <div class="project3d-spinner-ring"></div>
+            </div>
+
+            <!-- Drag hint: muncul saat 3D aktif -->
+            <span class="project3d-hint">drag to rotate</span>
+        `;
     }
 
     /* ---- Project cards ---- */
@@ -82,12 +105,16 @@
         const linkClass = hasLink ? 'project-link' : 'project-link disabled';
         const linkLabel = proj.linkLabel || 'View Project';
 
+        /* data-glb attr untuk project3d.js */
+        const glbAttr = proj.glb ? `data-glb="${proj.glb}"` : '';
+
         return `
             <div class="project-card${featuredClass} reveal reveal-delay-${delay}"
                  data-category="${proj.category}"
                  data-project-id="${proj.id}"
                  data-page-type="${proj.pageType || ''}"
-                 data-has-video="${!!(proj.preview?.video)}">
+                 data-has-video="${!!(proj.preview?.video)}"
+                 ${glbAttr}>
                 ${bgNum}
 
                 ${buildPreview(proj)}
@@ -119,6 +146,9 @@
 
     /* ---- Video hover: play/pause on mouseenter/leave ---- */
     grid.querySelectorAll('.project-card[data-has-video="true"]').forEach(card => {
+        /* Skip kalau card punya GLB — video digantikan 3D */
+        if (card.dataset.glb) return;
+
         const video = card.querySelector('.project-preview-video');
         if (!video) return;
 
