@@ -284,183 +284,10 @@
 
             <!-- Filter Bar -->
             <div class="projects-filter reveal reveal-delay-2">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="game">Game Dev</button>
-                <button class="filter-btn" data-filter="3d">3D Art</button>
-                <button class="filter-btn" data-filter="shader">Shader</button>
-                <button class="filter-btn" data-filter="web">Web</button>
             </div>
 
             <!-- Project Grid -->
             <div class="projects-grid" id="projects-grid">
-
-                <!-- 01 — Featured: Game Project -->
-                <div class="project-card featured reveal" data-category="game">
-                    <span class="project-bg-num">01</span>
-
-                    <div class="project-card-top">
-                        <span class="project-num">Project 01</span>
-                        <span class="project-status wip">In Progress</span>
-                    </div>
-
-                    <div class="project-category">Game Dev</div>
-                    <h3 class="project-title">Project Name Here</h3>
-                    <p class="project-desc">
-                        A brief description of what this game is about — genre, core mechanic, and what makes it
-                        unique. Keep it punchy and specific. What problem does it solve, what experience does it
-                        deliver?
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">Unity</span>
-                        <span class="project-tag">C#</span>
-                        <span class="project-tag">HLSL</span>
-                        <span class="project-tag">Blender</span>
-                        <span class="project-tag">FMOD</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link">
-                            View Project <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 02 — 3D Art -->
-                <div class="project-card reveal reveal-delay-1" data-category="3d">
-                    <div class="project-card-top">
-                        <span class="project-num">Project 02</span>
-                        <span class="project-status completed">Completed</span>
-                    </div>
-
-                    <div class="project-category">3D Art</div>
-                    <h3 class="project-title">3D Scene / Art Title</h3>
-                    <p class="project-desc">
-                        Environment art, character, or product render — describe the concept, mood, and technical
-                        approach used in Blender to achieve the final look.
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">Blender</span>
-                        <span class="project-tag">Cycles</span>
-                        <span class="project-tag">Substance</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link">
-                            View Artwork <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 03 — Shader -->
-                <div class="project-card reveal reveal-delay-1" data-category="shader">
-                    <div class="project-card-top">
-                        <span class="project-num">Project 03</span>
-                        <span class="project-status completed">Completed</span>
-                    </div>
-
-                    <div class="project-category">Shader / GLSL</div>
-                    <h3 class="project-title">Shader Experiment</h3>
-                    <p class="project-desc">
-                        A real-time shader experiment — describe the visual effect, technique used (raymarching,
-                        noise, SDF, etc.) and what drove the exploration.
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">GLSL</span>
-                        <span class="project-tag">WebGL</span>
-                        <span class="project-tag">Three.js</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link">
-                            Live Demo <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 04 — Game Jam -->
-                <div class="project-card reveal reveal-delay-2" data-category="game">
-                    <div class="project-card-top">
-                        <span class="project-num">Project 04</span>
-                        <span class="project-status completed">Completed</span>
-                    </div>
-
-                    <div class="project-category">Game Dev</div>
-                    <h3 class="project-title">Game Jam Entry</h3>
-                    <p class="project-desc">
-                        A game jam build — theme, time limit, what was built, what you learned, and any results
-                        or ratings received.
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">Godot</span>
-                        <span class="project-tag">GDScript</span>
-                        <span class="project-tag">Aseprite</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link">
-                            Play on itch.io <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 05 — Web Interactive -->
-                <div class="project-card reveal reveal-delay-2" data-category="web">
-                    <div class="project-card-top">
-                        <span class="project-num">Project 05</span>
-                        <span class="project-status concept">Concept</span>
-                    </div>
-
-                    <div class="project-category">Web / Interactive</div>
-                    <h3 class="project-title">Interactive Web Experience</h3>
-                    <p class="project-desc">
-                        A web-based interactive piece — describe what it is, the interaction model, and the
-                        visual or narrative experience it delivers.
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">Three.js</span>
-                        <span class="project-tag">GSAP</span>
-                        <span class="project-tag">WebGL</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link disabled">
-                            Coming Soon <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 06 — 3D Character -->
-                <div class="project-card reveal reveal-delay-3" data-category="3d">
-                    <div class="project-card-top">
-                        <span class="project-num">Project 06</span>
-                        <span class="project-status archived">Archived</span>
-                    </div>
-
-                    <div class="project-category">3D Art</div>
-                    <h3 class="project-title">Character / Model Study</h3>
-                    <p class="project-desc">
-                        A character modeling or sculpting study — anatomy, style direction, topology decisions,
-                        and any rigging or animation work done.
-                    </p>
-
-                    <div class="project-tags">
-                        <span class="project-tag">Blender</span>
-                        <span class="project-tag">Sculpt</span>
-                        <span class="project-tag">Rigging</span>
-                    </div>
-
-                    <div class="project-card-footer">
-                        <a href="#" class="project-link">
-                            View Model <span class="project-link-arrow">&#8594;</span>
-                        </a>
-                    </div>
-                </div>
-
             </div>
         </div>
     </section>
@@ -691,6 +518,8 @@
     <!-- Scripts — main logic first, then enhancements -->
     <script src="scripts/data/skills-data.js"></script>
     <script src="scripts/data/skills-render.js"></script>
+    <script src="scripts/data/projects-data.js"></script>
+    <script src="scripts/data/projects-render.js"></script>
     <script src="scripts/main.js"></script>
     <script src="scripts/cursor.js"></script>
     <script src="scripts/motion.js"></script>
