@@ -19,7 +19,87 @@
   padding: 0 var(--space-xl);
   position: relative;
   z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-2xl);
 }
+
+
+/* --- 3D Canvas container --- */
+#hero-3d-canvas {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    position: relative;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease-smooth) 0.5s;
+    cursor: grab;
+}
+ 
+#hero-3d-canvas:active {
+    cursor: grabbing;
+}
+ 
+#hero-3d-canvas.hero-3d-ready {
+    opacity: 1;
+}
+ 
+#hero-3d-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+ 
+/* Subtle glow behind sphere */
+#hero-3d-canvas::before {
+    content: '';
+    position: absolute;
+    inset: 10%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 107, 53, 0.06) 0%,
+        rgba(77, 140, 255, 0.04) 50%,
+        transparent 75%
+    );
+    pointer-events: none;
+    z-index: 0;
+    animation: sphere-glow-pulse 4s ease-in-out infinite;
+}
+ 
+@keyframes sphere-glow-pulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50%       { opacity: 1.2; transform: scale(1.06); }
+}
+ 
+/* Drag hint label */
+#hero-3d-canvas::after {
+    content: 'drag to rotate';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+ 
+#hero-3d-canvas.hero-3d-ready:hover::after {
+    opacity: 1;
+}
+
+/* --- Override: hero text section stays left --- */
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+ 
 
 /* --- Status Badge --- */
 .hero-status {
@@ -246,113 +326,7 @@
   pointer-events: none;
 }
 
-/* ================================================
-   HERO 3D — Canvas container & two-column layout
-   Tambahkan ke akhir styles/hero.css
-================================================ */
 
-/* --- Hero inner: two-column layout --- */
-.hero-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: var(--space-2xl);
-}
-
-/* --- 3D Canvas container --- */
-#hero-3d-canvas {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    position: relative;
-    opacity: 0;
-    transition: opacity 1.2s var(--ease-smooth) 0.5s;
-    cursor: grab;
-}
-
-#hero-3d-canvas:active {
-    cursor: grabbing;
-}
-
-#hero-3d-canvas.hero-3d-ready {
-    opacity: 1;
-}
-
-#hero-3d-canvas canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-}
-
-/* Subtle glow behind sphere */
-#hero-3d-canvas::before {
-    content: '';
-    position: absolute;
-    inset: 10%;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 107, 53, 0.06) 0%,
-        rgba(77, 140, 255, 0.04) 50%,
-        transparent 75%
-    );
-    pointer-events: none;
-    z-index: 0;
-    animation: sphere-glow-pulse 4s ease-in-out infinite;
-}
-
-@keyframes sphere-glow-pulse {
-    0%, 100% { opacity: 0.8; transform: scale(1); }
-    50%       { opacity: 1.2; transform: scale(1.06); }
-}
-
-/* Drag hint label */
-#hero-3d-canvas::after {
-    content: 'drag to rotate';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-#hero-3d-canvas.hero-3d-ready:hover::after {
-    opacity: 1;
-}
-
-/* --- Override: hero text section stays left --- */
-.hero-content {
-    position: relative;
-    z-index: 1;
-}
-
-/* --- Responsive: stack on mobile --- */
-@media (max-width: 900px) {
-    .hero-inner {
-        grid-template-columns: 1fr;
-    }
-
-    #hero-3d-canvas {
-        max-width: 340px;
-        margin: 0 auto;
-        aspect-ratio: 1 / 1;
-        order: -1; /* sphere di atas di mobile */
-    }
-}
-
-@media (max-width: 768px) {
-    #hero-3d-canvas {
-        max-width: 260px;
-        opacity: 0.85;
-    }
-}
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
@@ -410,3 +384,26 @@
     margin-bottom: var(--space-sm);
   }
 }
+
+
+/* --- Responsive: stack on mobile --- */
+@media (max-width: 900px) {
+    .hero-inner {
+        grid-template-columns: 1fr;
+    }
+ 
+    #hero-3d-canvas {
+        max-width: 340px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
+        order: -1; /* sphere di atas di mobile */
+    }
+}
+ 
+@media (max-width: 768px) {
+    #hero-3d-canvas {
+        max-width: 260px;
+        opacity: 0.85;
+    }
+}
+ 
