@@ -34,16 +34,43 @@
     /* ================================================
        GENERIC: .reveal elements
     ================================================ */
+    const EXIT_STAGGER_CLASSES = ['exit-stagger-1', 'exit-stagger-2', 'exit-stagger-3', 'exit-stagger-4', 'exit-stagger-5'];
+
+    function clearExitClasses(el) {
+        el.classList.remove('exiting', 'exit-next', 'exit-prev', ...EXIT_STAGGER_CLASSES);
+    }
+
     function enterReveal(sectionEl) {
         sectionEl.querySelectorAll('.reveal').forEach(el => {
+            clearExitClasses(el);
             el.classList.remove('visible');
             void el.offsetWidth;
             requestAnimationFrame(() => el.classList.add('visible'));
         });
     }
 
-    function leaveReveal(sectionEl) {
-        sectionEl.querySelectorAll('.reveal').forEach(el => el.classList.remove('visible'));
+    /* Animate .reveal elements OUT before the panel slides away.
+       direction: 'next' → content drifts up (panel exits upward)
+                  'prev' → content drifts down (panel exits downward)
+       Keeps the per-element motion continuous with the page swap. */
+    function leaveReveal(sectionEl, direction = 'next') {
+        const exitClass = direction === 'prev' ? 'exit-prev' : 'exit-next';
+        const items = Array.from(sectionEl.querySelectorAll('.reveal'));
+
+        items.forEach((el, i) => {
+            clearExitClasses(el);
+            const stagger = EXIT_STAGGER_CLASSES[Math.min(i, EXIT_STAGGER_CLASSES.length - 1)];
+            el.classList.add('exiting', exitClass, stagger);
+        });
+
+        // Clean up once the exit transition has fully finished,
+        // so the element is reset for the next 'sectionenter'.
+        setTimeout(() => {
+            items.forEach(el => {
+                el.classList.remove('visible');
+                clearExitClasses(el);
+            });
+        }, 520);
     }
 
 
@@ -75,7 +102,19 @@
 
     function enterHero(sectionEl) {
         HERO_SELECTORS.forEach(sel => {
-            sectionEl.querySelectorAll(sel).forEach(restartCSS);
+            sectionEl.querySelectorAll(sel).forEach(el => {
+                el.classList.remove('motion-exit');
+                restartCSS(el);
+            });
+        });
+    }
+
+    /* Reverse the entrance animation as the hero panel slides away */
+    function leaveHero(sectionEl) {
+        HERO_SELECTORS.forEach(sel => {
+            sectionEl.querySelectorAll(sel).forEach(el => {
+                el.classList.add('motion-exit');
+            });
         });
     }
 
@@ -132,8 +171,8 @@
         });
     }
 
-    function leaveAbout(sectionEl) {
-        leaveReveal(sectionEl);
+    function leaveAbout(sectionEl, direction) {
+        leaveReveal(sectionEl, direction);
         sectionEl.querySelector('.about-identity')?.classList.remove('shimmer-ready');
         sectionEl.querySelector('#avatar-wrap')?.classList.remove('photo-ready');
     }
@@ -147,9 +186,15 @@
         drawDivider(sectionEl);
     }
 
-    function leaveProjects(sectionEl) {
-        leaveReveal(sectionEl);
+    function leaveProjects(sectionEl, direction) {
+        leaveReveal(sectionEl, direction);
         undrawDivider(sectionEl);
+
+        // Reset any active 3D tilt so cards don't return mid-tilt
+        sectionEl.querySelectorAll('.project-card').forEach(card => {
+            card.style.transform = '';
+            card.classList.remove('tilting');
+        });
     }
 
 
@@ -165,8 +210,8 @@
         });
     }
 
-    function leaveSkills(sectionEl) {
-        leaveReveal(sectionEl);
+    function leaveSkills(sectionEl, direction) {
+        leaveReveal(sectionEl, direction);
         undrawDivider(sectionEl);
         sectionEl.querySelectorAll('.skill-group').forEach(g => g.classList.remove('visible'));
     }
@@ -205,8 +250,8 @@
         typingTimer = setTimeout(type, 400);
     }
 
-    function leaveContact(sectionEl) {
-        leaveReveal(sectionEl);
+    function leaveContact(sectionEl, direction) {
+        leaveReveal(sectionEl, direction);
         undrawDivider(sectionEl);
         clearTimeout(typingTimer);
     }
@@ -224,6 +269,7 @@
     };
 
     const LEAVE = {
+        hero:     leaveHero,
         about:    leaveAbout,
         projects: leaveProjects,
         skills:   leaveSkills,
@@ -234,14 +280,14 @@
         const id = e.detail?.id;
         const sectionEl = document.getElementById(id);
         if (!sectionEl) return;
-        ENTER[id]?.(sectionEl);
+        ENTER[id]?.(sectionEl, e.detail?.direction);
     });
 
     window.addEventListener('sectionleave', (e) => {
         const id = e.detail?.id;
         const sectionEl = document.getElementById(id);
         if (!sectionEl) return;
-        LEAVE[id]?.(sectionEl);
+        LEAVE[id]?.(sectionEl, e.detail?.direction);
     });
 
 })();

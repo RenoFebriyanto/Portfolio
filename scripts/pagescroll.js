@@ -129,7 +129,7 @@ function goTo(toIdx, dir) {
     const enterY = direction === 'next' ? '12%'  : '-12%';
 
     // Reset animasi section yang ditinggalkan
-    window.dispatchEvent(new CustomEvent('sectionleave', { detail: { id: fromSec.id } }));
+    window.dispatchEvent(new CustomEvent('sectionleave', { detail: { id: fromSec.id, direction } }));
 
     // Exit current panel
     fromPanel.style.transition = `transform ${TRANS_DUR}ms cubic-bezier(0.4,0,1,1), opacity ${TRANS_DUR * 0.75}ms ease`;
@@ -154,7 +154,7 @@ function goTo(toIdx, dir) {
     toPanel.style.opacity    = '1';
 
     // Mainkan animasi section yang baru muncul — bersamaan dengan slide-in
-    window.dispatchEvent(new CustomEvent('sectionenter', { detail: { id: toSec.id } }));
+    window.dispatchEvent(new CustomEvent('sectionenter', { detail: { id: toSec.id, direction } }));
 
     setTimeout(() => {
         fromPanel.classList.remove('panel-visible');

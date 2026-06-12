@@ -326,7 +326,24 @@
   pointer-events: none;
 }
 
+/* --- Exit Animations (motion out on section leave) --- */
+.hero-status.motion-exit {
+  animation: fade-up-out 0.35s var(--ease-smooth) forwards;
+}
 
+.hero-heading-line span.motion-exit {
+  animation: reveal-line-out 0.4s var(--ease-smooth) forwards;
+}
+
+.hero-desc.motion-exit,
+.hero-tags.motion-exit,
+.hero-cta.motion-exit {
+  animation: fade-down-out 0.35s var(--ease-smooth) forwards;
+}
+
+.hero-scroll.motion-exit {
+  animation: fade-down-out 0.3s var(--ease-smooth) forwards;
+}
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
