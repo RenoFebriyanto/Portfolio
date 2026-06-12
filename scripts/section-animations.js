@@ -133,42 +133,63 @@
         const avatar = sectionEl.querySelector('#avatar-wrap');
         if (avatar) retrigger(avatar, 'photo-ready', 200);
 
-        // Stat counters — count up from 0 every time
-        sectionEl.querySelectorAll('.stat-num').forEach(el => {
-            const card = el.closest('.stat-card');
-            card?.classList.remove('counted');
+        // Stat counters — count up from 0, support decimal & dynamic values
+sectionEl.querySelectorAll('.stat-num').forEach(el => {
+    const card   = el.closest('.stat-card');
+    const rawKey = el.dataset.raw || '';  // special key dari about-render
 
-            // Cache original target value & suffix on first run
-            if (!el.dataset.targetVal) {
-                const raw = el.textContent.replace(/[^0-9]/g, '');
-                el.dataset.targetVal = raw || '0';
-                const accentEl = el.querySelector('.stat-accent');
-                el.dataset.suffix = accentEl ? accentEl.outerHTML : '';
-            }
+    card?.classList.remove('counted');
 
-            const end    = parseInt(el.dataset.targetVal, 10);
-            const suffix = el.dataset.suffix || '';
-            if (!end || isNaN(end)) return;
+    /* Resolve nilai terkini setiap kali section muncul */
+    let resolvedNum;
+    if (rawKey === 'YEARS_ACTIVE') {
+        // Hitung ulang realtime
+        const d    = window.ABOUT_DATA || {};
+        const startYear  = d.startYear  || 2022;
+        const startMonth = (d.startMonth || 1) - 1;
+        const start      = new Date(startYear, startMonth, 1);
+        const diffYears  = (Date.now() - start) / (1000 * 60 * 60 * 24 * 365.25);
+        resolvedNum = diffYears.toFixed(1);
+    } else if (rawKey === 'PROJECT_COUNT') {
+        resolvedNum = String(Array.isArray(window.PROJECTS_DATA) ? window.PROJECTS_DATA.length : 0);
+    } else {
+        // Nilai statis — ambil dari teks, skip '∞'
+        const raw = el.textContent.replace(/[^0-9.]/g, '');
+        resolvedNum = raw || null;
+    }
 
-            el.innerHTML = '0' + suffix;
+    const accentEl = el.querySelector('.stat-accent');
+    const suffix   = accentEl ? accentEl.outerHTML : '';
 
-            const duration  = 900;
-            const startTime = performance.now();
+    /* Angka infinity / non-numerik — tampilkan langsung tanpa animasi */
+    if (!resolvedNum || isNaN(parseFloat(resolvedNum))) {
+        card?.classList.add('counted');
+        return;
+    }
 
-            function tick(now) {
-                const progress = Math.min((now - startTime) / duration, 1);
-                const eased    = 1 - Math.pow(1 - progress, 2);
-                const current  = Math.round(eased * end);
-                el.innerHTML   = current + suffix;
-                if (progress < 1) {
-                    requestAnimationFrame(tick);
-                } else {
-                    el.innerHTML = end + suffix;
-                    card?.classList.add('counted');
-                }
-            }
+    const isDecimal = resolvedNum.includes('.');
+    const end       = parseFloat(resolvedNum);
+    const decimals  = isDecimal ? (resolvedNum.split('.')[1]?.length || 1) : 0;
+
+    el.innerHTML = (0).toFixed(decimals) + suffix;
+
+    const duration  = 900;
+    const startTime = performance.now();
+
+    function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased    = 1 - Math.pow(1 - progress, 2);
+        const current  = eased * end;
+        el.innerHTML   = current.toFixed(decimals) + suffix;
+        if (progress < 1) {
             requestAnimationFrame(tick);
-        });
+        } else {
+            el.innerHTML = end.toFixed(decimals) + suffix;
+            card?.classList.add('counted');
+        }
+    }
+    requestAnimationFrame(tick);
+});
     }
 
     function leaveAbout(sectionEl, direction) {

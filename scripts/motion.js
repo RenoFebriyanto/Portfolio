@@ -124,8 +124,6 @@
 })();
 
 
-
-
 /* ========================================
    5. PROJECT CARD 3D TILT
 ======================================== */
@@ -138,9 +136,8 @@
     const MAX_TILT = 7;
 
     cards.forEach((card) => {
-        const glow = document.createElement('div');
-        glow.className = 'card-tilt-glow';
-        card.appendChild(glow);
+        // .card-tilt-glow sudah dirender oleh projects-render.js, skip inject
+        const glow = card.querySelector('.card-tilt-glow');
 
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -155,10 +152,12 @@
             card.style.transform = `perspective(700px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-3px)`;
             card.classList.add('tilting');
 
-            const gx = ((e.clientX - rect.left) / rect.width)  * 100;
-            const gy = ((e.clientY - rect.top)  / rect.height) * 100;
-            glow.style.setProperty('--glow-x', `${gx}%`);
-            glow.style.setProperty('--glow-y', `${gy}%`);
+            if (glow) {
+                const gx = ((e.clientX - rect.left) / rect.width)  * 100;
+                const gy = ((e.clientY - rect.top)  / rect.height) * 100;
+                glow.style.setProperty('--glow-x', `${gx}%`);
+                glow.style.setProperty('--glow-y', `${gy}%`);
+            }
         });
 
         card.addEventListener('mouseleave', () => {

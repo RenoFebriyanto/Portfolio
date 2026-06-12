@@ -1,14 +1,53 @@
 /* ================================================
    ABOUT-RENDER.JS — Build section About dari
    window.ABOUT_DATA (scripts/data/about-data.js).
-
-   Harus dimuat SETELAH about-data.js dan
-   SEBELUM section-animations.js, cursor.js, motion.js.
+   Semua konten dikontrol dari about-data.js.
+   Tidak perlu sentuh index.html.
 ================================================ */
 
 (function renderAbout() {
     const data = window.ABOUT_DATA;
-    if (!data) return;
+    if (!data) {
+        console.warn('[About] window.ABOUT_DATA tidak ditemukan.');
+        return;
+    }
+
+    /* ================================================
+       RESOLVER: nilai dinamis untuk stat cards
+    ================================================ */
+
+    /**
+     * Hitung Years Active secara realtime dari data.startYear / startMonth.
+     * Mengembalikan string desimal 1 digit, misal "3.7" atau "4.0".
+     * Animasi count-up di section-animations.js akan berjalan normal.
+     */
+    function resolveYearsActive() {
+        const startYear  = data.startYear  || 2022;
+        const startMonth = (data.startMonth || 1) - 1; // JS month 0-indexed
+        const start = new Date(startYear, startMonth, 1);
+        const now   = new Date();
+        const diffMs    = now - start;
+        const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+        return diffYears.toFixed(1);   // "3.7"
+    }
+
+    /**
+     * Hitung total project dari window.PROJECTS_DATA.
+     * Fallback ke '0' kalau data belum ada.
+     */
+    function resolveProjectCount() {
+        if (Array.isArray(window.PROJECTS_DATA)) {
+            return String(window.PROJECTS_DATA.length);
+        }
+        return '0';
+    }
+
+    /** Ganti special key dengan nilai yang sudah dihitung */
+    function resolveStatNum(num) {
+        if (num === 'YEARS_ACTIVE')   return resolveYearsActive();
+        if (num === 'PROJECT_COUNT')  return resolveProjectCount();
+        return num;
+    }
 
     /* ---- Heading ---- */
     const headingEl = document.querySelector('.about-heading');
@@ -22,7 +61,7 @@
             .join('');
     }
 
-    /* ---- Chips ---- */
+    /* ---- Chips (What I Do) ---- */
     const chipsEl = document.querySelector('.about-doing');
     if (chipsEl && Array.isArray(data.chips)) {
         chipsEl.innerHTML = data.chips
@@ -45,7 +84,7 @@
     const cornerTag = document.querySelector('.avatar-corner-tag');
     if (cornerTag) cornerTag.textContent = data.cornerTag || data.name;
 
-    /* ---- Name & role ---- */
+    /* ---- Name & Role ---- */
     const nameEl = document.querySelector('.about-identity-name');
     const roleEl = document.querySelector('.about-identity-role');
     if (nameEl) nameEl.textContent = data.name;
@@ -67,11 +106,16 @@
     const statsEl = document.querySelector('.about-stats');
     if (statsEl && Array.isArray(data.stats)) {
         statsEl.innerHTML = data.stats
-            .map(s => `
+            .map(s => {
+                const resolvedNum = resolveStatNum(s.num);
+                return `
                 <div class="stat-card">
-                    <div class="stat-num">${s.num}${s.accent ? `<span class="stat-accent">${s.accent}</span>` : ''}</div>
+                    <div class="stat-num" data-raw="${s.num}">
+                        ${resolvedNum}${s.accent ? `<span class="stat-accent">${s.accent}</span>` : ''}
+                    </div>
                     <div class="stat-label">${s.label}</div>
-                </div>`)
+                </div>`;
+            })
             .join('');
     }
 

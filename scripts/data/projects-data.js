@@ -1,31 +1,8 @@
-/* ================================================
-   PROJECTS DATA — edit di sini untuk menambah,
-   menghapus, atau mengubah project & category.
-   Tidak perlu sentuh index.html / CSS.
-
-   Tambah project baru:
-   - Tambahkan object baru ke PROJECTS_DATA.
-   - "category" harus cocok dengan salah satu "key"
-     di PROJECT_CATEGORIES.
-   - "featured: true" -> card lebih besar (span 2 kolom).
-   - "link" -> URL halaman detail project (kosongkan "" 
-     kalau belum ada, tombol jadi "Coming Soon").
-   - "pageType" -> dipakai nanti utk pilih layout/animasi
-     halaman detail (misal "3d" pakai layout 3D viewer).
-
-   Hapus project:
-   - Hapus / comment-out object-nya.
-
-   Tambah category baru:
-   - Tambahkan { key: 'xxx', label: 'Label' } ke
-     PROJECT_CATEGORIES, lalu pakai key itu di "category".
-================================================ */
-
 window.PROJECT_CATEGORIES = [
     { key: 'all',    label: 'All' },
     { key: 'game',   label: 'Game Dev' },
     { key: '3d',     label: '3D Art' },
-    { key: 'vfx', label: 'Visual Effects' },
+    { key: 'vfx',    label: 'Visual Effects' },
     { key: 'web',    label: 'Web' },
 ];
 
@@ -35,15 +12,25 @@ window.PROJECTS_DATA = [
         slug: 'project-name-here',
         category: 'game',
         categoryLabel: 'Game Dev',
-        status: 'wip',           // completed | wip | archived | concept
+        status: 'wip',
         statusLabel: 'In Progress',
         featured: true,
         title: 'Project Name Here',
-        desc: 'A brief description of what this game is about — genre, core mechanic, and what makes it unique. Keep it punchy and specific. What problem does it solve, what experience does it deliver?',
+        desc: 'A brief description of what this game is about — genre, core mechanic, and what makes it unique. Keep it punchy and specific.',
         tags: ['Unity', 'C#', 'HLSL', 'Blender', 'FMOD'],
         link: 'd',
         linkLabel: 'View Project',
         pageType: 'game',
+
+        /* ---- Preview ---- */
+        // image : path ke screenshot / thumbnail (jpg, png, webp)
+        // video : path ke clip pendek (mp4/webm), autoplay on hover
+        // color : fallback accent color kalau tidak ada media
+        preview: {
+            image: 'assets/images/projects/project-name-here.jpg',
+            video: 'assets/videos/projects/project-name-here.mp4', // kosongkan '' kalau tidak ada
+            color: '#FF6B35',   // warna dominant project
+        },
     },
     {
         id: 2,
@@ -54,26 +41,38 @@ window.PROJECTS_DATA = [
         statusLabel: 'Completed',
         featured: false,
         title: '3D Scene / Art Title',
-        desc: 'Environment art, character, or product render — describe the concept, mood, and technical approach used in Blender to achieve the final look.',
+        desc: 'Environment art, character, or product render — describe the concept, mood, and technical approach used in Blender.',
         tags: ['Blender', 'Cycles', 'Substance'],
         link: '',
         linkLabel: 'View Artwork',
         pageType: '3d',
+
+        preview: {
+            image: 'assets/images/projects/3d-scene-art-title.jpg',
+            video: '',
+            color: '#a78bfa',
+        },
     },
     {
         id: 3,
         slug: 'shader-experiment',
-        category: 'shader',
+        category: 'vfx',
         categoryLabel: 'Shader / GLSL',
         status: 'completed',
         statusLabel: 'Completed',
         featured: false,
         title: 'Shader Experiment',
-        desc: 'A real-time shader experiment — describe the visual effect, technique used (raymarching, noise, SDF, etc.) and what drove the exploration.',
+        desc: 'A real-time shader experiment — describe the visual effect, technique used (raymarching, noise, SDF, etc.).',
         tags: ['GLSL', 'WebGL', 'Three.js'],
         link: '',
         linkLabel: 'Live Demo',
         pageType: 'shader',
+
+        preview: {
+            image: 'assets/images/projects/shader-experiment.jpg',
+            video: 'assets/videos/projects/shader-experiment.mp4',
+            color: '#4D8CFF',
+        },
     },
     {
         id: 4,
@@ -89,6 +88,12 @@ window.PROJECTS_DATA = [
         link: '',
         linkLabel: 'Play on itch.io',
         pageType: 'game',
+
+        preview: {
+            image: 'assets/images/projects/game-jam-entry.jpg',
+            video: '',
+            color: '#FF6B35',
+        },
     },
     {
         id: 5,
@@ -99,11 +104,17 @@ window.PROJECTS_DATA = [
         statusLabel: 'Concept',
         featured: false,
         title: 'Interactive Web Experience',
-        desc: 'A web-based interactive piece — describe what it is, the interaction model, and the visual or narrative experience it delivers.',
+        desc: 'A web-based interactive piece — describe what it is, the interaction model, and the visual or narrative experience.',
         tags: ['Three.js', 'GSAP', 'WebGL'],
         link: '',
         linkLabel: 'Coming Soon',
         pageType: 'web',
+
+        preview: {
+            image: '',
+            video: '',
+            color: '#4D8CFF',
+        },
     },
     {
         id: 6,
@@ -119,5 +130,11 @@ window.PROJECTS_DATA = [
         link: '',
         linkLabel: 'View Model',
         pageType: '3d',
+
+        preview: {
+            image: 'assets/images/projects/character-model-study.jpg',
+            video: '',
+            color: '#a78bfa',
+        },
     },
 ];
