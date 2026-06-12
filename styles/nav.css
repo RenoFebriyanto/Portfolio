@@ -94,6 +94,11 @@
     width: 100%;
 }
 
+.nav-logo-img {
+    height: 32px;
+    width: auto;
+    display: block;
+}
 
 /* --- CTA button in nav --- */
 .nav-cta {

@@ -137,6 +137,13 @@
     gap: var(--space-md);
 }
 
+.social-icon-img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
 .social-link-icon {
     width: 32px;
     height: 32px;
@@ -405,6 +412,13 @@
     justify-content: space-between;
     gap: var(--space-xl);
     flex-wrap: wrap;
+}
+
+.footer-logo-img {
+    height: 22px;
+    width: auto;
+    display: block;
+    opacity: 0.85;
 }
 
 .footer-logo {
