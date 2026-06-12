@@ -60,46 +60,47 @@
    <div id="scroll-container">
     <section class="hero" id="hero">
         <div class="hero-inner">
+            <div class="hero-content">
+                    <!-- Status Badge -->
+                    <div class="hero-status">
+                        <span class="hero-status-dot"></span>
+                        <span class="hero-status-text">Open for opportunities</span>
+                    </div>
 
-            <!-- Status Badge -->
-            <div class="hero-status">
-                <span class="hero-status-dot"></span>
-                <span class="hero-status-text">Open for opportunities</span>
+                    <!-- Heading -->
+                    <h1 class="hero-heading">
+                        <span class="hero-heading-line"><span>Game Tech</span></span>
+                        <span class="hero-heading-line"><span>& <span class="accent">3D</span></span></span>
+                        <span class="hero-heading-line"><span>Creator.</span></span>
+                </h1>
+
+                <!-- Description -->
+                <p class="hero-desc">
+                    Building immersive experiences at the intersection of game technology,
+                    real-time 3D, and interactive web. Turning ideas into playable, visual realities.
+                </p>
+
+                <!-- Tags -->
+                <div class="hero-tags">
+                    <span class="tag">Game Dev</span>
+                    <span class="tag">3D Artist</span>
+                    <span class="tag">2D Artist</span>
+                    <span class="tag">Designer</span>
+                    <span class="tag">Programmer</span>
+                    <span class="tag">Web 3</span>
+                </div>
+
+                <!-- CTA -->
+                <div class="hero-cta">
+                    <a href="#projects" class="btn-primary">
+                        View Projects <span class="btn-arrow">&#8594;</span>
+                    </a>
+                    <a href="#about" class="btn-secondary">
+                        About Me <span class="btn-arrow">&#8594;</span>
+                    </a>
+                </div>
             </div>
-
-            <!-- Heading -->
-            <h1 class="hero-heading">
-                <span class="hero-heading-line"><span>Game Tech</span></span>
-                <span class="hero-heading-line"><span>& <span class="accent">3D</span></span></span>
-                <span class="hero-heading-line"><span>Creator.</span></span>
-            </h1>
-
-            <!-- Description -->
-            <p class="hero-desc">
-                Building immersive experiences at the intersection of game technology,
-                real-time 3D, and interactive web. Turning ideas into playable, visual realities.
-            </p>
-
-            <!-- Tags -->
-            <div class="hero-tags">
-                <span class="tag">Game Dev</span>
-                <span class="tag">3D Artist</span>
-                <span class="tag">2D Artist</span>
-                <span class="tag">Designer</span>
-                <span class="tag">Programmer</span>
-                <span class="tag">Web 3</span>
-            </div>
-
-            <!-- CTA -->
-            <div class="hero-cta">
-                <a href="#projects" class="btn-primary">
-                    View Projects <span class="btn-arrow">&#8594;</span>
-                </a>
-                <a href="#about" class="btn-secondary">
-                    About Me <span class="btn-arrow">&#8594;</span>
-                </a>
-            </div>
-
+            <div id="hero-3d-canvas"></div>
         </div>
 
         <!-- Decorative large text -->
@@ -525,6 +526,7 @@
     <script src="scripts/motion.js"></script>
     <script src="scripts/section-animations.js"></script>
     <script src="scripts/pagescroll.js"></script>
+    <script src="scripts/hero3d.js"></script>
 
 </body>
 
