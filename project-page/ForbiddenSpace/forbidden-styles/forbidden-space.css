@@ -76,35 +76,115 @@ img { max-width: 100%; display: block; }
   opacity: 0.6;
 }
 
-/* ── CUSTOM CURSOR ── */
-.cursor-ring {
-  position: fixed;
-  width: 32px;
-  height: 32px;
-  border: 1.5px solid var(--fs-cyan);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, opacity 0.2s;
-  mix-blend-mode: screen;
+/* ============================================================
+   CUSTOM CURSOR — Ring + Dot, lerp di JS
+   Body class: cursor-hover / cursor-click / cursor-card / cursor-hidden
+============================================================ */
+
+/* Sembunyikan cursor default */
+*, *::before, *::after {
+  cursor: none !important;
 }
 
-.cursor-dot {
+.cursor-dot,
+.cursor-ring {
   position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+/* Dot kecil di tengah */
+.cursor-dot {
   width: 4px;
   height: 4px;
   background: var(--fs-cyan);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
   box-shadow: 0 0 6px var(--fs-cyan);
+  transition:
+    width      0.18s var(--ease-out),
+    height     0.18s var(--ease-out),
+    opacity    0.18s ease,
+    background 0.18s ease;
 }
 
-body:hover .cursor-ring { opacity: 1; }
-a:hover ~ .cursor-ring,
-button:hover ~ .cursor-ring { width: 48px; height: 48px; }
+/* Ring luar — lerp behind mouse */
+.cursor-ring {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--fs-cyan);
+  background: transparent;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  transition:
+    width        0.35s var(--ease-out),
+    height       0.35s var(--ease-out),
+    opacity      0.25s ease,
+    border-color 0.25s ease,
+    background   0.3s ease;
+}
+
+/* --- Hover: link, button, nav --- */
+body.cursor-hover .cursor-ring {
+  width: 48px;
+  height: 48px;
+  opacity: 0.85;
+  border-color: var(--fs-cyan);
+  background: var(--fs-cyan-dim);
+}
+body.cursor-hover .cursor-dot {
+  width: 3px;
+  height: 3px;
+  opacity: 0.6;
+}
+
+/* --- Click / active state --- */
+body.cursor-click .cursor-ring {
+  width: 22px;
+  height: 22px;
+  opacity: 1;
+  border-color: var(--fs-cyan);
+  background: rgba(0, 200, 255, 0.25);
+}
+body.cursor-click .cursor-dot {
+  width: 7px;
+  height: 7px;
+}
+
+/* --- Card hover: gallery, mechanic/contribution/team cards --- */
+body.cursor-card .cursor-ring {
+  width: 56px;
+  height: 56px;
+  opacity: 0.3;
+  border-color: var(--fs-orange);
+  background: transparent;
+}
+body.cursor-card .cursor-dot {
+  background: var(--fs-orange);
+  box-shadow: 0 0 6px var(--fs-orange);
+}
+
+/* --- Hidden saat mouse keluar viewport --- */
+body.cursor-hidden .cursor-ring,
+body.cursor-hidden .cursor-dot {
+  opacity: 0;
+}
+
+/* --- Mobile: matikan custom cursor --- */
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+
+  *, *::before, *::after {
+    cursor: auto !important;
+  }
+}
+
 
 /* ── NAV ── */
 .nav {

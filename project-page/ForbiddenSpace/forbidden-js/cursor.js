@@ -1,31 +1,43 @@
-/* ============================================================
-   CURSOR.JS — Custom cursor: ring (lerp) + dot, glow cyan
-   Hover state membesar pada link/button, beda warna di gallery
-============================================================ */
+/* ================================================
+   CURSOR.JS — Custom ring cursor with lerp
+   Sama arsitektur dengan portfolio (scripts/cursor.js),
+   warna diatur lewat CSS (cursor.css / forbidden-space.css)
+================================================ */
 (function initCursor() {
+    // Skip di touch / coarse pointer device
     if (window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
 
-    const ring = document.getElementById('cursorRing');
     const dot  = document.getElementById('cursorDot');
-    if (!ring || !dot) return;
+    const ring = document.getElementById('cursorRing');
+    if (!dot || !ring) return;
 
+    // Posisi mouse mentah
     let mouseX = -100, mouseY = -100;
+    // Posisi ring (lerp)
     let ringX  = -100, ringY  = -100;
-    const LERP = 0.16;
+    const LERP = 0.12;
 
+    // Track mouse
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
         dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-        ring.style.opacity = '1';
-        dot.style.opacity  = '1';
+        document.body.classList.remove('cursor-hidden');
     });
 
+    // Hide saat keluar viewport
     document.addEventListener('mouseleave', () => {
-        ring.style.opacity = '0';
-        dot.style.opacity  = '0';
+        document.body.classList.add('cursor-hidden');
+    });
+    document.addEventListener('mouseenter', () => {
+        document.body.classList.remove('cursor-hidden');
     });
 
+    // Click state
+    document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
+    document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
+
+    // RAF loop — lerp ring ke posisi mouse
     function lerp(a, b, t) { return a + (b - a) * t; }
 
     function tick() {
@@ -36,34 +48,20 @@
     }
     requestAnimationFrame(tick);
 
-    /* ---- Hover states ---- */
-    function bind(selector, enter, leave) {
-        document.querySelectorAll(selector).forEach(el => {
-            el.addEventListener('mouseenter', enter);
-            el.addEventListener('mouseleave', leave);
+    // ---- Hover state management ----
+
+    // Interactive: link, button, nav, CTA
+    const INTERACTIVE = 'a, button, .nav-back, .nav-cta, .btn-primary, .btn-ghost, .lightbox-close';
+    // Cards: gallery, mechanic/contribution/team cards
+    const CARDS = '.gallery-item, .mechanic-card, .contribution-card, .team-card';
+
+    function addHover(selector, bodyClass) {
+        document.querySelectorAll(selector).forEach((el) => {
+            el.addEventListener('mouseenter', () => document.body.classList.add(bodyClass));
+            el.addEventListener('mouseleave', () => document.body.classList.remove(bodyClass));
         });
     }
 
-    // Link / tombol → ring membesar, isi cyan tipis
-    bind('a, button, .filter-btn, .nav-cta, .nav-back', () => {
-        ring.style.width = '52px';
-        ring.style.height = '52px';
-        ring.style.background = 'var(--fs-cyan-dim)';
-        ring.style.borderColor = 'var(--fs-cyan)';
-    }, () => {
-        ring.style.width = '32px';
-        ring.style.height = '32px';
-        ring.style.background = 'transparent';
-    });
-
-    // Gallery / lightbox close → ring lebih besar, accent orange (zoom hint)
-    bind('.gallery-item, .lightbox-close', () => {
-        ring.style.width = '64px';
-        ring.style.height = '64px';
-        ring.style.borderColor = 'var(--fs-orange)';
-    }, () => {
-        ring.style.width = '32px';
-        ring.style.height = '32px';
-        ring.style.borderColor = 'var(--fs-cyan)';
-    });
+    addHover(INTERACTIVE, 'cursor-hover');
+    addHover(CARDS, 'cursor-card');
 })();
