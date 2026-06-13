@@ -601,6 +601,7 @@ p { color: var(--fs-text-muted); line-height: 1.75; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto;
+  grid-auto-flow: dense;   /* ← tambahan: rapatkan layout */
   gap: 6px;
 }
 
