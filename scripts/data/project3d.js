@@ -12,16 +12,13 @@
    Renderer di-pause saat tidak di-hover untuk hemat GPU.
 ================================================ */
 
+import * as THREE from 'https://esm.sh/three@0.160.0';
+import { GLTFLoader } from 'https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
 (function initProject3D() {
 
     /* Skip di touch device — drag rotate tidak natural di mobile */
     if (window.matchMedia('(hover: none)').matches) return;
-
-    /* THREE harus sudah tersedia via CDN sebelum script ini */
-    if (typeof THREE === 'undefined') {
-        console.warn('[Project3D] THREE.js tidak ditemukan. Load CDN dulu.');
-        return;
-    }
 
     /* ---- Config ---- */
     const FADE_DURATION  = 350;   // ms fade antara image ↔ 3D
@@ -134,12 +131,7 @@
             if (!state.renderer) initRenderer();
 
             /* Load via GLTFLoader */
-            const loader = new THREE.GLTFLoader ? new THREE.GLTFLoader() : null;
-            if (!loader) {
-                console.warn('[Project3D] GLTFLoader tidak tersedia');
-                showSpinner(false);
-                return;
-            }
+            const loader = new GLTFLoader();
 
             loader.load(
                 glbPath,

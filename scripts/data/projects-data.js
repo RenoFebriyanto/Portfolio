@@ -15,9 +15,9 @@ window.PROJECTS_DATA = [
         status: 'wip',
         statusLabel: 'In Progress',
         featured: true,
-        title: 'Project Name Here',
-        desc: 'A brief description of what this game is about — genre, core mechanic, and what makes it unique. Keep it punchy and specific.',
-        tags: ['Unity', 'C#', 'HLSL', 'Blender', 'FMOD'],
+        title: 'Forbidden Space',
+        desc: 'In a remote corner of the universe lies a mysterious place known as “The Forbidden Space.” It is the domain of a four-dimensional extraterrestrial being capable of manipulating time itself. Players take control of a spacecraft named J4-RW0, or “Jarwo,” who accidentally enters The Forbidden Space. Trapped within this strange realm, Jarwo becomes nothing more than a plaything for the powerful extraterrestrial entity, which endlessly resets and repeats time, forcing him to relive the same events over and over again.',
+        tags: ['Unity', 'C#', 'VFX Graph', 'Shader Graph'],
         link: 'd',
         linkLabel: 'View Project',
         pageType: 'game',
@@ -27,9 +27,9 @@ window.PROJECTS_DATA = [
         // video : path ke clip pendek (mp4/webm), autoplay on hover
         // color : fallback accent color kalau tidak ada media
         preview: {
-            image: 'assets/images/projects/project-name-here.jpg',
-            video: 'assets/videos/projects/project-name-here.mp4', // kosongkan '' kalau tidak ada
-            color: '#FF6B35',   // warna dominant project
+            image: 'Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
+            video: '', // kosongkan '' kalau tidak ada
+            color: '#359aff',   // warna dominant project
         },
     },
     {
@@ -44,11 +44,15 @@ window.PROJECTS_DATA = [
         desc: 'Environment art, character, or product render — describe the concept, mood, and technical approach used in Blender.',
         tags: ['Blender', 'Cycles', 'Substance'],
         link: '',
-        linkLabel: 'View Artwork',
+        linkLabe l: 'View Artwork',
         pageType: '3d',
 
+        /* Path ke file GLB — preview awal tetap pakai image,
+           model 3D hanya di-load & ditampilkan saat hover */
+        glb: 'Assets/project/3d/3dSphere.glb',
+
         preview: {
-            image: 'assets/images/projects/3d-scene-art-title.jpg',
+            image: 'Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
             video: '',
             color: '#a78bfa',
         },
