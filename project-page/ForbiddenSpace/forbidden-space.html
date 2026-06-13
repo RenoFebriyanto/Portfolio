@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forbidden Space — Reno Febriyanto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="forbidden-styles/forbidden-space.css" />
+</head>
+<body>
+
+  <!-- ── CURSOR ── -->
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- ── BACKGROUND PARTICLES ── -->
+  <canvas class="bg-canvas" id="bgCanvas"></canvas>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-back">
+      <span class="nav-back-arrow">←</span>
+      <span>Back to Portfolio</span>
+    </a>
+    <div class="nav-project-label">
+      <span class="nav-tag">GAME</span>
+      <span class="nav-title">Forbidden Space</span>
+    </div>
+    <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="nav-cta">
+      Play on itch.io ↗
+    </a>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="fs-hero">
+    <div class="fs-hero-bg">
+      <!-- Animated scan lines -->
+      <div class="scan-lines"></div>
+      <!-- Vignette -->
+      <div class="vignette"></div>
+    </div>
+
+    <div class="fs-hero-content">
+      <div class="fs-hero-meta reveal-up">
+        <span class="badge badge-game">ROGUELIKE · 2D · SHOOTER</span>
+        <span class="badge badge-engine">Unity</span>
+        <span class="badge badge-status">Released · 2026</span>
+      </div>
+
+      <h1 class="fs-hero-title reveal-up" data-delay="0.1">
+        <span class="title-line">FORBIDDEN</span>
+        <span class="title-line title-accent">SPACE</span>
+      </h1>
+
+      <p class="fs-hero-tagline reveal-up" data-delay="0.2">
+        A cosmic time-loop roguelike where death resets the universe.
+      </p>
+
+      <div class="fs-hero-role reveal-up" data-delay="0.3">
+        <span class="role-label">MY ROLE</span>
+        <span class="role-value">Programmer · VFX Artist</span>
+      </div>
+
+      <div class="fs-hero-actions reveal-up" data-delay="0.4">
+        <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="btn-primary">
+          Play Free on itch.io
+        </a>
+        <a href="#overview" class="btn-ghost">
+          View Project
+        </a>
+      </div>
+    </div>
+
+    <!-- Preview image / cover art -->
+    <div class="fs-hero-visual reveal-right">
+      <div class="hero-img-frame">
+        <img 
+          src="project/game/ForbiddenSpace/ForbiddenSpacePreview.png" 
+          alt="Forbidden Space Preview"
+          class="hero-img"
+          onerror="this.parentElement.classList.add('img-placeholder')"
+        />
+        <div class="hero-img-glow"></div>
+      </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="scroll-cue">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── OVERVIEW ── -->
+  <section class="section fs-overview" id="overview">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">01 — STORY</div>
+      <div class="overview-grid">
+        <div class="overview-text reveal-up" data-delay="0.1">
+          <h2>Trapped in a Cosmic Loop</h2>
+          <p>
+            In a remote corner of the universe lies a mysterious place known as <em>"The Forbidden Space."</em> 
+            It is the domain of a four-dimensional extraterrestrial being capable of manipulating time itself.
+          </p>
+          <p>
+            Players take control of a spacecraft named <strong>J4-RW0</strong> — "Jarwo" — who accidentally enters 
+            The Forbidden Space. Trapped within this strange realm, Jarwo becomes nothing more than a plaything 
+            for the powerful entity, which endlessly resets and repeats time, forcing him to relive the same 
+            events over and over again.
+          </p>
+        </div>
+        <div class="overview-stats reveal-up" data-delay="0.2">
+          <div class="stat-item">
+            <span class="stat-value">2D</span>
+            <span class="stat-label">Art Style</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">∞</span>
+            <span class="stat-label">Time Loops</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">4</span>
+            <span class="stat-label">Team Members</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">HTML5</span>
+            <span class="stat-label">Platform</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VIDEO ── -->
+  <section class="section fs-video">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">02 — GAMEPLAY</div>
+      <div class="video-wrapper reveal-up" data-delay="0.15">
+        <div class="video-frame">
+          <iframe 
+            src="https://www.youtube.com/embed/jWMfVkl7hZA" 
+            title="Forbidden Space Gameplay"
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+        <div class="video-caption">Gameplay Trailer — Forbidden Space</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MECHANICS ── -->
+  <section class="section fs-mechanics">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">03 — MECHANICS</div>
+      <h2 class="reveal-up" data-delay="0.1">How It Works</h2>
+
+      <div class="mechanics-grid">
+
+        <div class="mechanic-card reveal-up" data-delay="0.1">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M20 8 L20 20 L28 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="20" cy="20" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>Time-Loop Progression</h3>
+          <p>Death is not the end. Every failure resets the timeline — restart the journey while learning enemy patterns and improving survival strategies.</p>
+        </div>
+
+        <div class="mechanic-card reveal-up" data-delay="0.2">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path d="M20 4 L20 36 M4 20 L36 20" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="20" cy="4" r="2" fill="currentColor"/>
+              <circle cx="36" cy="20" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>Twin-Stick Sci-Fi Combat</h3>
+          <p>Fast-paced space combat focused on movement, positioning, and aiming precision. Mouse-aimed, WASD-driven — arcade meets tactical.</p>
+        </div>
+
+        <div class="mechanic-card reveal-up" data-delay="0.3">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <polygon points="20,4 36,34 4,34" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="16" x2="20" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="20" cy="28" r="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>Boss Battles</h3>
+          <p>Optional boss encounters with unique combat phases. Currently in development — accessible from the main menu for early testing.</p>
+        </div>
+
+        <div class="mechanic-card reveal-up" data-delay="0.4">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="22" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="6" y="22" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="22" y="22" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h3>Planet Diversity</h3>
+          <p>Each planet introduces different enemy species with unique attack patterns — aggressive rammers, projectile-based weapon systems, and dimensional threats.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SCREENSHOTS ── -->
+  <section class="section fs-gallery">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">04 — SCREENSHOTS</div>
+      <div class="gallery-grid reveal-up" data-delay="0.1">
+        <!-- These will pull from your local assets folder -->
+        <div class="gallery-item gallery-item--tall" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5NDQ3MS5wbmc=/original/RVvsqd.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5NDQ3MS5wbmc=/original/RVvsqd.png" alt="Screenshot 1" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTk2MC5wbmc=/original/G5mEIZ.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTk2MC5wbmc=/original/G5mEIZ.png" alt="Screenshot 2" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTkyNy5wbmc=/original/TQvQJg.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTkyNy5wbmc=/original/TQvQJg.png" alt="Screenshot 3" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--tall" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OS5wbmc=/original/nxHC5y.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OS5wbmc=/original/nxHC5y.png" alt="Screenshot 4" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5Mi5wbmc=/original/r W0scz.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5Mi5wbmc=/original/rW0scz.png" alt="Screenshot 5" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5My5wbmc=/original/oSWsfE.png">
+          <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5My5wbmc=/original/oSWsfE.png" alt="Screenshot 6" loading="lazy"/>
+          <div class="gallery-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+      <button class="lightbox-close" id="lightboxClose">×</button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+    </div>
+  </section>
+
+  <!-- ── MY CONTRIBUTION ── -->
+  <section class="section fs-contribution">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">05 — MY CONTRIBUTION</div>
+      <div class="contribution-grid">
+
+        <div class="contribution-card reveal-up" data-delay="0.1">
+          <div class="contribution-number">01</div>
+          <h3>Game Programming</h3>
+          <p>Core game systems implementation in C# — player controller, weapon systems, enemy AI state machines, roguelike loop logic, and scene management.</p>
+          <div class="contribution-tags">
+            <span>C#</span><span>Unity</span><span>State Machine</span>
+          </div>
+        </div>
+
+        <div class="contribution-card reveal-up" data-delay="0.2">
+          <div class="contribution-number">02</div>
+          <h3>VFX Artist</h3>
+          <p>Designed and implemented all visual effects — neon weapon trails, explosion particles, warp distortion effects, energy shields, and environmental ambient FX using Unity's VFX Graph and Shader Graph.</p>
+          <div class="contribution-tags">
+            <span>VFX Graph</span><span>Shader Graph</span><span>Particle Systems</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SOUND & ATMOSPHERE ── -->
+  <section class="section fs-atmosphere">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">06 — ATMOSPHERE</div>
+      <div class="atmosphere-content reveal-up" data-delay="0.1">
+        <div class="atmosphere-text">
+          <h2>Sound Design & Visual Style</h2>
+          <ul class="atmosphere-list">
+            <li>
+              <span class="atm-icon">◎</span>
+              <div>
+                <strong>Cosmic Sci-Fi Atmosphere</strong>
+                <p>A mysterious and unsettling universe inspired by deep-space horror, dimensional anomalies, and futuristic alien worlds.</p>
+              </div>
+            </li>
+            <li>
+              <span class="atm-icon">◈</span>
+              <div>
+                <strong>Stylized Visual Design</strong>
+                <p>Neon lighting, glowing energy effects, and high-contrast planetary environments create a cinematic arcade-like presentation.</p>
+              </div>
+            </li>
+            <li>
+              <span class="atm-icon">◉</span>
+              <div>
+                <strong>Dynamic Audio</strong>
+                <p>Electronic ambient music, distorted cosmic sounds, energy weapon effects, and alien creature noises build tension throughout every encounter.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TEAM ── -->
+  <section class="section fs-team">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">07 — TEAM</div>
+      <div class="team-grid reveal-up" data-delay="0.1">
+
+        <div class="team-card">
+          <div class="team-avatar">RFK</div>
+          <div class="team-info">
+            <span class="team-name">Robbani Fadhillah Kafura</span>
+            <span class="team-role">Game Designer · Programmer</span>
+          </div>
+        </div>
+
+        <div class="team-card team-card--me">
+          <div class="team-avatar team-avatar--me">RF</div>
+          <div class="team-info">
+            <span class="team-name">Reno Febriyanto</span>
+            <span class="team-role">Programmer · VFX Artist</span>
+          </div>
+          <div class="team-badge-me">You</div>
+        </div>
+
+        <div class="team-card">
+          <div class="team-avatar">AFK</div>
+          <div class="team-info">
+            <span class="team-name">Adinda Fadilla Kirana Dewi</span>
+            <span class="team-role">Game Artist 2D</span>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="team-avatar">PP</div>
+          <div class="team-info">
+            <span class="team-name">Putu Pande</span>
+            <span class="team-role">Game Artist 2D</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTROLS ── -->
+  <section class="section fs-controls">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">08 — CONTROLS</div>
+      <div class="controls-layout reveal-up" data-delay="0.1">
+        <div class="key-grid">
+          <div class="key-row key-row--top">
+            <div class="key">W</div>
+          </div>
+          <div class="key-row">
+            <div class="key">A</div>
+            <div class="key">S</div>
+            <div class="key">D</div>
+          </div>
+        </div>
+        <div class="controls-list">
+          <div class="ctrl-item"><span class="ctrl-key">W/A/S/D</span><span>Move spacecraft</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">Right Click</span><span>Shoot</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">Mouse</span><span>Aim direction</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">R</span><span>Reload weapon</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="section fs-cta">
+    <div class="container">
+      <div class="cta-inner reveal-up">
+        <p class="cta-eyebrow">The loop awaits.</p>
+        <h2>Ready to enter The Forbidden Space?</h2>
+        <div class="cta-actions">
+          <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="btn-primary btn-large">
+            Play Free Now — itch.io
+          </a>
+          <a href="index.html" class="btn-ghost">
+            ← Back to Portfolio
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Ambient grid -->
+    <div class="cta-grid-overlay"></div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="fs-footer">
+    <div class="container">
+      <span>© 2026 Reno Febriyanto</span>
+      <div class="footer-links">
+        <a href="https://github.com/RenoFebriyanto" target="_blank">GitHub</a>
+        <a href="https://catmounth.itch.io" target="_blank">itch.io</a>
+        <a href="https://linkedin.com/in/renofebriyanto/" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="forbidden-js/"></script>
+</body>
+</html>
