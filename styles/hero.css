@@ -2,14 +2,15 @@
    HERO SECTION
 ================================================ */
 .hero {
-  height: 100%;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: var(--nav-height);
-  position: relative;
-  overflow: hidden;
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: var(--nav-height);
+    padding-bottom: var(--space-xl); /* ← tambah padding bottom */
+    position: relative;
+    overflow: hidden;
 }
 
 .hero-inner {
@@ -23,6 +24,7 @@
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: var(--space-2xl);
+    max-height: calc(100vh - var(--nav-height) - var(--space-2xl));
 }
 
 
@@ -345,6 +347,24 @@
   animation: fade-down-out 0.3s var(--ease-smooth) forwards;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .hero-status,
+    .hero-desc,
+    .hero-tags,
+    .hero-cta,
+    .hero-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .hero-heading-line span {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .hero-cta {
@@ -356,52 +376,107 @@
     display: none;
   }
 }
-
 /* --- Responsive: short viewport heights --- */
-@media (max-height: 760px) {
-  .hero-status {
-    margin-bottom: var(--space-md);
-  }
+@media (max-height: 820px) {
+    .hero-status {
+        margin-bottom: var(--space-md);
+        padding: 4px 12px;
+    }
 
-  .hero-heading {
-    font-size: clamp(40px, 7.5vw, 88px);
-    margin-bottom: var(--space-md);
-  }
+    .hero-heading {
+        font-size: clamp(36px, 6.5vw, 88px);
+        margin-bottom: var(--space-md);
+    }
 
-  .hero-desc {
-    margin-bottom: var(--space-md);
-    font-size: 15px;
-  }
+    .hero-desc {
+        font-size: 14px;
+        margin-bottom: var(--space-md);
+        line-height: 1.65;
+    }
 
-  .hero-tags {
-    margin-bottom: var(--space-lg);
-  }
+    .hero-tags {
+        margin-bottom: var(--space-lg);
+        gap: 6px;
+    }
 
-  .hero-scroll {
-    bottom: var(--space-md);
-  }
+    .tag {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+
+    .hero-cta {
+        gap: var(--space-sm);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 20px;
+        font-size: 12px;
+    }
+
+    .hero-scroll {
+        bottom: var(--space-md);
+    }
 }
 
-@media (max-height: 600px) {
-  .hero-status,
-  .hero-tags {
-    display: none; /* sembunyikan elemen non-esensial agar CTA selalu terlihat */
-  }
+@media (max-height: 700px) {
+    .hero-status {
+        margin-bottom: var(--space-sm);
+    }
 
-  .hero-heading {
-    font-size: clamp(36px, 7vw, 72px);
-    margin-bottom: var(--space-sm);
-  }
+    .hero-heading {
+        font-size: clamp(32px, 5.5vw, 72px);
+        margin-bottom: var(--space-sm);
+    }
 
-  .hero-desc {
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: var(--space-sm);
-  }
+    .hero-desc {
+        font-size: 13px;
+        margin-bottom: var(--space-sm);
+        line-height: 1.6;
+        /* Batasi 2 baris agar tidak makan tempat */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-tags {
+        margin-bottom: var(--space-md);
+        gap: 5px;
+    }
+
+    .tag {
+        font-size: 9px;
+        padding: 3px 8px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 9px 18px;
+        font-size: 11px;
+    }
+
+    .hero-scroll {
+        display: none;
+    }
 }
 
+@media (max-height: 580px) {
+    .hero-status,
+    .hero-tags {
+        display: none;
+    }
+
+    .hero-heading {
+        font-size: clamp(28px, 5vw, 56px);
+        margin-bottom: var(--space-sm);
+    }
+
+    .hero-desc {
+        -webkit-line-clamp: 2;
+        margin-bottom: var(--space-sm);
+    }
+}
 
 /* --- Responsive: stack on mobile --- */
 @media (max-width: 900px) {

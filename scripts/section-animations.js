@@ -101,13 +101,15 @@
     ];
 
     function enterHero(sectionEl) {
-        HERO_SELECTORS.forEach(sel => {
-            sectionEl.querySelectorAll(sel).forEach(el => {
-                el.classList.remove('motion-exit');
-                restartCSS(el);
-            });
-        });
-    }
+    sectionEl.querySelectorAll(HERO_SELECTORS.join(',')).forEach(el => {
+        el.classList.remove('motion-exit');
+
+        // Reset animation
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+    });
+}
 
     /* Reverse the entrance animation as the hero panel slides away */
     function leaveHero(sectionEl) {

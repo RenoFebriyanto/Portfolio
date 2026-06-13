@@ -44,7 +44,7 @@ window.PROJECTS_DATA = [
         desc: 'Environment art, character, or product render — describe the concept, mood, and technical approach used in Blender.',
         tags: ['Blender', 'Cycles', 'Substance'],
         link: '',
-        linkLabe l: 'View Artwork',
+        linkLabe: 'View Artwork',
         pageType: '3d',
 
         /* Path ke file GLB — preview awal tetap pakai image,
