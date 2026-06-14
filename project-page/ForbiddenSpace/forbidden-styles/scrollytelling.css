@@ -1,0 +1,345 @@
+/* ============================================================
+   SCROLLYTELLING.CSS — Snap scroll hero ↔ overview
+   + Full background video untuk section overview
+   Tambahan ke forbidden-space.css
+============================================================ */
+
+/* ── BODY SNAP MODE ──
+   Saat snap aktif, body tidak scroll normal.
+   Hanya overview yang bisa scroll internal setelah snap in.
+*/
+body.snap-mode {
+  overflow: hidden;
+}
+
+/* Setelah user masuk ke overview, aktifkan scroll normal lagi
+   untuk sisa section (di-handle JS via rest-sections wrapper) */
+body.snap-mode.rest-scrollable {
+  overflow: auto;
+}
+
+/* ────────────────────────────────────────────────────────────
+   SNAP PANEL BASE
+   Hero & Overview keduanya position: fixed full-viewport
+   saat snap mode aktif.
+──────────────────────────────────────────────────────────── */
+body.snap-mode #hero,
+body.snap-mode #overview {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 10;
+  /* Transisi slide + fade */
+  transition:
+    transform  700ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity    600ms ease;
+  will-change: transform, opacity;
+}
+
+/* ── REST SECTIONS: muncul setelah overview ── */
+body.snap-mode #rest-sections {
+  position: relative;
+  z-index: 5;
+  /* Margin top = 100vh agar muncul setelah overview keluar dari snap */
+  margin-top: 100vh;
+}
+
+/* ────────────────────────────────────────────────────────────
+   SNAP STATES
+──────────────────────────────────────────────────────────── */
+
+/* Active: tampil normal di posisi default */
+body.snap-mode .snap-active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hidden below: siap naik dari bawah */
+body.snap-mode .snap-hidden-below {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Exit ke atas: hero slide naik keluar */
+body.snap-mode .snap-exit-up {
+  transform: translateY(-8%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform  700ms cubic-bezier(0.4, 0, 1, 1),
+    opacity    500ms ease;
+}
+
+/* Enter dari bawah: overview naik masuk */
+body.snap-mode .snap-enter-up {
+  animation: snapEnterUp 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes snapEnterUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Exit ke bawah: overview turun keluar */
+body.snap-mode .snap-exit-down {
+  animation: snapExitDown 700ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes snapExitDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Enter dari atas: hero turun masuk kembali */
+body.snap-mode .snap-enter-down {
+  animation: snapEnterDown 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes snapEnterDown {
+  from {
+    transform: translateY(-8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   OVERVIEW — VIDEO BACKGROUND
+──────────────────────────────────────────────────────────── */
+
+/* Overview section: relative untuk stacking context */
+body.snap-mode #overview {
+  overflow-y: auto;  /* boleh scroll internal kalau konten panjang */
+  overflow-x: hidden;
+}
+
+/* Video wrapper — absolute fill, z below content */
+.overview-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* Opacity transition saat fade out (reverse) */
+  transition: opacity 600ms ease;
+}
+
+.overview-video-bg.video-fading {
+  opacity: 0;
+}
+
+/* Video element — cover full area */
+.overview-bg-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  display: block;
+  /* Mulai tidak terlihat, fade in setelah section snap */
+  opacity: 0;
+  transition: opacity 500ms ease 200ms; /* delay agar mulai fade setelah snap */
+}
+
+/* Saat overview aktif, video fade in */
+body.snap-mode #overview.snap-active .overview-bg-video {
+  opacity: 1;
+}
+
+/* Dark overlay di atas video — agar konten tetap terbaca */
+.overview-video-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    /* Gradient dari bawah — gelap untuk text area */
+    linear-gradient(
+      to bottom,
+      rgba(2, 9, 13, 0.45)  0%,
+      rgba(2, 9, 13, 0.30)  30%,
+      rgba(2, 9, 13, 0.50)  70%,
+      rgba(2, 9, 13, 0.80) 100%
+    );
+  z-index: 1;
+}
+
+/* Subtle vignette edges */
+.overview-video-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(2, 9, 13, 0.55) 100%
+  );
+}
+
+/* Overview konten — pastikan di atas video */
+#overview .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ────────────────────────────────────────────────────────────
+   OVERVIEW — LAYOUT ADJUSTMENTS
+   Full screen → center konten secara vertikal
+──────────────────────────────────────────────────────────── */
+body.snap-mode #overview .fs-overview {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 100px;   /* clearance dari nav */
+  padding-bottom: 60px;
+}
+
+/* Overview grid: sedikit rearrange untuk full screen layout */
+body.snap-mode #overview .overview-grid {
+  gap: 80px;
+  align-items: center;
+}
+
+/* Stats lebih menonjol di atas video */
+body.snap-mode #overview .stat-item {
+  background: rgba(10, 45, 53, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(0, 200, 255, 0.2);
+}
+
+body.snap-mode #overview .stat-value {
+  text-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
+}
+
+/* Teks overview lebih kontras di atas video */
+body.snap-mode #overview .overview-text p {
+  text-shadow: 0 1px 8px rgba(2, 9, 13, 0.8);
+}
+
+body.snap-mode #overview h2 {
+  text-shadow: 0 2px 16px rgba(2, 9, 13, 0.9);
+}
+
+/* Section eyebrow */
+body.snap-mode #overview .section-eyebrow {
+  text-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+}
+
+/* ────────────────────────────────────────────────────────────
+   SCROLL INDICATOR pada overview — hint untuk lanjut scroll
+──────────────────────────────────────────────────────────── */
+.overview-scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: rgba(90, 138, 150, 0.7);
+  animation: hintPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 600ms ease 800ms; /* delay muncul setelah transisi selesai */
+}
+
+body.snap-mode #overview.snap-active .overview-scroll-hint {
+  opacity: 1;
+}
+
+.overview-scroll-hint-line {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, rgba(0, 200, 255, 0.5), transparent);
+  animation: scrollHintDrop 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes scrollHintDrop {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  50%  { transform: scaleY(1); transform-origin: top; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ────────────────────────────────────────────────────────────
+   HERO — tetap rapi saat snap mode
+──────────────────────────────────────────────────────────── */
+body.snap-mode #hero {
+  overflow: hidden;
+}
+
+/* ────────────────────────────────────────────────────────────
+   RESPONSIVE
+──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  body.snap-mode #overview .fs-overview {
+    padding-top: 80px;
+  }
+
+  body.snap-mode #overview .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  body.snap-mode #overview .overview-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  body.snap-mode #overview .overview-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   REDUCED MOTION
+──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  body.snap-mode #hero,
+  body.snap-mode #overview {
+    transition: opacity 300ms ease;
+  }
+
+  body.snap-mode .snap-enter-up,
+  body.snap-mode .snap-exit-up,
+  body.snap-mode .snap-enter-down,
+  body.snap-mode .snap-exit-down {
+    animation-duration: 150ms;
+  }
+
+  .overview-bg-video {
+    transition: opacity 200ms ease;
+  }
+}   
