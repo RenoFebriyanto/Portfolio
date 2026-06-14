@@ -1,0 +1,201 @@
+/* ============================================================
+   ABOUT
+   ============================================================ */
+
+.about {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-secondary);
+}
+
+.about__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+  align-items: center;
+  padding: var(--space-10) 0;
+}
+
+/* Left: text block */
+.about__text {}
+
+.about__body {
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--space-6);
+  max-width: 480px;
+}
+
+.about__body strong {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* Stat row */
+.about__stats {
+  display: flex;
+  gap: var(--space-7);
+  margin-bottom: var(--space-8);
+}
+
+.about__stat-value {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+  display: block;
+}
+
+.about__stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+  display: block;
+}
+
+/* Social links */
+.about__links {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.about__link {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.about__link:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Right: visual card */
+.about__visual {
+  position: relative;
+}
+
+.about__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  position: relative;
+  overflow: hidden;
+}
+
+.about__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.4;
+}
+
+/* Tech stack tags */
+.about__tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.about__tech-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.about__tech-item:hover {
+  border-color: var(--color-border-hover);
+}
+
+.about__tech-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.about__tech-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.about__tech-level {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-accent);
+  margin-left: auto;
+}
+
+/* Currently learning badge */
+.about__learning {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.about__learning-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.about__learning-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.about__tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-blue);
+  background: var(--color-blue-dim);
+  border: 1px solid rgba(77, 140, 255, 0.2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 100px;
+}
+
+@media (max-width: 900px) {
+  .about__inner {
+    grid-template-columns: 1fr;
+  }
+  .about__visual {
+    order: -1;
+  }
+}

@@ -1,0 +1,96 @@
+/* ============================================================
+   SKILLS
+   ============================================================ */
+
+.skills {
+  background: var(--color-bg-secondary);
+  padding-top: var(--nav-height);
+}
+
+.skills__inner {
+  padding: var(--space-9) 0;
+}
+
+.skills__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-10) var(--space-10);
+  margin-top: var(--space-8);
+}
+
+.skills__category {}
+
+.skills__category-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.skills__category-title::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.5;
+}
+
+.skills__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Skill item */
+.skill-item {}
+
+.skill-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.skill-item__name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+.skill-item__value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-accent);
+}
+
+/* Track */
+.skill-item__track {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.skill-item__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-blue));
+  border-radius: 100px;
+  width: 0%;
+  transition: width 1.2s var(--ease-out);
+}
+
+.skill-item__bar.animated {
+  width: var(--skill-level);
+}
+
+@media (max-width: 768px) {
+  .skills__grid {
+    grid-template-columns: 1fr;
+  }
+}
