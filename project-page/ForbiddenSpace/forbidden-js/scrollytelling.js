@@ -1,357 +1,626 @@
 /* ============================================================
-   SCROLLYTELLING.JS — Full-page snap navigation
-   Hero ↔ Overview dengan video reverse literal
-
-   Alur:
-   - Hero: tampil normal, semua animasi jalan
-   - Scroll down → hero slide up & fade out
-                 → overview snap in dari bawah
-                 → Godd2.mp4 play forward sebagai bg
-   - Scroll up → video playbackRate = -1 (reverse literal)
-               → setelah video selesai / threshold → kembali ke hero
-               → hero slide down fade in
+   SCROLLYTELLING.JS  v3 — Forbidden Space
+   
+   Alur lengkap:
+   
+   ① HERO ENTRANCE (page load)
+      - Semua elemen hero (.hero-enter) animate in bertahap
+   
+   ② HERO → OVERVIEW
+      - Tunggu hero entrance selesai (atau skip jika sudah selesai)
+      - Jalankan hero EXIT animation (.hero-leave)
+      - Setelah exit selesai → slide panel hero ke atas
+      - Overview panel snap dari bawah
+      - Video play forward
+      - Overview entrance animation (.ov-enter) jalan
+   
+   ③ OVERVIEW → HERO (reverse)
+      - Jalankan overview EXIT animation (.ov-leave)
+      - Setelah exit selesai → video mulai reverse frame-by-frame
+      - Saat video reverse mencapai 0 → slide panel overview ke bawah
+      - Hero panel snap dari atas
+      - Hero entrance animation jalan ulang
+   
 ============================================================ */
 
 (function initScrollytelling() {
 
-  /* ── CONFIG ── */
-  const TRANS_MS      = 700;    // durasi slide transition CSS
-  const VIDEO_SRC     = '../../Assets/video/Godd2.mp4';  // path dari forbidden-space.html
-  const REVERSE_SPEED = 2.5;    // kecepatan playback reverse (lebih cepat = lebih dramatis)
-  const FORWARD_SPEED = 1.0;
-
-  /* ── STATE ── */
-  let currentSection = 'hero';  // 'hero' | 'overview'
-  let isAnimating    = false;
-  let lastWheel      = 0;
-  const COOL         = 900;     // cooldown antara navigasi (ms)
-
-  /* ── ELEMENTS ── */
-  const heroEl      = document.getElementById('hero');
-  const overviewEl  = document.getElementById('overview');
-  const restEl      = document.getElementById('rest-sections'); // wrapper semua section setelah overview
+  /* ── GUARD ── */
+  const heroEl     = document.getElementById('hero');
+  const overviewEl = document.getElementById('overview');
   if (!heroEl || !overviewEl) return;
 
-  /* ── BUILD VIDEO BACKGROUND ── */
-  const videoWrap = document.createElement('div');
-  videoWrap.className = 'overview-video-bg';
+  /* ── CONFIG ── */
+  const VIDEO_SRC      = '../../Assets/project/game/ForbiddenSpace/Motion/Godd2.mp4';
+  const REVERSE_SPEED  = 3.0;         // frame mundur per RAF tick (fps = REVERSE_SPEED * 60 fps efektif)
+  const PANEL_DUR      = 700;         // ms durasi slide panel CSS
+  const COOL           = 1000;        // cooldown antar navigasi
+
+  /* ── STATE ── */
+  let currentSection  = 'hero';
+  let isAnimating     = false;
+  let heroEntranceDone = false;
+  let lastNav         = 0;
+  let reverseRafId    = null;
+
+  /* ── TIMING: durasi animasi per fase (ms) ── */
+  const HERO_EXIT_DUR     = 650;   // durasi CSS exit animation hero
+  const OV_ENTER_DUR      = 800;   // durasi CSS entrance animation overview
+  const OV_EXIT_DUR       = 600;   // durasi CSS exit animation overview
+  const HERO_ENTER_DUR    = 750;   // durasi CSS entrance animation hero (re-enter)
+
+  /* ══════════════════════════════════════════════════
+     VIDEO SETUP
+  ══════════════════════════════════════════════════ */
+  const videoWrap   = document.createElement('div');
+  videoWrap.className = 'ov-video-bg';
 
   const video = document.createElement('video');
-  video.src      = VIDEO_SRC;
-  video.muted    = true;
-  video.playsInline = true;
-  video.preload  = 'auto';
-  video.loop     = false;
-  video.className = 'overview-bg-video';
+  video.src          = VIDEO_SRC;
+  video.muted        = true;
+  video.playsInline  = true;
+  video.preload      = 'auto';
+  video.loop         = false;
+  video.className    = 'ov-bg-video';
 
   const videoOverlay = document.createElement('div');
-  videoOverlay.className = 'overview-video-overlay';
+  videoOverlay.className = 'ov-video-overlay';
 
   videoWrap.appendChild(video);
   videoWrap.appendChild(videoOverlay);
 
-  // Insert ke section.fs-overview (bukan div#overview),
-  // karena .overview-video-bg butuh parent position:relative
-  const overviewSection = overviewEl.querySelector('section.fs-overview') || overviewEl;
-  overviewSection.style.position = 'relative';
-  overviewSection.insertAdjacentElement('afterbegin', videoWrap);
+  const ovSection = overviewEl.querySelector('section.fs-overview') || overviewEl;
+  ovSection.style.position = 'relative';
+  ovSection.insertAdjacentElement('afterbegin', videoWrap);
 
-  /* ── PRELOAD video ── */
   video.load();
 
-  /* ── SETUP INITIAL STATES ── */
-  // Hero: tampil normal
-  heroEl.classList.add('snap-active');
+  /* ── Saat video selesai forward → freeze di frame terakhir ── */
+  video.addEventListener('ended', () => {
+    video.currentTime = video.duration || video.currentTime;
+    video.pause();
+  });
 
-  // Overview: siap di bawah, tersembunyi
-  overviewEl.classList.add('snap-hidden-below');
-  overviewEl.classList.remove('snap-active');
-
-  /* ── BODY: enable snap mode ── */
+  /* ══════════════════════════════════════════════════
+     INITIAL STATE
+  ══════════════════════════════════════════════════ */
   document.body.classList.add('snap-mode');
 
-  /* ── WRAPPER semua section setelah overview ── */
-  // Wrap section setelah overview agar bisa di-scroll normal setelah overview muncul
-  const afterSections = [];
-  let sibling = overviewEl.nextElementSibling;
-  while (sibling) {
-    afterSections.push(sibling);
-    sibling = sibling.nextElementSibling;
+  /* Hero: positioned fixed, mulai state hidden lalu entrance */
+  heroEl.style.cssText = `
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    overflow: hidden; z-index: 10;
+    will-change: transform, opacity;
+  `;
+
+  /* Overview: positioned fixed, tersembunyi di bawah */
+  overviewEl.style.cssText = `
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    overflow-y: auto; overflow-x: hidden; z-index: 9;
+    will-change: transform, opacity;
+    transform: translateY(100%); opacity: 0; pointer-events: none;
+  `;
+
+  /* Rest sections: di bawah layar, z-index rendah */
+  let restWrapper = buildRestSections();
+
+  /* ══════════════════════════════════════════════════
+     REST SECTIONS WRAPPER
+  ══════════════════════════════════════════════════ */
+  function buildRestSections() {
+    let wrapper = document.getElementById('rest-sections');
+    if (wrapper) return wrapper;
+
+    const siblings = [];
+    let sib = overviewEl.nextElementSibling;
+    while (sib) {
+      siblings.push(sib);
+      sib = sib.nextElementSibling;
+    }
+
+    if (!siblings.length) return null;
+
+    wrapper = document.createElement('div');
+    wrapper.id = 'rest-sections';
+    siblings[0].parentNode.insertBefore(wrapper, siblings[0]);
+    siblings.forEach(el => wrapper.appendChild(el));
+    return wrapper;
   }
 
-  // Buat rest wrapper kalau belum ada
-  let restWrapper = document.getElementById('rest-sections');
-  if (!restWrapper && afterSections.length) {
-    restWrapper = document.createElement('div');
-    restWrapper.id = 'rest-sections';
-    afterSections[0].parentNode.insertBefore(restWrapper, afterSections[0]);
-    afterSections.forEach(el => restWrapper.appendChild(el));
+  /* ══════════════════════════════════════════════════
+     HERO ENTRANCE ANIMATION (page load)
+  ══════════════════════════════════════════════════ */
+  const HERO_ENTER_ITEMS = [
+    { sel: '.fs-hero-meta',     cls: 'hero-anim-enter', delay: 0   },
+    { sel: '.fs-hero-title',    cls: 'hero-anim-enter', delay: 120 },
+    { sel: '.fs-hero-tagline',  cls: 'hero-anim-enter', delay: 240 },
+    { sel: '.fs-hero-role',     cls: 'hero-anim-enter', delay: 340 },
+    { sel: '.fs-hero-actions',  cls: 'hero-anim-enter', delay: 440 },
+    { sel: '.fs-hero-visual',   cls: 'hero-anim-enter', delay: 150 },
+    { sel: '.scroll-cue',       cls: 'hero-anim-enter', delay: 600 },
+  ];
+
+  function runHeroEntrance() {
+    /* Reset semua elemen ke state hidden */
+    HERO_ENTER_ITEMS.forEach(({ sel }) => {
+      const el = heroEl.querySelector(sel);
+      if (!el) return;
+      el.classList.remove('hero-anim-enter', 'hero-anim-leave');
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(28px)';
+    });
+
+    /* Animasikan masuk satu per satu */
+    let maxEnd = 0;
+    HERO_ENTER_ITEMS.forEach(({ sel, delay }) => {
+      const el = heroEl.querySelector(sel);
+      if (!el) return;
+      const end = delay + HERO_ENTER_DUR;
+      if (end > maxEnd) maxEnd = end;
+
+      setTimeout(() => {
+        el.style.transition = `opacity ${HERO_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1) ${0}ms,
+                               transform ${HERO_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1) ${0}ms`;
+        el.style.opacity   = '1';
+        el.style.transform = 'translateY(0)';
+      }, delay);
+    });
+
+    return maxEnd; /* total durasi entrance */
   }
 
-  /* ────────────────────────────────────────────
+  /* Hero EXIT animation — elemen drift ke atas sambil fade */
+  function runHeroExit(direction = 'up') {
+    return new Promise(resolve => {
+      const yDir = direction === 'up' ? '-20px' : '20px';
+
+      HERO_ENTER_ITEMS.forEach(({ sel, delay }, i) => {
+        const el = heroEl.querySelector(sel);
+        if (!el) return;
+        const staggerDelay = i * 30; /* exit cepat, stagger tipis */
+
+        setTimeout(() => {
+          el.style.transition = `opacity ${HERO_EXIT_DUR * 0.7}ms ease ${0}ms,
+                                 transform ${HERO_EXIT_DUR * 0.8}ms cubic-bezier(0.4,0,1,1) ${0}ms`;
+          el.style.opacity   = '0';
+          el.style.transform = `translateY(${yDir})`;
+        }, staggerDelay);
+      });
+
+      setTimeout(resolve, HERO_EXIT_DUR);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════
+     OVERVIEW ENTRANCE ANIMATION
+  ══════════════════════════════════════════════════ */
+  const OV_ENTER_ITEMS = [
+    { sel: '.section-eyebrow',    delay: 0   },
+    { sel: '.overview-text h2',   delay: 100 },
+    { sel: '.overview-text p',    delay: 200 },
+    { sel: '.overview-stats',     delay: 320 },
+    { sel: '.stat-item',          delay: 380, stagger: 80 },
+    { sel: '.overview-scroll-hint', delay: 700 },
+  ];
+
+  function resetOverviewItems() {
+    OV_ENTER_ITEMS.forEach(({ sel, stagger }) => {
+      if (stagger) {
+        overviewEl.querySelectorAll(sel).forEach(el => {
+          el.style.opacity   = '0';
+          el.style.transform = 'translateY(20px)';
+          el.style.transition = '';
+        });
+      } else {
+        const el = overviewEl.querySelector(sel);
+        if (!el) return;
+        el.style.opacity   = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = '';
+      }
+    });
+  }
+
+  function runOverviewEntrance() {
+    OV_ENTER_ITEMS.forEach(({ sel, delay, stagger }) => {
+      if (stagger) {
+        overviewEl.querySelectorAll(sel).forEach((el, i) => {
+          setTimeout(() => {
+            el.style.transition = `opacity ${OV_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1),
+                                   transform ${OV_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1)`;
+            el.style.opacity   = '1';
+            el.style.transform = 'translateY(0)';
+          }, delay + i * stagger);
+        });
+      } else {
+        const el = overviewEl.querySelector(sel);
+        if (!el) return;
+        setTimeout(() => {
+          el.style.transition = `opacity ${OV_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1),
+                                 transform ${OV_ENTER_DUR}ms cubic-bezier(0.16,1,0.3,1)`;
+          el.style.opacity   = '1';
+          el.style.transform = 'translateY(0)';
+        }, delay);
+      }
+    });
+  }
+
+  /* Overview EXIT animation */
+  function runOverviewExit() {
+    return new Promise(resolve => {
+      const items = OV_ENTER_ITEMS.slice().reverse();
+      items.forEach(({ sel, stagger }, i) => {
+        const delay = i * 40;
+        if (stagger) {
+          overviewEl.querySelectorAll(sel).forEach((el, j) => {
+            setTimeout(() => {
+              el.style.transition = `opacity ${OV_EXIT_DUR * 0.7}ms ease,
+                                     transform ${OV_EXIT_DUR * 0.7}ms cubic-bezier(0.4,0,1,1)`;
+              el.style.opacity   = '0';
+              el.style.transform = 'translateY(-16px)';
+            }, delay + j * 30);
+          });
+        } else {
+          const el = overviewEl.querySelector(sel);
+          if (!el) return;
+          setTimeout(() => {
+            el.style.transition = `opacity ${OV_EXIT_DUR * 0.7}ms ease,
+                                   transform ${OV_EXIT_DUR * 0.7}ms cubic-bezier(0.4,0,1,1)`;
+            el.style.opacity   = '0';
+            el.style.transform = 'translateY(-16px)';
+          }, delay);
+        }
+      });
+
+      setTimeout(resolve, OV_EXIT_DUR);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════
      VIDEO CONTROL
-  ──────────────────────────────────────────── */
+  ══════════════════════════════════════════════════ */
+  function playVideoForward() {
+    cancelReverseRaf();
+    video.playbackRate = 1.0;
 
-  function playForward() {
-    if (!video.src) return;
-    video.playbackRate = FORWARD_SPEED;
-    // Kalau video sudah hampir habis, reset ke awal
-    if (video.currentTime >= video.duration - 0.1) {
+    if (!video.duration || video.currentTime >= video.duration - 0.05) {
       video.currentTime = 0;
     }
+
     video.play().catch(() => {});
   }
 
-  function playReverse() {
-    if (!video.src || video.duration === 0) return;
-
-    // Kalau video di awal, langsung complete
-    if (video.currentTime <= 0.05) {
-      video.pause();
-      onReverseComplete();
-      return;
+  function cancelReverseRaf() {
+    if (reverseRafId) {
+      cancelAnimationFrame(reverseRafId);
+      reverseRafId = null;
     }
+  }
 
-    // Pause dulu, lalu frame-by-frame reverse via RAF
-    video.pause();
-    let reverseRaf;
+  /* Reverse video frame-by-frame → returns Promise yang resolve saat currentTime <= 0 */
+  function playVideoReverse() {
+    return new Promise(resolve => {
+      cancelReverseRaf();
+      video.pause();
 
-    function stepReverse() {
-      if (video.currentTime <= 0) {
+      if (!video.duration || video.currentTime <= 0.05) {
         video.currentTime = 0;
-        cancelAnimationFrame(reverseRaf);
-        onReverseComplete();
+        resolve();
         return;
       }
-      // Step mundur ~60fps
-      video.currentTime = Math.max(0, video.currentTime - (1 / 60) * REVERSE_SPEED);
-      reverseRaf = requestAnimationFrame(stepReverse);
-    }
 
-    // Simpan ref RAF agar bisa di-cancel
-    video._reverseRaf = reverseRaf;
-    reverseRaf = requestAnimationFrame(stepReverse);
-    video._reverseRaf = reverseRaf; // update ref
+      const STEP = (1 / 60) * REVERSE_SPEED; /* mundur sekian detik per frame ~60fps */
+
+      function step() {
+        if (video.currentTime <= STEP) {
+          video.currentTime = 0;
+          resolve();
+          return;
+        }
+        video.currentTime = Math.max(0, video.currentTime - STEP);
+        reverseRafId = requestAnimationFrame(step);
+      }
+
+      reverseRafId = requestAnimationFrame(step);
+    });
   }
 
-  // Cancel reverse kalau user scroll lagi ke bawah sebelum selesai
-  function cancelReverse() {
-    if (video._reverseRaf) {
-      cancelAnimationFrame(video._reverseRaf);
-      video._reverseRaf = null;
-    }
+  /* ══════════════════════════════════════════════════
+     PANEL SLIDE HELPERS
+  ══════════════════════════════════════════════════ */
+  function setPanelStyle(el, props) {
+    Object.assign(el.style, props);
   }
 
-  /* ── CALLBACK: reverse selesai → kembali ke hero ── */
-  function onReverseComplete() {
-    transitionToHero();
+  function slidePanel(el, from, to, dur = PANEL_DUR) {
+    return new Promise(resolve => {
+      setPanelStyle(el, {
+        transition: 'none',
+        transform:  from.transform  || '',
+        opacity:    from.opacity    || '',
+      });
+
+      /* Force reflow */
+      void el.getBoundingClientRect();
+
+      setPanelStyle(el, {
+        transition: `transform ${dur}ms cubic-bezier(0.16,1,0.3,1),
+                     opacity   ${dur * 0.8}ms ease`,
+        transform:  to.transform || 'translateY(0)',
+        opacity:    to.opacity   || '1',
+      });
+
+      setTimeout(resolve, dur);
+    });
   }
 
-  /* ────────────────────────────────────────────
-     TRANSITIONS
-  ──────────────────────────────────────────── */
-
-  function transitionToOverview() {
+  /* ══════════════════════════════════════════════════
+     TRANSITION: HERO → OVERVIEW
+  ══════════════════════════════════════════════════ */
+  async function transitionToOverview() {
     if (isAnimating || currentSection === 'overview') return;
+
+    const now = performance.now();
+    if (now - lastNav < COOL) return;
+
     isAnimating = true;
+    lastNav     = now;
 
-    // 1. Hero slide up & fade out
-    heroEl.classList.remove('snap-active');
-    heroEl.classList.add('snap-exit-up');
+    /* 1. Jalankan hero EXIT animation */
+    await runHeroExit('up');
 
-    // 2. Overview snap in dari bawah
-    overviewEl.classList.remove('snap-hidden-below');
-    overviewEl.classList.add('snap-enter-up', 'snap-active');
+    /* 2. Slide hero panel ke atas sambil overview snap dari bawah */
+    resetOverviewItems(); /* pastikan overview items di-reset sebelum visible */
 
-    // 3. Play video forward
-    cancelReverse();
-    playForward();
+    /* Aktifkan video di-preload/fade-in */
+    videoWrap.classList.remove('ov-video-hidden');
 
+    /* Mulai slide kedua panel paralel */
+    const slideHeroOut = slidePanel(
+      heroEl,
+      { transform: 'translateY(0)',    opacity: '0' },
+      { transform: 'translateY(-10%)', opacity: '0' }
+    );
+
+    /* Overview mulai dari bawah */
+    setPanelStyle(overviewEl, {
+      transform:    'translateY(100%)',
+      opacity:      '0',
+      pointerEvents:'none',
+      transition:   'none',
+    });
+    void overviewEl.getBoundingClientRect();
+
+    setPanelStyle(overviewEl, {
+      transition: `transform ${PANEL_DUR}ms cubic-bezier(0.16,1,0.3,1),
+                   opacity   ${PANEL_DUR * 0.8}ms ease`,
+      transform:  'translateY(0)',
+      opacity:    '1',
+      pointerEvents: 'auto',
+    });
+
+    await slideHeroOut;
+
+    /* Sembunyikan hero (tidak perlu render) */
+    setPanelStyle(heroEl, { visibility: 'hidden', pointerEvents: 'none' });
+
+    /* 3. Play video forward */
+    playVideoForward();
+
+    /* 4. Overview entrance animation (sedikit delay setelah panel muncul) */
     setTimeout(() => {
-      heroEl.classList.remove('snap-exit-up');
-      overviewEl.classList.remove('snap-enter-up');
-      currentSection = 'overview';
-      isAnimating    = false;
-    }, TRANS_MS);
+      runOverviewEntrance();
+    }, 80);
+
+    currentSection = 'overview';
+    isAnimating    = false;
   }
 
-  function transitionToHero() {
+  /* ══════════════════════════════════════════════════
+     TRANSITION: OVERVIEW → HERO
+  ══════════════════════════════════════════════════ */
+  async function transitionToHero() {
     if (isAnimating || currentSection === 'hero') return;
+
+    const now = performance.now();
+    if (now - lastNav < COOL) return;
+
     isAnimating = true;
+    lastNav     = now;
 
-    // 1. Overview exit ke bawah
-    overviewEl.classList.remove('snap-active');
-    overviewEl.classList.add('snap-exit-down', 'snap-hidden-below');
+    /* 1. Jalankan overview EXIT animation */
+    await runOverviewExit();
 
-    // 2. Hero kembali dari atas ke posisi normal
-    heroEl.classList.add('snap-enter-down', 'snap-active');
+    /* 2. Video reverse (paralel dengan panel slide prep) */
+    const reversePromise = playVideoReverse();
 
-    // 3. Fade out video overlay (video sudah reverse)
-    videoWrap.classList.add('video-fading');
+    /* 3. Prepare hero di belakang overview */
+    setPanelStyle(heroEl, {
+      visibility:   'visible',
+      transform:    'translateY(-8%)',
+      opacity:      '0',
+      pointerEvents:'none',
+      transition:   'none',
+    });
 
-    setTimeout(() => {
-      overviewEl.classList.remove('snap-exit-down');
-      heroEl.classList.remove('snap-enter-down');
-      videoWrap.classList.remove('video-fading');
-      video.pause();
-      currentSection = 'hero';
-      isAnimating    = false;
-    }, TRANS_MS);
+    /* 4. Tunggu video reverse selesai */
+    await reversePromise;
+
+    /* 5. Slide overview turun keluar, hero masuk dari atas */
+    const slideOvOut = slidePanel(
+      overviewEl,
+      { transform: 'translateY(0)', opacity: '1' },
+      { transform: 'translateY(100%)', opacity: '0' }
+    );
+
+    /* Hero slide masuk dari atas */
+    void heroEl.getBoundingClientRect();
+    setPanelStyle(heroEl, {
+      transition: `transform ${PANEL_DUR}ms cubic-bezier(0.16,1,0.3,1),
+                   opacity   ${PANEL_DUR * 0.8}ms ease`,
+      transform:  'translateY(0)',
+      opacity:    '1',
+    });
+
+    await slideOvOut;
+
+    /* Reset overview */
+    setPanelStyle(overviewEl, {
+      transform:    'translateY(100%)',
+      opacity:      '0',
+      pointerEvents:'none',
+      transition:   'none',
+    });
+    videoWrap.classList.add('ov-video-hidden');
+
+    /* 6. Hero entrance animation ulang */
+    setPanelStyle(heroEl, { pointerEvents: 'auto' });
+    runHeroEntrance();
+
+    currentSection = 'overview'; /* sebelum reset, pastikan logic di bawah benar */
+    currentSection = 'hero';
+    isAnimating    = false;
   }
 
-  /* ────────────────────────────────────────────
-     SCROLL & INPUT DETECTION
-  ──────────────────────────────────────────── */
-
-  /* ── STATE: apakah snap sudah dilepas (user sudah melewati overview) ── */
+  /* ══════════════════════════════════════════════════
+     SNAP RELEASE — masuk ke rest sections
+  ══════════════════════════════════════════════════ */
   let snapReleased = false;
 
   function releaseSnap() {
     if (snapReleased) return;
     snapReleased = true;
 
-    // Overview keluar dari fixed, kembali ke flow normal
-    overviewEl.classList.remove('snap-active');
-    overviewEl.style.position  = 'relative';
-    overviewEl.style.height    = '';
-    overviewEl.style.overflow  = '';
-    overviewEl.style.transform = '';
-    overviewEl.style.opacity   = '1';
+    /* Lepas overview dari fixed ke flow normal */
+    setPanelStyle(overviewEl, {
+      position:   'relative',
+      transform:  'none',
+      opacity:    '1',
+      height:     '',
+      overflow:   '',
+    });
 
-    // Hero tetap tersembunyi (sudah exit ke atas)
+    /* Sembunyikan hero */
     heroEl.style.display = 'none';
 
-    // Body bisa scroll lagi
     document.body.classList.remove('snap-mode');
     document.body.classList.add('snap-released');
 
-    // Scroll ke rest-sections
     const rest = document.getElementById('rest-sections');
-    if (rest) {
-      rest.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (rest) rest.scrollIntoView({ behavior: 'smooth' });
   }
 
   function reengageSnap() {
     if (!snapReleased) return;
     snapReleased = false;
 
-    // Kembalikan overview ke fixed
-    overviewEl.style.position = '';
-    overviewEl.style.height   = '';
-    heroEl.style.display      = '';
+    heroEl.style.display = '';
+    setPanelStyle(heroEl, {
+      position:   'fixed',
+      inset:      '0',
+      width:      '100%',
+      height:     '100%',
+      overflow:   'hidden',
+      zIndex:     '10',
+    });
 
     document.body.classList.add('snap-mode');
     document.body.classList.remove('snap-released');
 
-    // Tampilkan overview aktif lagi
-    overviewEl.classList.add('snap-active');
     currentSection = 'overview';
   }
 
-  function handleScrollDown() {
+  /* ══════════════════════════════════════════════════
+     INPUT HANDLERS
+  ══════════════════════════════════════════════════ */
+  function handleDown() {
     if (currentSection === 'hero') {
       transitionToOverview();
       return;
     }
 
-    // Di overview: cek apakah sudah di bawah → lepas snap ke rest sections
     if (currentSection === 'overview' && !snapReleased) {
       const atBottom = overviewEl.scrollTop + overviewEl.clientHeight >= overviewEl.scrollHeight - 4;
-      // Kalau konten overview tidak overflow (fit dalam viewport), langsung release
       const noScroll = overviewEl.scrollHeight <= overviewEl.clientHeight + 4;
-      if (atBottom || noScroll) {
-        releaseSnap();
-      }
+      if (atBottom || noScroll) releaseSnap();
     }
   }
 
-  function handleScrollUp() {
-    // Kalau snap sudah dilepas dan user scroll ke paling atas halaman → re-engage overview
+  function handleUp() {
     if (snapReleased) {
       const pageTop = window.scrollY || document.documentElement.scrollTop;
-      if (pageTop <= 4) {
-        reengageSnap();
-      }
+      if (pageTop <= 4) reengageSnap();
       return;
     }
 
     if (currentSection === 'overview') {
-      // Cek apakah overview sudah di scroll paling atas
-      const scrollTop = overviewEl.scrollTop || 0;
-      if (scrollTop > 10) return; // biarkan scroll internal dulu
-
-      // Reverse video → transisi ke hero
-      cancelReverse();
-      playReverse();
+      const atTop = (overviewEl.scrollTop || 0) <= 4;
+      if (!atTop) return; /* biarkan scroll internal dulu */
       transitionToHero();
     }
   }
 
-  /* ── WHEEL ── */
-  let wheelAcc = 0;
-  const WHEEL_THRESHOLD = 80;
+  /* Wheel */
+  let wheelAcc  = 0;
+  let lastWheel = 0;
+  const WHEEL_THRESH = 80;
+  const WHEEL_COOL   = 500;
 
   window.addEventListener('wheel', (e) => {
-    const now = Date.now();
-    if (isAnimating) { e.preventDefault?.(); return; }
+    if (isAnimating) return;
 
-    // Kalau di overview dan belum di paling atas saat scroll up → biarkan
+    const now = Date.now();
+    if (now - lastWheel > WHEEL_COOL) wheelAcc = 0;
+    lastWheel = now;
+
+    /* Kalau di overview & belum di atas, biarkan scroll internal */
     if (currentSection === 'overview' && e.deltaY < 0) {
-      const scrollTop = overviewEl.scrollTop || window.scrollY || document.documentElement.scrollTop;
-      if (scrollTop > 20) return;
+      if ((overviewEl.scrollTop || 0) > 10) return;
     }
 
     wheelAcc += e.deltaY;
-
-    if (now - lastWheel > COOL) {
-      wheelAcc = e.deltaY;
-    }
-    lastWheel = now;
-
-    if (Math.abs(wheelAcc) >= WHEEL_THRESHOLD) {
-      if (wheelAcc > 0) handleScrollDown();
-      else              handleScrollUp();
+    if (Math.abs(wheelAcc) >= WHEEL_THRESH) {
+      if (wheelAcc > 0) handleDown();
+      else              handleUp();
       wheelAcc = 0;
     }
   }, { passive: true });
 
-  /* ── TOUCH ── */
-  let touchStartY = 0;
+  /* Touch */
+  let touchY = 0;
   const SWIPE_MIN = 55;
 
-  window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
+  window.addEventListener('touchstart', e => {
+    touchY = e.touches[0].clientY;
   }, { passive: true });
 
-  window.addEventListener('touchend', (e) => {
+  window.addEventListener('touchend', e => {
     if (isAnimating) return;
-    const dy = touchStartY - e.changedTouches[0].clientY;
+    const dy = touchY - e.changedTouches[0].clientY;
     if (Math.abs(dy) < SWIPE_MIN) return;
-
-    if (dy > 0) handleScrollDown();
-    else        handleScrollUp();
+    if (dy > 0) handleDown();
+    else        handleUp();
   }, { passive: true });
 
-  /* ── KEYBOARD ── */
-  document.addEventListener('keydown', (e) => {
+  /* Keyboard */
+  document.addEventListener('keydown', e => {
     if (isAnimating) return;
     const tag = document.activeElement?.tagName?.toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
 
-    if (e.key === 'ArrowDown' || e.key === 'PageDown') handleScrollDown();
-    if (e.key === 'ArrowUp'   || e.key === 'PageUp')   handleScrollUp();
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') handleDown();
+    if (e.key === 'ArrowUp'   || e.key === 'PageUp')   handleUp();
   });
 
-  /* ── NAV LINK: "View Project" btn di hero → langsung ke overview ── */
+  /* Nav links */
   document.querySelectorAll('a[href="#overview"]').forEach(link => {
-    link.addEventListener('click', (e) => {
+    link.addEventListener('click', e => {
       e.preventDefault();
       if (currentSection !== 'overview') transitionToOverview();
     });
   });
 
-  /* ── SCROLL CUE click ── */
+  /* Scroll cue */
   const scrollCue = document.querySelector('.scroll-cue');
   if (scrollCue) {
     scrollCue.addEventListener('click', () => {
@@ -359,30 +628,37 @@
     });
   }
 
-  /* ── BACK TO PORTFOLIO nav ── */
-  const navBack = document.querySelector('.nav-back');
-  if (navBack) {
-    // nav-back sudah href ke portfolio, biarkan default
-  }
-
-  /* ── VIDEO: saat video habis dimainkan forward, loop atau freeze ── */
-  video.addEventListener('ended', () => {
-    // Freeze di frame terakhir saat forward (biarkan tetap terlihat)
-    video.currentTime = video.duration;
-    video.pause();
-  });
-
-  /* ── REDUCED MOTION: skip animasi video ── */
+  /* ══════════════════════════════════════════════════
+     REDUCED MOTION
+  ══════════════════════════════════════════════════ */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    // Tetap snapping tapi tanpa video
     videoWrap.style.display = 'none';
   }
 
-  /* ── PUBLIC API ── */
+  /* ══════════════════════════════════════════════════
+     PUBLIC API
+  ══════════════════════════════════════════════════ */
   window.SnapNav = {
     toOverview: transitionToOverview,
     toHero:     transitionToHero,
     current:    () => currentSection,
   };
+
+  /* ══════════════════════════════════════════════════
+     START — jalankan hero entrance saat halaman load
+  ══════════════════════════════════════════════════ */
+  /* Set semua hero items ke opacity 0 dulu */
+  HERO_ENTER_ITEMS.forEach(({ sel }) => {
+    const el = heroEl.querySelector(sel);
+    if (!el) return;
+    el.style.opacity   = '0';
+    el.style.transform = 'translateY(28px)';
+  });
+
+  /* Jalankan entrance sedikit setelah DOMContentLoaded */
+  const totalEntrance = runHeroEntrance();
+  setTimeout(() => {
+    heroEntranceDone = true;
+  }, totalEntrance + 100);
 
 })();
