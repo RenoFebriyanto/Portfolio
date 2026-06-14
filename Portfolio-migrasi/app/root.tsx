@@ -20,7 +20,7 @@ import projects from '~/styles/projects.css?url';
 import skills from '~/styles/skills.css?url';
 import contact from '~/styles/contact.css?url';
 
-import { Cursor } from '~/components/ui/Cursor';
+import Cursor from '~/components/ui/Cursor';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
