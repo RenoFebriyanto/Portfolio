@@ -55,6 +55,10 @@
   --duration-fast:   150ms;
   --duration-normal: 300ms;
   --duration-slow:   600ms;
+  
+
+  /* Cursor */
+  --color-accent-rgb: 94, 234, 212;
 
   /* Z-index layers */
   --z-base:    0;

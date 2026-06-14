@@ -1,4 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export function Footer() {
-    return (_jsx("footer", { className: "footer", children: _jsxs("div", { className: "footer__inner container", children: [_jsxs("p", { className: "footer__copy", children: ["\u00A9 ", new Date().getFullYear(), " ", _jsx("span", { children: "Reno Febriyanto" }), " \u2014 Built with React Router v7 + Three.js"] }), _jsxs("nav", { className: "footer__links", children: [_jsx("a", { className: "footer__link", href: "https://github.com/RenoFebriyanto", target: "_blank", rel: "noreferrer", children: "GitHub" }), _jsx("a", { className: "footer__link", href: "https://linkedin.com/in/renofebriyanto/", target: "_blank", rel: "noreferrer", children: "LinkedIn" }), _jsx("a", { className: "footer__link", href: "https://catmounth.itch.io", target: "_blank", rel: "noreferrer", children: "itch.io" })] })] }) }));
-}

@@ -132,6 +132,30 @@ ul, ol {
   border: 0;
 }
 
+/* Tambahkan di base.css yang sudah ada */
+
+.scroll-container {
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.section {
+  scroll-snap-align: start;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Hide default cursor saat custom cursor aktif */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

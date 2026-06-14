@@ -1,56 +1,63 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router";
 
-interface NavProps {
-  activeIndex: number;
-  scrollTo: (index: number) => void;
-}
-
-const NAV_LINKS = [
-  { label: 'About',    index: 1 },
-  { label: 'Projects', index: 2 },
-  { label: 'Skills',   index: 3 },
-  { label: 'Contact',  index: 4 },
+const navLinks = [
+  { label: "Home", to: "/" },
+  { label: "About", to: "/#about" },
+  { label: "Projects", to: "/#projects" },
+  { label: "Skills", to: "/#skills" },
+  { label: "Contact", to: "/#contact" },
 ];
 
-export function Nav({ activeIndex, scrollTo }: NavProps) {
+export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const container = document.getElementById('scroll-container');
-    if (!container) return;
-
-    const handler = () => setScrolled(container.scrollTop > 40);
-    container.addEventListener('scroll', handler, { passive: true });
-    return () => container.removeEventListener('scroll', handler);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleNavClick = (to: string) => {
+    setMenuOpen(false);
+    if (to.startsWith("/#")) {
+      const id = to.replace("/#", "");
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
-      <div className="nav__inner container">
-        {/* Logo */}
-        <button className="nav__logo" onClick={() => scrollTo(0)}>
-          RF<span className="nav__logo-dot" />
-        </button>
+    <header className={`nav${scrolled ? " nav--scrolled" : ""}`}>
+      <div className="nav__inner">
+        <a href="/" className="nav__logo">
+          <span className="nav__logo-bracket">[</span>
+          <span className="nav__logo-name">YourName</span>
+          <span className="nav__logo-bracket">]</span>
+        </a>
 
-        {/* Links */}
-        <ul className="nav__links">
-          {NAV_LINKS.map(({ label, index }) => (
-            <li key={label}>
-              <button
-                className={`nav__link${activeIndex === index ? ' active' : ''}`}
-                onClick={() => scrollTo(index)}
-              >
-                {label}
-              </button>
-            </li>
+        <nav className={`nav__links${menuOpen ? " nav__links--open" : ""}`}>
+          {navLinks.map((link) => (
+            <button
+              key={link.label}
+              className="nav__link"
+              onClick={() => handleNavClick(link.to)}
+            >
+              {link.label}
+            </button>
           ))}
-        </ul>
+        </nav>
 
-        {/* CTA */}
-        <button className="nav__cta" onClick={() => scrollTo(4)}>
-          Hire Me
+        <button
+          className={`nav__burger${menuOpen ? " nav__burger--open" : ""}`}
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
+          <span />
+          <span />
+          <span />
         </button>
       </div>
-    </nav>
+    </header>
   );
 }

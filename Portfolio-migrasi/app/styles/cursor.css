@@ -1,69 +1,59 @@
-/* ============================================================
-   CURSOR
-   ============================================================ */
-
-.cursor-ring,
-.cursor-dot {
-  position: fixed;
+.cursor__dot,
+.cursor__ring {
   pointer-events: none;
-  z-index: var(--z-cursor);
+  position: fixed;
+  top: 0;
+  left: 0;
   border-radius: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-100px, -100px);
+  z-index: 9999;
   will-change: transform;
-  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.cursor-ring {
+.cursor__dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  margin-left: -3px;
+  margin-top: -3px;
+  transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+}
+
+.cursor__ring {
   width: 36px;
   height: 36px;
-  border: 1px solid rgba(255, 107, 53, 0.5);
-  transition: width var(--duration-normal) var(--ease-out),
-              height var(--duration-normal) var(--ease-out),
-              border-color var(--duration-normal) var(--ease-out),
-              background var(--duration-normal) var(--ease-out),
-              opacity var(--duration-fast) var(--ease-out);
+  border: 1.5px solid rgba(var(--color-accent-rgb), 0.5);
+  margin-left: -18px;
+  margin-top: -18px;
+  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease,
+    opacity 0.25s ease, transform 0.12s linear;
 }
 
-.cursor-dot {
-  width: 5px;
-  height: 5px;
-  background: var(--color-accent);
-  transition: width var(--duration-normal) var(--ease-out),
-              height var(--duration-normal) var(--ease-out),
-              opacity var(--duration-fast) var(--ease-out);
+/* Hover state */
+.cursor__dot--hover {
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
 }
 
-/* --- Hover: links, buttons, form fields --- */
-.cursor-ring.hovered {
-  width: 56px;
-  height: 56px;
+.cursor__ring--hover {
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  margin-top: -26px;
   border-color: var(--color-accent);
-  background: rgba(255, 107, 53, 0.05);
 }
 
-.cursor-dot.hovered {
-  width: 4px;
-  height: 4px;
-}
-
-/* --- Card: project cards, skill items, stats --- */
-.cursor-ring.card {
-  width: 64px;
-  height: 64px;
-  opacity: 0.28;
-  border-color: var(--color-text-muted);
-  background: transparent;
-}
-
-/* --- Hidden: mouse left viewport --- */
-.cursor-ring.hidden,
-.cursor-dot.hidden {
+/* Hidden state */
+.cursor__dot--hidden,
+.cursor__ring--hidden {
   opacity: 0;
 }
 
 @media (pointer: coarse) {
-  .cursor-ring,
-  .cursor-dot {
+  .cursor__dot,
+  .cursor__ring {
     display: none;
   }
 }

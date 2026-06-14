@@ -1,39 +1,36 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from "react";
 
-export function useScrollSnap(sectionCount: number) {
-  const containerRef  = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+export function useScrollSnap(enabled = true) {
+  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (!enabled) return;
 
-    const sections = Array.from(
-      container.querySelectorAll<HTMLElement>('.section')
-    );
+    const container = document.querySelector(".scroll-container") as HTMLElement;
+    if (!container) return;
+    containerRef.current = container;
+
+    // Snap behavior dihandle via CSS scroll-snap
+    // Hook ini bisa diperluas untuk scroll index tracking nanti
+    const sections = container.querySelectorAll<HTMLElement>(".section");
 
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const idx = sections.indexOf(entry.target as HTMLElement);
-            if (idx !== -1) setActiveIndex(idx);
+            const id = entry.target.getAttribute("id");
+            if (id) {
+              window.history.replaceState(null, "", `#${id}`);
+            }
           }
         });
       },
-      { root: container, threshold: 0.5 }
+      { threshold: 0.5 }
     );
 
-    sections.forEach(s => observer.observe(s));
+    sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, [sectionCount]);
+  }, [enabled]);
 
-  const scrollTo = (index: number) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const sections = container.querySelectorAll<HTMLElement>('.section');
-    sections[index]?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  return { containerRef, activeIndex, scrollTo };
+  return containerRef;
 }
