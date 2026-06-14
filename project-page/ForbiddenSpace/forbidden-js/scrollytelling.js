@@ -16,7 +16,7 @@
 
   /* ── CONFIG ── */
   const TRANS_MS      = 700;    // durasi slide transition CSS
-  const VIDEO_SRC     = '../../Assets/project/game/ForbiddenSpace/Motion/Godd2.mp4';  // path dari forbidden-space.html
+  const VIDEO_SRC     = '../../Assets/video/Godd2.mp4';  // path dari forbidden-space.html
   const REVERSE_SPEED = 2.5;    // kecepatan playback reverse (lebih cepat = lebih dramatis)
   const FORWARD_SPEED = 1.0;
 
@@ -49,7 +49,12 @@
 
   videoWrap.appendChild(video);
   videoWrap.appendChild(videoOverlay);
-  overviewEl.insertAdjacentElement('afterbegin', videoWrap);
+
+  // Insert ke section.fs-overview (bukan div#overview),
+  // karena .overview-video-bg butuh parent position:relative
+  const overviewSection = overviewEl.querySelector('section.fs-overview') || overviewEl;
+  overviewSection.style.position = 'relative';
+  overviewSection.insertAdjacentElement('afterbegin', videoWrap);
 
   /* ── PRELOAD video ── */
   video.load();
@@ -198,24 +203,87 @@
      SCROLL & INPUT DETECTION
   ──────────────────────────────────────────── */
 
+  /* ── STATE: apakah snap sudah dilepas (user sudah melewati overview) ── */
+  let snapReleased = false;
+
+  function releaseSnap() {
+    if (snapReleased) return;
+    snapReleased = true;
+
+    // Overview keluar dari fixed, kembali ke flow normal
+    overviewEl.classList.remove('snap-active');
+    overviewEl.style.position  = 'relative';
+    overviewEl.style.height    = '';
+    overviewEl.style.overflow  = '';
+    overviewEl.style.transform = '';
+    overviewEl.style.opacity   = '1';
+
+    // Hero tetap tersembunyi (sudah exit ke atas)
+    heroEl.style.display = 'none';
+
+    // Body bisa scroll lagi
+    document.body.classList.remove('snap-mode');
+    document.body.classList.add('snap-released');
+
+    // Scroll ke rest-sections
+    const rest = document.getElementById('rest-sections');
+    if (rest) {
+      rest.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function reengageSnap() {
+    if (!snapReleased) return;
+    snapReleased = false;
+
+    // Kembalikan overview ke fixed
+    overviewEl.style.position = '';
+    overviewEl.style.height   = '';
+    heroEl.style.display      = '';
+
+    document.body.classList.add('snap-mode');
+    document.body.classList.remove('snap-released');
+
+    // Tampilkan overview aktif lagi
+    overviewEl.classList.add('snap-active');
+    currentSection = 'overview';
+  }
+
   function handleScrollDown() {
     if (currentSection === 'hero') {
       transitionToOverview();
+      return;
     }
-    // Kalau sudah di overview → scroll normal (rest sections)
+
+    // Di overview: cek apakah sudah di bawah → lepas snap ke rest sections
+    if (currentSection === 'overview' && !snapReleased) {
+      const atBottom = overviewEl.scrollTop + overviewEl.clientHeight >= overviewEl.scrollHeight - 4;
+      // Kalau konten overview tidak overflow (fit dalam viewport), langsung release
+      const noScroll = overviewEl.scrollHeight <= overviewEl.clientHeight + 4;
+      if (atBottom || noScroll) {
+        releaseSnap();
+      }
+    }
   }
 
   function handleScrollUp() {
+    // Kalau snap sudah dilepas dan user scroll ke paling atas halaman → re-engage overview
+    if (snapReleased) {
+      const pageTop = window.scrollY || document.documentElement.scrollTop;
+      if (pageTop <= 4) {
+        reengageSnap();
+      }
+      return;
+    }
+
     if (currentSection === 'overview') {
       // Cek apakah overview sudah di scroll paling atas
       const scrollTop = overviewEl.scrollTop || 0;
       if (scrollTop > 10) return; // biarkan scroll internal dulu
 
-      // Mulai reverse video → setelah reverse complete → kembali ke hero
+      // Reverse video → transisi ke hero
       cancelReverse();
       playReverse();
-      // transitionToHero akan dipanggil oleh onReverseComplete
-      // Tapi juga trigger transisi CSS sekarang agar terasa responsif
       transitionToHero();
     }
   }
