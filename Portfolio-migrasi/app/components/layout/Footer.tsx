@@ -1,15 +1,32 @@
-export function Footer() {
+export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="footer">
-      <div className="footer__inner container">
+      <div className="footer__inner">
         <p className="footer__copy">
-          © {new Date().getFullYear()} <span>Reno Febriyanto</span> — Built with React Router v7 + Three.js
+          &copy; {year}{" "}
+          <span className="footer__name">Reno Febriyanto</span>
+          {" "}&mdash; Built with React Router, Three.js &amp; GSAP
         </p>
-        <nav className="footer__links">
-          <a className="footer__link" href="https://github.com/RenoFebriyanto" target="_blank" rel="noreferrer">GitHub</a>
-          <a className="footer__link" href="https://linkedin.com/in/renofebriyanto/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <a className="footer__link" href="https://catmounth.itch.io" target="_blank" rel="noreferrer">itch.io</a>
-        </nav>
+        <div className="footer__links">
+          
+            href="https://github.com/yourusername"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer__link"
+          >
+            GitHub
+          </a>
+          
+            href="https://linkedin.com/in/yourusername"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer__link"
+          >
+            LinkedIn
+          </a>
+        </div>
       </div>
     </footer>
   );
