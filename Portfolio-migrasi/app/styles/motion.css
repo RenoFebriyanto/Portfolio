@@ -1,0 +1,152 @@
+/* ================================================
+   MOTION.CSS — Per-section visual depth & motion
+   React port: hanya berisi style; trigger logic
+   dipindah ke component-level hooks (IntersectionObserver,
+   onMouseMove handlers), bukan global motion.js.
+================================================ */
+
+/* ================================================
+   PROJECTS — 3D card tilt glow (tilt itself via JS
+   inline transform in ProjectCard component)
+================================================ */
+.project-card {
+    transform-style: preserve-3d;
+    perspective: 800px;
+}
+
+.project-card .card-tilt-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+        circle at var(--glow-x, 50%) var(--glow-y, 50%),
+        rgba(255, 107, 53, 0.10) 0%,
+        transparent 65%
+    );
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.project-card:hover .card-tilt-glow {
+    opacity: 1;
+}
+
+/* ================================================
+   SKILLS — Value label fades in after bar fills
+   (mirrors .skill-item__bar.animated state set by
+   Skills.tsx's IntersectionObserver)
+================================================ */
+.skill-item__value {
+    opacity: 0;
+    transition: opacity 0.4s ease 0.8s;
+}
+
+.skill-item:has(.skill-item__bar.animated) .skill-item__value {
+    opacity: 1;
+}
+
+/* ================================================
+   ABOUT — Identity card shimmer sweep
+================================================ */
+.about__card.shimmer-ready {
+    overflow: hidden;
+}
+
+.about__card.shimmer-ready::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 107, 53, 0.06) 40%,
+        rgba(255, 107, 53, 0.12) 50%,
+        rgba(255, 107, 53, 0.06) 60%,
+        transparent 100%
+    );
+    pointer-events: none;
+    animation: shimmer-sweep 0.9s var(--ease-out) 0.3s forwards;
+}
+
+@keyframes shimmer-sweep {
+    to { left: 140%; }
+}
+
+/* ================================================
+   GLOBAL — Section number parallax ghost text
+   (rendered per-section as <span class="*__ghost">,
+   position handled by section CSS + scroll handler)
+================================================ */
+.motion-section-ghost {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-size: clamp(100px, 14vw, 200px);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.016);
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+    will-change: transform;
+    z-index: 0;
+}
+
+/* ================================================
+   GLOBAL — Typing cursor blink (eyebrow labels)
+================================================ */
+.motion-typed::after {
+    content: '|';
+    display: inline-block;
+    color: var(--color-accent);
+    margin-left: 1px;
+    animation: blink-caret 0.9s step-end infinite;
+}
+
+@keyframes blink-caret {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+/* ================================================
+   CONTACT — Form submit ripple
+================================================ */
+.form-submit {
+    position: relative;
+    overflow: hidden;
+}
+
+.form-submit .submit-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    pointer-events: none;
+    animation: ripple-expand 0.55s var(--ease-out) forwards;
+}
+
+@keyframes ripple-expand {
+    to {
+        transform: scale(24);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .about__card.shimmer-ready::after,
+    .motion-typed::after,
+    .form-submit .submit-ripple {
+        animation: none;
+        display: none;
+    }
+}

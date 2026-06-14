@@ -1,108 +1,121 @@
-import { useState } from 'react';
-import { projects, categories } from '~/data/projects';
-import { ProjectScene } from '~/components/three/ProjectScene';
+/* ============================================================
+   PROJECTS DATA — single source of truth
+   Tambah/edit/hapus project dari sini.
+   ============================================================ */
 
-export function Projects() {
-  const [active, setActive] = useState<string>('all');
+export type ProjectCategory = 'game' | '3d' | 'shader' | 'web';
 
-  const filtered = active === 'all'
-    ? projects
-    : projects.filter(p => p.category === active);
-
-  return (
-    <section className="section scrollable projects" id="projects">
-      <div className="container">
-        <div className="projects__inner">
-
-          <div className="projects__header">
-            <div>
-              <p className="section-label">02 — Work</p>
-              <h2 className="section-heading">Projects</h2>
-            </div>
-
-            {/* Filter tabs */}
-            <div className="projects__filters">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  className={`projects__filter${active === cat ? ' active' : ''}`}
-                  onClick={() => setActive(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Grid */}
-          <div className="projects__grid reveal-stagger">
-            {filtered.map(project => (
-              <article className="project-card" key={project.slug}>
-
-                {/* Three.js preview */}
-                <div className="project-card__preview">
-                  <ProjectScene
-                    sceneType={project.sceneType}
-                    className="project-card__canvas"
-                  />
-
-                  {/* Hover overlay */}
-                  <div className="project-card__overlay">
-                    {project.link && (
-                      <a
-                        className="project-card__action"
-                        href={project.link}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Live ↗
-                      </a>
-                    )}
-                    {project.githubLink && (
-                      <a
-                        className="project-card__action"
-                        href={project.githubLink}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        GitHub ↗
-                      </a>
-                    )}
-                    {project.itchLink && (
-                      <a
-                        className="project-card__action"
-                        href={project.itchLink}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        itch.io ↗
-                      </a>
-                    )}
-                    {/* Fallback if no links yet */}
-                    {!project.link && !project.githubLink && !project.itchLink && (
-                      <span className="project-card__action">Coming Soon</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="project-card__body">
-                  <p className="project-card__category">{project.category}</p>
-                  <h3 className="project-card__title">{project.title}</h3>
-                  <p className="project-card__desc">{project.description}</p>
-                  <div className="project-card__tags">
-                    {project.tags.map(tag => (
-                      <span className="project-card__tag" key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-
-              </article>
-            ))}
-          </div>
-
-        </div>
-      </div>
-    </section>
-  );
+export interface Project {
+  slug: string;
+  title: string;
+  category: ProjectCategory;
+  categoryLabel: string;
+  description: string;
+  tags: string[];
+  /** Three.js scene type untuk preview card */
+  sceneType: 'game' | 'art' | 'shader' | 'web';
+  /** Optional external link (live demo / itch.io) */
+  link?: string;
+  itchLink?: string;
+  githubLink?: string;
+  /** Optional GLB model path (relative to /public) */
+  modelPath?: string;
+  /** Featured = card lebih besar di grid */
+  featured?: boolean;
+  status?: 'completed' | 'wip' | 'archived' | 'concept';
+  statusLabel?: string;
+  year?: number;
+  /** Path ke halaman detail project (route projects/$slug) */
+  detailPath?: string;
 }
+
+export const projects: Project[] = [
+  {
+    slug: 'forbidden-space',
+    title: 'Forbidden Space',
+    category: 'game',
+    categoryLabel: 'Game Dev',
+    description:
+      'A cosmic time-loop roguelike where death resets the universe. Twin-stick sci-fi combat with boss battles, built in Unity.',
+    tags: ['Unity', 'C#', 'VFX Graph', 'Shader Graph'],
+    sceneType: 'game',
+    itchLink: 'https://wubblyduby.itch.io/forbidden-space',
+    status: 'wip',
+    statusLabel: 'In Progress',
+    featured: true,
+    year: 2026,
+    detailPath: '/projects/forbidden-space',
+  },
+  {
+    slug: '3d-scene-art-title',
+    title: '3D Scene / Art Title',
+    category: '3d',
+    categoryLabel: '3D Art',
+    description:
+      'Environment art, character, or product render — describe the concept, mood, and technical approach used in Blender.',
+    tags: ['Blender', 'Cycles', 'Substance'],
+    sceneType: 'art',
+    modelPath: '/models/3dSphere.glb',
+    status: 'completed',
+    statusLabel: 'Completed',
+    year: 2025,
+  },
+  {
+    slug: 'shader-experiment',
+    title: 'Shader Experiment',
+    category: 'shader',
+    categoryLabel: 'Shader / GLSL',
+    description:
+      'A real-time shader experiment — raymarching, noise, SDF — built with GLSL and Three.js.',
+    tags: ['GLSL', 'WebGL', 'Three.js'],
+    sceneType: 'shader',
+    status: 'completed',
+    statusLabel: 'Completed',
+    year: 2025,
+  },
+  {
+    slug: 'game-jam-entry',
+    title: 'Game Jam Entry',
+    category: 'game',
+    categoryLabel: 'Game Dev',
+    description:
+      'A game jam build — theme, time limit, what was built, what was learned, and results received.',
+    tags: ['Godot', 'GDScript', 'Aseprite'],
+    sceneType: 'game',
+    status: 'completed',
+    statusLabel: 'Completed',
+    year: 2025,
+  },
+  {
+    slug: 'interactive-web-experience',
+    title: 'Interactive Web Experience',
+    category: 'web',
+    categoryLabel: 'Web / Interactive',
+    description:
+      'A web-based interactive piece — interaction model, visual style, and narrative experience.',
+    tags: ['Three.js', 'GSAP', 'WebGL'],
+    sceneType: 'web',
+    status: 'concept',
+    statusLabel: 'Concept',
+    year: 2026,
+  },
+  {
+    slug: 'character-model-study',
+    title: 'Character / Model Study',
+    category: '3d',
+    categoryLabel: '3D Art',
+    description:
+      'A character modeling or sculpting study — anatomy, style direction, topology, rigging, and animation.',
+    tags: ['Blender', 'Sculpt', 'Rigging'],
+    sceneType: 'art',
+    status: 'archived',
+    statusLabel: 'Archived',
+    year: 2024,
+  },
+];
+
+/** Semua kategori unik dari data, plus 'all' di awal */
+export const categories = [
+  'all',
+  ...Array.from(new Set(projects.map((p) => p.category))),
+] as const;
