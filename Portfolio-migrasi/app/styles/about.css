@@ -16,9 +16,6 @@
   padding: var(--space-10) 0;
 }
 
-/* Left: text block */
-.about__text {}
-
 .about__body {
   font-size: 1.05rem;
   font-weight: 300;

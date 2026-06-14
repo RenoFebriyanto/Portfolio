@@ -17,9 +17,6 @@
   align-items: start;
 }
 
-/* Left: info */
-.contact__info {}
-
 .contact__body {
   font-size: 1rem;
   font-weight: 300;

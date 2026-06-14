@@ -19,6 +19,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "customConditions": ["module"],
     "paths": {
       "~/*": ["./app/*"]
     }
