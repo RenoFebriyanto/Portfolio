@@ -6,1141 +6,428 @@
   <title>Forbidden Space — Reno Febriyanto</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <style>
-    /* ============================
-       VARIABLES & RESET
-    ============================ */
-    :root {
-      --bg:        #04040A;
-      --accent:    #FF6B35;
-      --accent2:   #4D8CFF;
-      --white:     #FFFFFF;
-      --gray-100:  #E8E8E8;
-      --gray-400:  #8A8A9A;
-      --gray-600:  #3A3A4A;
-      --font-display: 'Barlow Condensed', sans-serif;
-      --font-body:    'DM Sans', sans-serif;
-      --font-mono:    'JetBrains Mono', monospace;
-      --section-duration: 0.9s;
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      width: 100%; height: 100%;
-      background: var(--bg);
-      color: var(--white);
-      font-family: var(--font-body);
-      overflow: hidden;
-    }
-
-    /* ============================
-       SCROLL CONTAINER
-    ============================ */
-    #scroll-container {
-      width: 100%;
-      height: 100vh;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    #scroll-container::-webkit-scrollbar { display: none; }
-
-    /* ============================
-       SECTIONS BASE
-    ============================ */
-    .section {
-      width: 100%;
-      height: 100vh;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ============================
-       NAV
-    ============================ */
-    #project-nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 24px 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
-    .nav-back {
-      pointer-events: all;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--gray-400);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.3s ease;
-    }
-    .nav-back:hover { color: var(--white); }
-    .nav-back svg { width: 14px; height: 14px; }
-
-    .nav-title {
-      font-family: var(--font-display);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gray-400);
-    }
-
-    .nav-index {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--gray-600);
-      letter-spacing: 0.08em;
-    }
-
-    /* ============================
-       SCROLL INDICATOR
-    ============================ */
-    #scroll-indicator {
-      position: fixed;
-      bottom: 36px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-    }
-    #scroll-indicator.hidden { opacity: 0; }
-
-    .scroll-line {
-      width: 1px;
-      height: 48px;
-      background: linear-gradient(to bottom, transparent, var(--accent));
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
-    .scroll-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      color: var(--gray-400);
-      text-transform: uppercase;
-      writing-mode: horizontal-tb;
-    }
-
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
-      50% { opacity: 1; transform: scaleY(1); }
-    }
-
-    /* ============================
-       SECTION DOTS NAV
-    ============================ */
-    #section-dots {
-      position: fixed;
-      right: 36px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      pointer-events: all;
-    }
-
-    .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--gray-600);
-      cursor: pointer;
-      transition: background 0.3s, transform 0.3s;
-    }
-    .dot.active {
-      background: var(--accent);
-      transform: scale(1.4);
-    }
-
-    /* ============================
-       SECTION 1 — HERO
-    ============================ */
-    #section-hero {
-      background: var(--bg);
-      flex-direction: column;
-      will-change: transform;
-      transition: transform var(--section-duration) var(--ease-out),
-                  opacity var(--section-duration) var(--ease-out);
-    }
-
-    #section-hero.slide-out {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-
-    /* Noise overlay */
-    .noise-overlay {
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    /* Ambient glow */
-    .hero-glow {
-      position: absolute;
-      width: 700px; height: 700px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,107,53,0.06) 0%, transparent 70%);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    /* Grid lines */
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,107,53,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,107,53,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
-
-    /* Corner accents */
-    .corner {
-      position: absolute;
-      width: 40px; height: 40px;
-      pointer-events: none;
-    }
-    .corner::before, .corner::after {
-      content: '';
-      position: absolute;
-      background: var(--accent);
-      opacity: 0.5;
-    }
-    .corner::before { width: 1px; height: 100%; }
-    .corner::after  { width: 100%; height: 1px; }
-
-    .corner-tl { top: 48px; left: 48px; }
-    .corner-tr { top: 48px; right: 48px; }
-    .corner-tr::before { left: auto; right: 0; }
-    .corner-br { bottom: 48px; right: 48px; }
-    .corner-br::before { left: auto; right: 0; top: auto; bottom: 0; }
-    .corner-br::after  { top: auto; bottom: 0; }
-    .corner-bl { bottom: 48px; left: 48px; }
-    .corner-bl::after { top: auto; bottom: 0; }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .hero-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.25em;
-      color: var(--accent);
-      text-transform: uppercase;
-      opacity: 0;
-      animation: fadeUp 0.8s var(--ease-out) 0.2s forwards;
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(72px, 12vw, 140px);
-      font-weight: 800;
-      line-height: 0.9;
-      letter-spacing: -0.02em;
-      text-transform: uppercase;
-      opacity: 0;
-      animation: fadeUp 0.8s var(--ease-out) 0.4s forwards;
-    }
-
-    .hero-title .line-1 { display: block; color: var(--white); }
-    .hero-title .line-2 { display: block; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.25); }
-
-    .hero-meta {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      opacity: 0;
-      animation: fadeUp 0.8s var(--ease-out) 0.6s forwards;
-    }
-
-    .meta-tag {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--gray-400);
-      text-transform: uppercase;
-      padding: 6px 14px;
-      border: 1px solid var(--gray-600);
-    }
-
-    .meta-sep { width: 24px; height: 1px; background: var(--gray-600); }
-
-    .hero-desc {
-      max-width: 480px;
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--gray-400);
-      font-weight: 300;
-      opacity: 0;
-      animation: fadeUp 0.8s var(--ease-out) 0.8s forwards;
-    }
-
-    /* Scan line effect */
-    .scan-line {
-      position: absolute;
-      left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,107,53,0.3), transparent);
-      animation: scan 8s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes scan {
-      from { top: -10%; } to { top: 110%; }
-    }
-
-    /* ============================
-       SECTION 2 — OVERVIEW
-    ============================ */
-    #section-overview {
-      background: #000;
-      opacity: 0;
-      transition: opacity var(--section-duration) var(--ease-out);
-      pointer-events: none;
-    }
-
-    #section-overview.visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* Video BG */
-    #bg-video {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-    }
-    #bg-video.video-visible { opacity: 1; }
-
-    /* Video dark overlay */
-    .video-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        105deg,
-        rgba(4,4,10,0.85) 0%,
-        rgba(4,4,10,0.55) 45%,
-        rgba(4,4,10,0.2) 100%
-      );
-      z-index: 1;
-    }
-
-    /* Overview content */
-    .overview-content {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 1200px;
-      padding: 0 80px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-
-    .overview-left {
-      opacity: 0;
-      transform: translateX(-32px);
-      transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
-    }
-    .overview-left.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .overview-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .overview-label::after {
-      content: '';
-      display: block;
-      width: 32px; height: 1px;
-      background: var(--accent);
-      opacity: 0.5;
-    }
-
-    .overview-title {
-      font-family: var(--font-display);
-      font-size: clamp(40px, 5vw, 64px);
-      font-weight: 700;
-      line-height: 1.0;
-      text-transform: uppercase;
-      letter-spacing: -0.01em;
-      margin-bottom: 28px;
-    }
-
-    .overview-title .accent { color: var(--accent); }
-
-    .overview-body {
-      font-size: 15px;
-      line-height: 1.8;
-      color: var(--gray-400);
-      font-weight: 300;
-      margin-bottom: 36px;
-    }
-
-    .overview-stats {
-      display: flex;
-      gap: 36px;
-    }
-
-    .stat-item { display: flex; flex-direction: column; gap: 4px; }
-    .stat-num {
-      font-family: var(--font-display);
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--white);
-      line-height: 1;
-    }
-    .stat-num .unit { font-size: 16px; color: var(--accent); }
-    .stat-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--gray-400);
-      text-transform: uppercase;
-    }
-    .stat-sep { width: 1px; background: var(--gray-600); align-self: stretch; }
-
-    /* Right side — decorative frame */
-    .overview-right {
-      opacity: 0;
-      transform: translateX(32px);
-      transition: opacity 0.8s 0.2s var(--ease-out), transform 0.8s 0.2s var(--ease-out);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .overview-right.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .overview-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .tag {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 7px 14px;
-      border: 1px solid var(--gray-600);
-      color: var(--gray-400);
-      transition: border-color 0.3s, color 0.3s;
-    }
-    .tag:hover { border-color: var(--accent); color: var(--accent); }
-    .tag.highlight { border-color: var(--accent); color: var(--accent); }
-
-    .overview-role-card {
-      padding: 24px;
-      border: 1px solid var(--gray-600);
-      background: rgba(255,255,255,0.02);
-      backdrop-filter: blur(8px);
-    }
-
-    .role-card-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .role-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .role-list li {
-      font-size: 13px;
-      color: var(--gray-100);
-      font-weight: 300;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .role-list li::before {
-      content: '';
-      display: block;
-      width: 16px; height: 1px;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
-
-    /* ============================
-       SECTION 3 — DETAILS
-    ============================ */
-    #section-details {
-      background: var(--bg);
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 0 80px;
-    }
-
-    .details-grid {
-      width: 100%;
-      max-width: 1200px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 2px;
-    }
-
-    .detail-block {
-      padding: 40px;
-      border: 1px solid var(--gray-600);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      background: rgba(255,255,255,0.015);
-      transition: background 0.3s;
-    }
-    .detail-block:hover { background: rgba(255,107,53,0.03); }
-
-    .detail-block-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-
-    .detail-block-title {
-      font-family: var(--font-display);
-      font-size: 28px;
-      font-weight: 600;
-      text-transform: uppercase;
-      line-height: 1.1;
-    }
-
-    .detail-block-body {
-      font-size: 13px;
-      line-height: 1.8;
-      color: var(--gray-400);
-      font-weight: 300;
-    }
-
-    /* ============================
-       SECTION 4 — GALLERY
-    ============================ */
-    #section-gallery {
-      background: #020208;
-    }
-
-    .gallery-content {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 1200px;
-      padding: 0 80px;
-    }
-
-    .gallery-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 40px;
-    }
-
-    .gallery-title {
-      font-family: var(--font-display);
-      font-size: 48px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: -0.01em;
-    }
-
-    .gallery-count {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      color: var(--gray-400);
-    }
-
-    .gallery-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 2px;
-      height: 50vh;
-    }
-
-    .gallery-cell {
-      background: var(--gray-600);
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .gallery-cell::after {
-      content: attr(data-label);
-      position: absolute;
-      bottom: 16px; left: 16px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--gray-400);
-      text-transform: uppercase;
-    }
-    .gallery-cell:hover::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border: 1px solid var(--accent);
-      pointer-events: none;
-      z-index: 2;
-    }
-    .cell-placeholder {
-      width: 100%; height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(255,107,53,0.04), rgba(77,140,255,0.04));
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--gray-600);
-      letter-spacing: 0.1em;
-    }
-
-    /* ============================
-       SECTION 5 — CONTACT / CTA
-    ============================ */
-    #section-cta {
-      background: var(--bg);
-      flex-direction: column;
-    }
-
-    .cta-content {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 32px;
-    }
-
-    .cta-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      color: var(--gray-400);
-      text-transform: uppercase;
-    }
-
-    .cta-title {
-      font-family: var(--font-display);
-      font-size: clamp(48px, 8vw, 96px);
-      font-weight: 800;
-      text-transform: uppercase;
-      line-height: 0.95;
-      letter-spacing: -0.02em;
-    }
-
-    .cta-title .ghost { color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); }
-
-    .cta-actions {
-      display: flex;
-      gap: 16px;
-      margin-top: 8px;
-    }
-
-    .btn-primary {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 16px 40px;
-      background: var(--accent);
-      color: var(--white);
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: background 0.3s, transform 0.3s;
-    }
-    .btn-primary:hover { background: #ff8555; transform: translateY(-2px); }
-
-    .btn-ghost {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 16px 40px;
-      background: transparent;
-      color: var(--gray-400);
-      border: 1px solid var(--gray-600);
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.3s, color 0.3s;
-    }
-    .btn-ghost:hover { border-color: var(--white); color: var(--white); }
-
-    .cta-footer {
-      margin-top: 24px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      color: var(--gray-600);
-    }
-
-    /* ============================
-       ANIMATIONS
-    ============================ */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="forbidden-styles/forbidden-space.css" />
 </head>
-
 <body>
 
-  <!-- ===== NAV ===== -->
-  <nav id="project-nav">
-    <a href="index.html" class="nav-back">
-      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 7H2M2 7L7 2M2 7L7 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Back to portfolio
+  <!-- ── CURSOR ── -->
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- ── BACKGROUND PARTICLES ── -->
+  <canvas class="bg-canvas" id="bgCanvas"></canvas>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <a href="../../index.html" class="nav-back">
+      <span class="nav-back-arrow">←</span>
+      <span>Back to Portfolio</span>
     </a>
-    <span class="nav-title">Forbidden Space</span>
-    <span class="nav-index" id="nav-index">01 / 05</span>
+    <div class="nav-project-label">
+      <span class="nav-tag">GAME</span>
+      <span class="nav-title">Forbidden Space</span>
+    </div>
+    <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="nav-cta">
+      Play on itch.io ↗
+    </a>
   </nav>
 
-  <!-- ===== SECTION DOTS ===== -->
-  <div id="section-dots">
-    <div class="dot active" data-section="0"></div>
-    <div class="dot" data-section="1"></div>
-    <div class="dot" data-section="2"></div>
-    <div class="dot" data-section="3"></div>
-    <div class="dot" data-section="4"></div>
-  </div>
+  <!-- ── HERO ── -->
+  <section class="fs-hero">
+    <div class="fs-hero-bg">
+      <!-- Animated scan lines -->
+      <div class="scan-lines"></div>
+      <!-- Vignette -->
+      <div class="vignette"></div>
+    </div>
 
-  <!-- ===== SCROLL INDICATOR ===== -->
-  <div id="scroll-indicator">
-    <div class="scroll-label">Scroll</div>
-    <div class="scroll-line"></div>
-  </div>
-
-  <!-- ===== SCROLL CONTAINER ===== -->
-  <div id="scroll-container">
-
-    <!-- === SECTION 1 : HERO === -->
-    <section class="section" id="section-hero">
-      <div class="hero-glow"></div>
-      <div class="hero-grid"></div>
-      <div class="noise-overlay"></div>
-      <div class="scan-line"></div>
-      <div class="corner corner-tl"></div>
-      <div class="corner corner-tr"></div>
-      <div class="corner corner-br"></div>
-      <div class="corner corner-bl"></div>
-
-      <div class="hero-content">
-        <p class="hero-eyebrow">Project 01 — 2024</p>
-        <h1 class="hero-title">
-          <span class="line-1">Forbidden</span>
-          <span class="line-2">Space</span>
-        </h1>
-        <div class="hero-meta">
-          <span class="meta-tag">Unity Engine</span>
-          <span class="meta-sep"></span>
-          <span class="meta-tag">3D Puzzle</span>
-          <span class="meta-sep"></span>
-          <span class="meta-tag">Solo Dev</span>
-        </div>
-        <p class="hero-desc">
-          A dark atmospheric puzzle experience that bends the rules of space and gravity. 
-          Navigate through impossible geometry in zero-G environments.
-        </p>
+    <div class="fs-hero-content">
+      <div class="fs-hero-meta reveal-up">
+        <span class="badge badge-game">ROGUELIKE · 2D · SHOOTER</span>
+        <span class="badge badge-engine">Unity</span>
+        <span class="badge badge-status">Released · 2026</span>
       </div>
-    </section>
 
-    <!-- === SECTION 2 : OVERVIEW (Video BG) === -->
-    <section class="section" id="section-overview">
-      <!-- Replace src with your actual video path: ./assets/video/Godd2.mp4 -->
-      <video id="bg-video" muted playsinline preload="auto">
-        <source src="../../Assets/project/game/ForbiddenSpace/Motion/Godd2.mp4" type="video/mp4" />
-      </video>
-      <div class="video-overlay"></div>
+      <h1 class="fs-hero-title reveal-up" data-delay="0.1">
+        <span class="title-line">FORBIDDEN</span>
+        <span class="title-line title-accent">SPACE</span>
+      </h1>
 
-      <div class="overview-content">
-        <!-- LEFT: Text content -->
-        <div class="overview-left" id="overview-left">
-          <div class="overview-label">Overview</div>
-          <h2 class="overview-title">
-            Beyond the<br/>
-            <span class="accent">Known</span> Grid
-          </h2>
-          <p class="overview-body">
-            Forbidden Space challenges the player to rethink what they understand about physical space. 
-            Built with custom physics constraints and shader-driven environments, every room is a puzzle 
-            of perception — where walls become floors and gravity is just a suggestion.
+      <p class="fs-hero-tagline reveal-up" data-delay="0.2">
+        A cosmic time-loop roguelike where death resets the universe.
+      </p>
+
+      <div class="fs-hero-role reveal-up" data-delay="0.3">
+        <span class="role-label">MY ROLE</span>
+        <span class="role-value">Programmer · VFX Artist</span>
+      </div>
+
+      <div class="fs-hero-actions reveal-up" data-delay="0.4">
+        <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="btn-primary">
+          Play Free on itch.io
+        </a>
+        <a href="#overview" class="btn-ghost">
+          View Project
+        </a>
+      </div>
+    </div>
+
+    <!-- Preview image / cover art -->
+    <div class="fs-hero-visual reveal-right">
+      <div class="hero-img-frame">
+        <img 
+            src="../../Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png" 
+            alt="Forbidden Space Preview"
+            class="hero-img"
+            onerror="this.parentElement.classList.add('img-placeholder')"
+        />
+        <div class="hero-img-glow"></div>
+      </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="scroll-cue">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── OVERVIEW ── -->
+  <section class="section fs-overview" id="overview">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">01 — STORY</div>
+      <div class="overview-grid">
+        <div class="overview-text reveal-up" data-delay="0.1">
+          <h2>Trapped in a Cosmic Loop</h2>
+          <p>
+            In a remote corner of the universe lies a mysterious place known as <em>"The Forbidden Space."</em> 
+            It is the domain of a four-dimensional extraterrestrial being capable of manipulating time itself.
           </p>
-          <div class="overview-stats">
-            <div class="stat-item">
-              <span class="stat-num">12<span class="unit">+</span></span>
-              <span class="stat-label">Levels</span>
-            </div>
-            <div class="stat-sep"></div>
-            <div class="stat-item">
-              <span class="stat-num">6<span class="unit">mo</span></span>
-              <span class="stat-label">Dev Time</span>
-            </div>
-            <div class="stat-sep"></div>
-            <div class="stat-item">
-              <span class="stat-num">1<span class="unit">k+</span></span>
-              <span class="stat-label">Downloads</span>
-            </div>
-          </div>
+          <p>
+            Players take control of a spacecraft named <strong>J4-RW0</strong> — "Jarwo" — who accidentally enters 
+            The Forbidden Space. Trapped within this strange realm, Jarwo becomes nothing more than a plaything 
+            for the powerful entity, which endlessly resets and repeats time, forcing him to relive the same 
+            events over and over again.
+          </p>
         </div>
-
-        <!-- RIGHT: Tags & role card -->
-        <div class="overview-right" id="overview-right">
-          <div class="overview-tags">
-            <span class="tag highlight">Unity 3D</span>
-            <span class="tag">C# Scripting</span>
-            <span class="tag">Blender</span>
-            <span class="tag">GLSL Shaders</span>
-            <span class="tag">Post-Processing</span>
-            <span class="tag">Sound Design</span>
+        <div class="overview-stats reveal-up" data-delay="0.2">
+          <div class="stat-item">
+            <span class="stat-value">2D</span>
+            <span class="stat-label">Art Style</span>
           </div>
-          <div class="overview-role-card">
-            <p class="role-card-label">My Role</p>
-            <ul class="role-list">
-              <li>Sole game designer & developer</li>
-              <li>3D environment art & lighting</li>
-              <li>Custom physics system design</li>
-              <li>UI/UX & player feedback systems</li>
-              <li>Publishing & community management</li>
-            </ul>
+          <div class="stat-item">
+            <span class="stat-value">∞</span>
+            <span class="stat-label">Time Loops</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">4</span>
+            <span class="stat-label">Team Members</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">HTML5</span>
+            <span class="stat-label">Platform</span>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- === SECTION 3 : DETAILS === -->
-    <section class="section" id="section-details">
-      <div class="details-grid">
-        <div class="detail-block">
-          <span class="detail-block-label">Concept</span>
-          <h3 class="detail-block-title">Space Bending Physics</h3>
-          <p class="detail-block-body">
-            Custom-built gravity manipulation using Unity's Rigidbody system. 
-            Each zone defines its own gravitational vector, creating seamless transitions 
-            between floor, wall, and ceiling traversal.
-          </p>
+  <!-- ── VIDEO ── -->
+  <section class="section fs-video">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">02 — GAMEPLAY</div>
+      <div class="video-wrapper reveal-up" data-delay="0.15">
+        <div class="video-frame">
+          <iframe 
+            src="https://www.youtube.com/embed/jWMfVkl7hZA" 
+            title="Forbidden Space Gameplay"
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
         </div>
-        <div class="detail-block">
-          <span class="detail-block-label">Visual</span>
-          <h3 class="detail-block-title">Dark Atmospheric Shaders</h3>
-          <p class="detail-block-body">
-            GLSL-driven post-processing stack with custom depth fog, 
-            chromatic aberration on gravity shifts, and a procedural star field 
-            that responds to player orientation.
-          </p>
-        </div>
-        <div class="detail-block">
-          <span class="detail-block-label">Audio</span>
-          <h3 class="detail-block-title">Reactive Soundscape</h3>
-          <p class="detail-block-body">
-            Ambient audio layers that shift in real-time based on the current gravity state. 
-            Low-frequency drones fade in as the player enters zero-G zones, 
-            heightening the sense of disorientation.
-          </p>
-        </div>
+        <div class="video-caption">Gameplay Trailer — Forbidden Space</div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- === SECTION 4 : GALLERY === -->
-    <section class="section" id="section-gallery">
-      <div class="gallery-content">
-        <div class="gallery-header">
-          <h2 class="gallery-title">Gallery</h2>
-          <span class="gallery-count">06 Captures</span>
-        </div>
-        <div class="gallery-row">
-          <div class="gallery-cell" data-label="Environment">
-            <div class="cell-placeholder">[ Screenshot 01 ]</div>
-          </div>
-          <div class="gallery-cell" data-label="Shader">
-            <div class="cell-placeholder">[ Screenshot 02 ]</div>
-          </div>
-          <div class="gallery-cell" data-label="Gameplay">
-            <div class="cell-placeholder">[ Screenshot 03 ]</div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- ── MECHANICS ── -->
+  <section class="section fs-mechanics">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">03 — MECHANICS</div>
+      <h2 class="reveal-up" data-delay="0.1">How It Works</h2>
 
-    <!-- === SECTION 5 : CTA === -->
-    <section class="section" id="section-cta">
-      <div class="corner corner-tl"></div>
-      <div class="corner corner-tr"></div>
-      <div class="corner corner-br"></div>
-      <div class="corner corner-bl"></div>
-      <div class="noise-overlay"></div>
-      <div class="cta-content">
-        <p class="cta-eyebrow">Explore the project</p>
-        <h2 class="cta-title">
-          <span class="ghost">Enter</span><br/>
-          <span>The Void</span>
-        </h2>
-        <div class="cta-actions">
-          <a href="https://catmounth.itch.io" target="_blank" rel="noopener" class="btn-primary">
-            Play on itch.io
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="mechanics-grid">
+
+        <div class="mechanic-card reveal-up" data-delay="0.1">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M20 8 L20 20 L28 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="20" cy="20" r="2" fill="currentColor"/>
             </svg>
-          </a>
-          <a href="https://github.com/RenoFebriyanto" target="_blank" rel="noopener" class="btn-ghost">View Source</a>
+          </div>
+          <h3>Time-Loop Progression</h3>
+          <p>Death is not the end. Every failure resets the timeline — restart the journey while learning enemy patterns and improving survival strategies.</p>
         </div>
-        <p class="cta-footer">
-          Next project &nbsp;&mdash;&nbsp;
-          <a href="#" style="color: var(--accent); text-decoration: none;">Shader Gallery →</a>
-        </p>
+
+        <div class="mechanic-card reveal-up" data-delay="0.2">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path d="M20 4 L20 36 M4 20 L36 20" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="20" cy="20" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="20" cy="4" r="2" fill="currentColor"/>
+              <circle cx="36" cy="20" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>Twin-Stick Sci-Fi Combat</h3>
+          <p>Fast-paced space combat focused on movement, positioning, and aiming precision. Mouse-aimed, WASD-driven — arcade meets tactical.</p>
+        </div>
+
+        <div class="mechanic-card reveal-up" data-delay="0.3">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <polygon points="20,4 36,34 4,34" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <line x1="20" y1="16" x2="20" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="20" cy="28" r="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>Boss Battles</h3>
+          <p>Optional boss encounters with unique combat phases. Currently in development — accessible from the main menu for early testing.</p>
+        </div>
+
+        <div class="mechanic-card reveal-up" data-delay="0.4">
+          <div class="mechanic-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="22" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="6" y="22" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="22" y="22" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h3>Planet Diversity</h3>
+          <p>Each planet introduces different enemy species with unique attack patterns — aggressive rammers, projectile-based weapon systems, and dimensional threats.</p>
+        </div>
+
       </div>
-    </section>
+    </div>
+  </section>
 
-  </div><!-- end #scroll-container -->
+  <!-- ── SCREENSHOTS ── -->
+  <section class="section fs-gallery">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">04 — SCREENSHOTS</div>
+      <div class="gallery-grid reveal-up" data-delay="0.1">
+        <div class="gallery-item gallery-item--tall" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5NDQ3MS5wbmc=/original/RVvsqd.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5NDQ3MS5wbmc=/original/RVvsqd.png" alt="Screenshot 1" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTk2MC5wbmc=/original/G5mEIZ.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTk2MC5wbmc=/original/G5mEIZ.png" alt="Screenshot 2" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTkyNy5wbmc=/original/tQvQJg.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MTkyNy5wbmc=/original/tQvQJg.png" alt="Screenshot 3" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item gallery-item--tall" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OS5wbmc=/original/nxHC5y.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OS5wbmc=/original/nxHC5y.png" alt="Screenshot 4" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5Mi5wbmc=/original/rW0scz.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5Mi5wbmc=/original/rW0scz.png" alt="Screenshot 5" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5My5wbmc=/original/NJ7BSU.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5My5wbmc=/original/NJ7BSU.png" alt="Screenshot 6" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OC5wbmc=/original/q2KVKO.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI4OC5wbmc=/original/q2KVKO.png" alt="Screenshot 7" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        <div class="gallery-item" data-src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5MC5wbmc=/original/kZKuG9.png">
+            <img src="https://img.itch.zone/aW1hZ2UvNDU5NzUxNS8yNzM5MzI5MC5wbmc=/original/kZKuG9.png" alt="Screenshot 8" loading="lazy"/>
+            <div class="gallery-overlay"></div>
+        </div>
+        </div>
+    </div>
 
-  <script>
-    /* ================================================
-       FORBIDDEN SPACE — Scroll & Transition Controller
-    ================================================ */
-    const container     = document.getElementById('scroll-container');
-    const sectionHero   = document.getElementById('section-hero');
-    const sectionOv     = document.getElementById('section-overview');
-    const video         = document.getElementById('bg-video');
-    const overviewLeft  = document.getElementById('overview-left');
-    const overviewRight = document.getElementById('overview-right');
-    const dots          = document.querySelectorAll('.dot');
-    const scrollInd     = document.getElementById('scroll-indicator');
-    const navIndex      = document.getElementById('nav-index');
-    const sections      = document.querySelectorAll('.section');
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+      <button class="lightbox-close" id="lightboxClose">×</button>
+      <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+    </div>
+  </section>
 
-    const sectionLabels = ['01 / 05', '02 / 05', '03 / 05', '04 / 05', '05 / 05'];
+  <!-- ── MY CONTRIBUTION ── -->
+  <section class="section fs-contribution">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">05 — MY CONTRIBUTION</div>
+      <div class="contribution-grid">
 
-    let currentSection  = 0;
-    let isTransitioning = false;
-    let textRevealed    = false;
-    let videoPlayReady  = false;
+        <div class="contribution-card reveal-up" data-delay="0.1">
+          <div class="contribution-number">01</div>
+          <h3>Boss Fight Programming</h3>
+          <p>Designed and implemented the entire boss encounter system — boss AI state machines, multi-phase attack logic, and the in-game UI for boss health, phase indicators, and combat feedback during the fight.</p>
+          <div class="contribution-tags">
+            <span>C#</span><span>Unity</span><span>Boss AI</span><span>UI System</span>
+          </div>
+        </div>
 
-    /* ──────────────────────────────────────
-       VIDEO — preload & state management
-    ────────────────────────────────────── */
-    video.addEventListener('canplay', () => { videoPlayReady = true; });
-    video.load();
+        <div class="contribution-card reveal-up" data-delay="0.2">
+          <div class="contribution-number">02</div>
+          <h3>Boss VFX Artist</h3>
+          <p>Created all visual effects for the boss fight — portal summon effects, slam impact shockwaves, laser beam attacks, projectile shoot effects, hit reactions, and death VFX — built with Unity's VFX Graph and Shader Graph.</p>
+          <div class="contribution-tags">
+            <span>VFX Graph</span><span>Shader Graph</span>
+          </div>
+        </div>
 
-    function playVideoForward() {
-      if (!videoPlayReady) return;
-      video.playbackRate = 1;
-      video.play().catch(() => {});
-    }
+      </div>
+    </div>
+  </section>
 
-    function playVideoReverse() {
-      /* HTML5 video doesn't natively reverse, so we jump to end and step backward */
-      if (!videoPlayReady) return;
-      if (video.paused) {
-        /* restart from near-end, step backward via requestAnimationFrame */
-        if (video.currentTime <= 0.05) {
-          video.currentTime = video.duration - 0.05;
-        }
-      }
-      video.pause();
-      stepBackward();
-    }
+  <!-- ── SOUND & ATMOSPHERE ── -->
+  <section class="section fs-atmosphere">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">06 — ATMOSPHERE</div>
+      <div class="atmosphere-content reveal-up" data-delay="0.1">
+        <div class="atmosphere-text">
+          <h2>Sound Design & Visual Style</h2>
+          <ul class="atmosphere-list">
+            <li>
+              <span class="atm-icon">◎</span>
+              <div>
+                <strong>Cosmic Sci-Fi Atmosphere</strong>
+                <p>A mysterious and unsettling universe inspired by deep-space horror, dimensional anomalies, and futuristic alien worlds.</p>
+              </div>
+            </li>
+            <li>
+              <span class="atm-icon">◈</span>
+              <div>
+                <strong>Stylized Visual Design</strong>
+                <p>Neon lighting, glowing energy effects, and high-contrast planetary environments create a cinematic arcade-like presentation.</p>
+              </div>
+            </li>
+            <li>
+              <span class="atm-icon">◉</span>
+              <div>
+                <strong>Dynamic Audio</strong>
+                <p>Electronic ambient music, distorted cosmic sounds, energy weapon effects, and alien creature noises build tension throughout every encounter.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    let reverseRAF = null;
+  <!-- ── TEAM ── -->
+  <section class="section fs-team">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">07 — TEAM</div>
+      <div class="team-grid reveal-up" data-delay="0.1">
 
-    function stepBackward() {
-      cancelAnimationFrame(reverseRAF);
-      if (video.currentTime <= 0) {
-        video.currentTime = 0;
-        hideVideoSection();
-        return;
-      }
-      video.currentTime -= 0.04; // ~24fps backward step
-      reverseRAF = requestAnimationFrame(stepBackward);
-    }
+        <div class="team-card">
+          <div class="team-avatar">RFK</div>
+          <div class="team-info">
+            <span class="team-name">Robbani Fadhillah Kafura</span>
+            <span class="team-role">Game Designer · Programmer</span>
+          </div>
+        </div>
 
-    function stopVideoReverse() {
-      cancelAnimationFrame(reverseRAF);
-    }
+        <div class="team-card team-card--me">
+          <div class="team-avatar team-avatar--me">RF</div>
+          <div class="team-info">
+            <span class="team-name">Reno Febriyanto</span>
+            <span class="team-role">Programmer · VFX Artist</span>
+          </div>
+          <div class="team-badge-me">You</div>
+        </div>
 
-    /* ──────────────────────────────────────
-       SECTION 2 — ENTER (Hero → Overview)
-    ────────────────────────────────────── */
-    function enterOverview() {
-      stopVideoReverse();
+        <div class="team-card">
+          <div class="team-avatar">AFK</div>
+          <div class="team-info">
+            <span class="team-name">Adinda Fadilla Kirana Dewi</span>
+            <span class="team-role">Game Artist 2D</span>
+          </div>
+        </div>
 
-      // 1. Slide hero out (up)
-      sectionHero.classList.add('slide-out');
+        <div class="team-card">
+          <div class="team-avatar">PP</div>
+          <div class="team-info">
+            <span class="team-name">Putu Pande</span>
+            <span class="team-role">Game Artist 2D</span>
+          </div>
+        </div>
 
-      // 2. Fade in overview section
-      sectionOv.classList.add('visible');
+      </div>
+    </div>
+  </section>
 
-      // 3. Show video, then play it
-      requestAnimationFrame(() => {
-        video.classList.add('video-visible');
-        playVideoForward();
-      });
+  <!-- ── CONTROLS ── -->
+  <section class="section fs-controls">
+    <div class="container">
+      <div class="section-eyebrow reveal-up">08 — CONTROLS</div>
+      <div class="controls-layout reveal-up" data-delay="0.1">
+        <div class="key-grid">
+          <div class="key-row key-row--top">
+            <div class="key">W</div>
+          </div>
+          <div class="key-row">
+            <div class="key">A</div>
+            <div class="key">S</div>
+            <div class="key">D</div>
+          </div>
+        </div>
+        <div class="controls-list">
+          <div class="ctrl-item"><span class="ctrl-key">W/A/S/D</span><span>Move spacecraft</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">Right Click</span><span>Shoot</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">Mouse</span><span>Aim direction</span></div>
+          <div class="ctrl-item"><span class="ctrl-key">R</span><span>Reload weapon</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      // 4. After video has started (~500ms), reveal text
-      setTimeout(() => {
-        if (!textRevealed) {
-          overviewLeft.classList.add('visible');
-          overviewRight.classList.add('visible');
-          textRevealed = true;
-        }
-      }, 500);
-    }
+  <!-- ── CTA ── -->
+  <section class="section fs-cta">
+    <div class="container">
+      <div class="cta-inner reveal-up">
+        <p class="cta-eyebrow">The loop awaits.</p>
+        <h2>Ready to enter The Forbidden Space?</h2>
+        <div class="cta-actions">
+          <a href="https://wubblyduby.itch.io/forbidden-space" target="_blank" class="btn-primary btn-large">
+            Play Free Now — itch.io
+          </a>
+          <a href="../../index.html" class="btn-ghost">
+            ← Back to Portfolio
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Ambient grid -->
+    <div class="cta-grid-overlay"></div>
+  </section>
 
-    /* ──────────────────────────────────────
-       SECTION 2 — EXIT (Overview → Hero)
-    ────────────────────────────────────── */
-    function exitOverview() {
-      // 1. Hide text
-      overviewLeft.classList.remove('visible');
-      overviewRight.classList.remove('visible');
-      textRevealed = false;
+  <!-- ── FOOTER ── -->
+  <footer class="fs-footer">
+    <div class="container">
+      <span>© 2026 Reno Febriyanto</span>
+      <div class="footer-links">
+        <a href="https://github.com/RenoFebriyanto" target="_blank">GitHub</a>
+        <a href="https://catmounth.itch.io" target="_blank">itch.io</a>
+        <a href="https://linkedin.com/in/renofebriyanto/" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
 
-      // 2. Play video in reverse
-      playVideoReverse();
-
-      // 3. Fade out section overlay while video reverses
-      setTimeout(() => {
-        sectionOv.classList.remove('visible');
-        video.classList.remove('video-visible');
-        stopVideoReverse();
-        video.pause();
-        video.currentTime = 0;
-      }, 700);
-
-      // 4. Slide hero back in
-      setTimeout(() => {
-        sectionHero.classList.remove('slide-out');
-      }, 300);
-    }
-
-    function hideVideoSection() {
-      sectionOv.classList.remove('visible');
-      video.classList.remove('video-visible');
-    }
-
-    /* ──────────────────────────────────────
-       SCROLL EVENT — detect section change
-    ────────────────────────────────────── */
-    let lastSection = 0;
-
-    container.addEventListener('scroll', () => {
-      const idx = Math.round(container.scrollTop / window.innerHeight);
-      const clampedIdx = Math.max(0, Math.min(idx, sections.length - 1));
-
-      // Update dots
-      dots.forEach((d, i) => d.classList.toggle('active', i === clampedIdx));
-
-      // Update nav index
-      navIndex.textContent = sectionLabels[clampedIdx] || '01 / 05';
-
-      // Hide scroll indicator after first section
-      scrollInd.classList.toggle('hidden', clampedIdx > 0);
-
-      if (clampedIdx === lastSection) return;
-
-      const prev = lastSection;
-      lastSection = clampedIdx;
-
-      // Transition logic: hero ↔ overview
-      if (prev === 0 && clampedIdx === 1) {
-        enterOverview();
-      } else if (prev === 1 && clampedIdx === 0) {
-        exitOverview();
-      } else if (prev === 1 && clampedIdx > 1) {
-        // Going deeper than overview — keep section 2 visible, stop reversing
-        stopVideoReverse();
-      } else if (clampedIdx === 1 && prev > 1) {
-        // Coming back to overview from below
-        enterOverview();
-      }
-    }, { passive: true });
-
-    /* ──────────────────────────────────────
-       DOTS — click to scroll
-    ────────────────────────────────────── */
-    dots.forEach(dot => {
-      dot.addEventListener('click', () => {
-        const idx = parseInt(dot.dataset.section);
-        container.scrollTo({ top: idx * window.innerHeight, behavior: 'smooth' });
-      });
-    });
-
-    /* ──────────────────────────────────────
-       KEYBOARD NAV
-    ────────────────────────────────────── */
-    document.addEventListener('keydown', e => {
-      const cur = Math.round(container.scrollTop / window.innerHeight);
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-        container.scrollTo({ top: (cur + 1) * window.innerHeight, behavior: 'smooth' });
-      }
-      if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-        container.scrollTo({ top: (cur - 1) * window.innerHeight, behavior: 'smooth' });
-      }
-    });
-
-  </script>
-</body>
+    <!-- SESUDAH -->
+    <script src="forbidden-js/particles.js"></script>
+    <script src="forbidden-js/cursor.js"></script>
+    <script src="forbidden-js/reveal.js"></script>
+    <script src="forbidden-js/gallery.js"></script>
+    </body>
 </html>
