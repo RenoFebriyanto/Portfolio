@@ -373,6 +373,17 @@
     border-radius: 100px;
 }
 
+/* ── Fix: React pakai .visible (sama dengan vanilla) ── */
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Section label line — trigger via .visible (sesuai vanilla) */
+.section-label.visible .section-label-line {
+    width: 40px;
+}
+
 @media (max-width: 900px) {
     .about-grid { grid-template-columns: 1fr; }
     .about-panel {

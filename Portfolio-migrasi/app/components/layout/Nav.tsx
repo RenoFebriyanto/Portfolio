@@ -4,7 +4,6 @@ const NAV_SECTIONS = [
   { label: "About",    id: "about"    },
   { label: "Projects", id: "projects" },
   { label: "Skills",   id: "skills"   },
-  { label: "Contact",  id: "contact"  },
 ];
 
 export default function Nav() {
@@ -41,7 +40,7 @@ export default function Nav() {
       {/* Logo */}
       <a href="/" className="nav-logo" onClick={e => { e.preventDefault(); navigateTo("hero"); }}>
         <img
-          src="/Assets/icons/logo/icon-512.png"
+          src="../../public/icon-512.png"
           alt="Reno Febri"
           className="nav-logo-img"
           onError={e => {

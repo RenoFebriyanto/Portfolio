@@ -1,300 +1,234 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+/* ================================================
+   PROJECT CARD — mirror 1:1 vanilla projects-render.js
+   
+   Struktur:
+   .project-card[featured?]
+     .project-preview
+       img.project-preview-img
+       video.project-preview-video (opsional)
+       .project-preview-overlay
+       .project-preview-noise
+       [canvas.project3d-canvas jika ada glb]
+     .project-card-body
+       .project-card-top   (num + status)
+       .project-category
+       h3.project-title
+       p.project-desc
+       .project-tags
+       .project-card-footer  (link)
+     .card-tilt-glow
+   
+   Three.js canvas per-card DINONAKTIFKAN —
+   diganti dengan preview image + hover overlay sederhana
+   agar konsisten dengan vanilla dan tidak berat.
+================================================ */
+
+import { useEffect, useRef, useCallback } from 'react';
 import type { Project } from '~/data/projects';
-import { GameScene } from '~/components/three/scenes/GameScene';
-import { ArtScene } from '~/components/three/scenes/ArtScene';
-import { ShaderScene } from '~/components/three/scenes/ShaderScene';
-import { WebScene } from '~/components/three/scenes/WebScene';
-import type { SceneFactory } from '~/components/three/scenes/types';
-
-const SCENE_MAP: Record<string, SceneFactory> = {
-  game:   GameScene,
-  art:    ArtScene,
-  shader: ShaderScene,
-  web:    WebScene,
-};
-
-// Global GLB cache shared across card instances
-const glbCache = new Map<string, unknown>();
 
 interface ProjectCardProps {
   project: Project;
-  index: number;
+  index:   number;
 }
 
+const MAX_TILT = 7;
+
 export function ProjectCard({ project, index }: ProjectCardProps) {
-  const canvasRef     = useRef<HTMLCanvasElement>(null);
-  const previewRef    = useRef<HTMLDivElement>(null);
-  const rendererRef   = useRef<THREE.WebGLRenderer | null>(null);
-  const sceneRef      = useRef<THREE.Scene | null>(null);
-  const cameraRef     = useRef<THREE.PerspectiveCamera | null>(null);
-  const animIdRef     = useRef<number | null>(null);
-  const handlersRef   = useRef<{ update: (t: number) => void; onPointerMove?: (x: number, y: number) => void; dispose: () => void } | null>(null);
-  const t0Ref         = useRef(performance.now());
-  const isHoveredRef  = useRef(false);
+  const cardRef  = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [isLoaded, setIsLoaded]   = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [show3d, setShow3d]       = useState(false);
+  /* ── 3D Tilt on hover (mirror motion.js initCardTilt) ── */
+  const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const cx   = rect.left + rect.width  / 2;
+    const cy   = rect.top  + rect.height / 2;
+    const dx   = (e.clientX - cx) / (rect.width  / 2);
+    const dy   = (e.clientY - cy) / (rect.height / 2);
+    const rotX = -dy * MAX_TILT;
+    const rotY =  dx * MAX_TILT;
+    card.style.transform = `perspective(700px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-3px)`;
+    card.classList.add('tilting');
 
-  const startLoop = useCallback(() => {
-    if (animIdRef.current) return;
-    const tick = () => {
-      animIdRef.current = requestAnimationFrame(tick);
-      const t = (performance.now() - t0Ref.current) / 1000;
-      handlersRef.current?.update(t);
-      if (rendererRef.current && sceneRef.current && cameraRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
-    };
-    tick();
-  }, []);
-
-  const stopLoop = useCallback(() => {
-    if (animIdRef.current) {
-      cancelAnimationFrame(animIdRef.current);
-      animIdRef.current = null;
+    const glow = card.querySelector<HTMLElement>('.card-tilt-glow');
+    if (glow) {
+      const gx = ((e.clientX - rect.left) / rect.width)  * 100;
+      const gy = ((e.clientY - rect.top)  / rect.height) * 100;
+      glow.style.setProperty('--glow-x', `${gx}%`);
+      glow.style.setProperty('--glow-y', `${gy}%`);
     }
   }, []);
 
-  const initRenderer = useCallback(() => {
-    const canvas   = canvasRef.current;
-    const preview  = previewRef.current;
-    if (!canvas || !preview || rendererRef.current) return;
-
-    const w = preview.clientWidth;
-    const h = preview.clientHeight || w * (9 / 16);
-
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping      = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    renderer.setSize(w, h);
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
-
-    rendererRef.current = renderer;
-    sceneRef.current    = scene;
-    cameraRef.current   = camera;
-
-    // Build scene using the appropriate factory
-    const factory = SCENE_MAP[project.sceneType] ?? GameScene;
-    handlersRef.current = factory({ scene, camera, renderer });
-  }, [project.sceneType]);
-
-  const loadGLB = useCallback(async () => {
-    if (!project.modelPath || isLoaded || isLoading) return;
-    setIsLoading(true);
-    initRenderer();
-
-    try {
-      let gltf = glbCache.get(project.modelPath) as { scene: THREE.Group } | undefined;
-
-      if (!gltf) {
-        const loader = new GLTFLoader();
-        gltf = await new Promise((resolve, reject) =>
-          loader.load(project.modelPath!, resolve, undefined, reject)
-        ) as { scene: THREE.Group };
-        gltf.scene.traverse((child: THREE.Object3D) => {
-          if ((child as THREE.Mesh).isMesh) {
-            const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-            if (mat?.map) mat.map.colorSpace = THREE.SRGBColorSpace;
-            mat.needsUpdate = true;
-          }
-        });
-        glbCache.set(project.modelPath, gltf);
-      }
-
-      // Replace default scene with GLB
-      if (sceneRef.current) {
-        const model = gltf.scene.clone(true);
-        const box    = new THREE.Box3().setFromObject(model);
-        const size   = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-        const scale  = 2.0 / Math.max(size.x, size.y, size.z);
-        model.scale.setScalar(scale);
-        model.position.copy(center.multiplyScalar(-scale));
-        sceneRef.current.clear();
-        sceneRef.current.add(new THREE.AmbientLight(0xffffff, 0.7));
-        const key = new THREE.DirectionalLight(0xffffff, 1.8);
-        key.position.set(3, 4, 3);
-        sceneRef.current.add(key);
-        sceneRef.current.add(model);
-
-        // Simple auto-rotate update
-        handlersRef.current = {
-          update: (t) => { model.rotation.y = t * 0.4; },
-          dispose: () => {},
-        };
-      }
-
-      setIsLoaded(true);
-      if (isHoveredRef.current) setShow3d(true);
-    } catch (err) {
-      console.error('[ProjectCard] GLB load error:', err);
-    } finally {
-      setIsLoading(false);
+  const onMouseLeave = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = '';
+    card.classList.remove('tilting');
+    /* Pause video saat mouse leave */
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
     }
-  }, [project.modelPath, isLoaded, isLoading, initRenderer]);
-
-  // Handle show3d changes
-  useEffect(() => {
-    if (show3d) {
-      startLoop();
-    } else {
-      // Stop loop after fade out
-      const timer = setTimeout(stopLoop, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [show3d, startLoop, stopLoop]);
-
-  const handleMouseEnter = useCallback(() => {
-    isHoveredRef.current = true;
-
-    if (project.modelPath) {
-      if (isLoaded) {
-        setShow3d(true);
-      } else {
-        loadGLB();
-        // Init default scene while loading for quick visual
-        initRenderer();
-        startLoop();
-      }
-    } else {
-      initRenderer();
-      startLoop();
-      setShow3d(true);
-    }
-  }, [project.modelPath, isLoaded, loadGLB, initRenderer, startLoop]);
-
-  const handleMouseLeave = useCallback(() => {
-    isHoveredRef.current = false;
-    setShow3d(false);
-    setIsLoading(false);
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!previewRef.current || !handlersRef.current?.onPointerMove) return;
-    const rect = previewRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-    const y = ((e.clientY - rect.top)  / rect.height) * 2 - 1;
-    handlersRef.current.onPointerMove(x, -y);
-  }, []);
+  const onMouseEnter = useCallback(() => {
+    /* Play video saat hover (jika ada, dan tidak punya GLB) */
+    if (videoRef.current && !project.modelPath) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [project.modelPath]);
 
-  // Resize observer
-  useEffect(() => {
-    const preview = previewRef.current;
-    if (!preview) return;
-    const ro = new ResizeObserver(() => {
-      if (!rendererRef.current || !cameraRef.current) return;
-      const w = preview.clientWidth;
-      const h = preview.clientHeight || w * (9 / 16);
-      rendererRef.current.setSize(w, h);
-      cameraRef.current.aspect = w / h;
-      cameraRef.current.updateProjectionMatrix();
-    });
-    ro.observe(preview);
-    return () => ro.disconnect();
-  }, []);
+  /* ── Helpers ── */
+  const num         = String(index + 1).padStart(2, '0');
+  const isFeatured  = project.featured === true;
+  const accentColor = project.accentColor ?? 'var(--accent-primary)';
+  const delay       = Math.min(index + 1, 5);
+  const hasImage    = !!project.previewImage;
+  const hasVideo    = !!project.previewVideo;
+  const hasGlb      = !!project.modelPath;
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      stopLoop();
-      handlersRef.current?.dispose();
-      rendererRef.current?.dispose();
-    };
-  }, [stopLoop]);
+  /* Status badge class */
+  const statusClass: Record<string, string> = {
+    completed: 'completed',
+    wip:       'wip',
+    archived:  'archived',
+    concept:   'concept',
+  };
+  const statusCls = statusClass[project.status ?? 'completed'] ?? 'completed';
 
-  const statusClass = project.status ?? 'completed';
-  const statusLabel = project.statusLabel ?? project.status ?? 'Completed';
-  const featuredClass = project.featured ? ' project-card--featured' : '';
-  const delay = Math.min(index + 1, 5);
+  /* Link */
+  const linkHref   = project.link ?? project.itchLink ?? project.detailPath ?? '#';
+  const hasLink    = !!(project.link ?? project.itchLink ?? project.detailPath);
+  const linkLabel  = project.link       ? 'View Project'
+                   : project.itchLink   ? 'Play on itch.io'
+                   : project.detailPath ? 'Case Study'
+                   : 'Coming Soon';
 
   return (
-    <article
-      className={`project-card${featuredClass} reveal reveal-delay-${delay}`}
+    <div
+      ref={cardRef}
+      className={[
+        'project-card',
+        'reveal',
+        `reveal-delay-${delay}`,
+        isFeatured ? 'featured' : '',
+      ].filter(Boolean).join(' ')}
       data-category={project.category}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      onMouseEnter={onMouseEnter}
     >
-      {/* Preview area */}
-      <div className="project-card__preview" ref={previewRef}>
-        {/* Fallback gradient bg */}
+      {/* ── Decorative bg number (featured only) ── */}
+      {isFeatured && (
+        <span className="project-bg-num" aria-hidden="true">{num}</span>
+      )}
+
+      {/* ══════════════════════════════════════
+          PREVIEW BLOCK
+          Mirror persis output buildPreview() vanilla
+      ══════════════════════════════════════ */}
+      {hasImage || hasVideo ? (
+        /* Normal preview dengan image / video */
         <div
-          className="project-card__preview-bg"
-          style={{ background: `radial-gradient(ellipse at 50% 50%, color-mix(in srgb, ${project.accentColor ?? 'var(--color-accent)'} 15%, transparent), var(--color-bg) 70%)` }}
-        />
+          className="project-preview"
+          style={{ '--preview-color': accentColor } as React.CSSProperties}
+        >
+          {/* Image */}
+          {hasImage && (
+            <img
+              className="project-preview-img"
+              src={project.previewImage}
+              alt={`${project.title} preview`}
+              loading="lazy"
+              draggable={false}
+            />
+          )}
 
-        {/* Three.js canvas */}
-        <canvas
-          ref={canvasRef}
-          className="project-card__canvas"
-          style={{
-            opacity: show3d ? 1 : 0,
-            transition: 'opacity 350ms ease',
-            pointerEvents: show3d ? 'auto' : 'none',
-          }}
-        />
+          {/* Video — autoplay on hover, hidden jika ada GLB */}
+          {hasVideo && !hasGlb && (
+            <video
+              ref={videoRef}
+              className="project-preview-video"
+              src={project.previewVideo}
+              muted
+              playsInline
+              loop
+              preload="none"
+              aria-hidden="true"
+            />
+          )}
 
-        {/* Loading spinner */}
-        {isLoading && (
-          <div className="project-card__spinner" aria-hidden>
-            <div className="project-card__spinner-ring" />
+          {/* Gradient overlay */}
+          <div
+            className="project-preview-overlay"
+            style={{ '--preview-color': accentColor } as React.CSSProperties}
+          />
+
+          {/* Noise grain */}
+          <div className="project-preview-noise" aria-hidden="true" />
+        </div>
+      ) : (
+        /* Placeholder — tidak ada image maupun video */
+        <div
+          className="project-preview project-preview--placeholder"
+          style={{ '--preview-color': accentColor } as React.CSSProperties}
+        >
+          <div className="project-preview-placeholder-inner">
+            <span className="project-preview-placeholder-num">{num}</span>
+            <span className="project-preview-placeholder-cat">{project.categoryLabel}</span>
           </div>
-        )}
+          <div className="project-preview-noise" aria-hidden="true" />
+        </div>
+      )}
 
-        {/* Status badge */}
-        <span className={`project-card__status project-card__status--${statusClass}`}>
-          {statusLabel}
-        </span>
+      {/* ══════════════════════════════════════
+          CARD BODY
+      ══════════════════════════════════════ */}
+      <div className="project-card-body">
 
-        {/* Overlay with links */}
-        <div className="project-card__overlay">
-          {project.link && (
-            <a href={project.link} className="project-card__action" target="_blank" rel="noopener noreferrer">
-              View Project ↗
-            </a>
-          )}
-          {project.itchLink && (
-            <a href={project.itchLink} className="project-card__action" target="_blank" rel="noopener noreferrer">
-              Play on itch.io ↗
-            </a>
-          )}
-          {project.detailPath && (
-            <a href={project.detailPath} className="project-card__action">
-              Case Study →
-            </a>
-          )}
+        {/* Top row: project number + status badge */}
+        <div className="project-card-top">
+          <span className="project-num">Project {num}</span>
+          <span className={`project-status ${statusCls}`}>
+            {project.statusLabel ?? project.status ?? 'Completed'}
+          </span>
         </div>
 
-        {/* Grid noise overlay */}
-        <div className="project-card__noise" aria-hidden />
-      </div>
+        {/* Category */}
+        <div className="project-category">{project.categoryLabel}</div>
 
-      {/* Card body */}
-      <div className="project-card__body">
-        <div className="project-card__meta">
-          <span className="project-card__num">Project {String(index + 1).padStart(2, '0')}</span>
-          {project.year && <span className="project-card__year">{project.year}</span>}
-        </div>
-        <p className="project-card__category">{project.categoryLabel}</p>
-        <h3 className="project-card__title">{project.title}</h3>
-        <p className="project-card__desc">{project.description}</p>
-        <div className="project-card__tags">
-          {project.tags.map(tag => (
-            <span key={tag} className="project-card__tag">{tag}</span>
+        {/* Title */}
+        <h3 className="project-title">{project.title}</h3>
+
+        {/* Description */}
+        <p className="project-desc">{project.description}</p>
+
+        {/* Tech tags */}
+        <div className="project-tags">
+          {(project.tags ?? []).map(tag => (
+            <span key={tag} className="project-tag">{tag}</span>
           ))}
         </div>
-      </div>
 
-      {/* Tilt glow */}
-      <div className="card-tilt-glow" aria-hidden />
-    </article>
+        {/* Footer: link */}
+        <div className="project-card-footer">
+          <a
+            href={linkHref}
+            className={`project-link${!hasLink ? ' disabled' : ''}`}
+            {...(hasLink && linkHref.startsWith('http')
+              ? { target: '_blank', rel: 'noopener noreferrer' }
+              : {})}
+          >
+            {linkLabel} <span className="project-link-arrow">&#8594;</span>
+          </a>
+        </div>
+
+      </div>{/* end .project-card-body */}
+
+      {/* Tilt inner glow */}
+      <div className="card-tilt-glow" aria-hidden="true" />
+
+    </div>
   );
 }

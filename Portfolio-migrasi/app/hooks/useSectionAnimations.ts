@@ -18,12 +18,12 @@ export function useSectionAnimations() {
     }
 
     function enterReveal(sectionEl: HTMLElement) {
-      sectionEl.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
-        el.classList.remove('revealed', 'exiting');
-        void el.offsetWidth;
-        requestAnimationFrame(() => el.classList.add('revealed'));
-      });
-    }
+  sectionEl.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
+    el.classList.remove('visible', 'revealed', 'exiting');
+    void el.offsetWidth;
+    requestAnimationFrame(() => el.classList.add('visible'));   // <-- ganti ke 'visible'
+  });
+}
 
     function leaveReveal(sectionEl: HTMLElement) {
       sectionEl.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
