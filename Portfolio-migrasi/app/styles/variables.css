@@ -1,69 +1,61 @@
-/* ============================================================
-   DESIGN TOKENS
-   ============================================================ */
+/* ================================================
+   DESIGN SYSTEM — CSS VARIABLES
+   Identik dengan vanilla portfolio/styles/variables.css
+================================================ */
 
 :root {
-  /* Colors */
-  --color-bg:           #04040A;
-  --color-bg-secondary: #080810;
-  --color-surface:      #0D0D1A;
-  --color-border:       rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 107, 53, 0.3);
+    /* --- COLORS: Backgrounds --- */
+    --bg-primary: #04040a;
+    --bg-surface: #09090f;
+    --bg-elevated: #0f0f18;
+    --bg-card: #111120;
 
-  --color-accent:       #FF6B35;
-  --color-accent-dim:   rgba(255, 107, 53, 0.12);
-  --color-accent-glow:  rgba(255, 107, 53, 0.25);
+    /* --- COLORS: Accent (Electric Orange) --- */
+    --accent-primary: #FF6B35;
+    --accent-dim: #cc5228;
+    --accent-bright: #FF8555;
+    --accent-glow: rgba(255, 107, 53, 0.12);
+    --accent-glow-strong: rgba(255, 107, 53, 0.22);
 
-  --color-blue:         #4D8CFF;
-  --color-blue-dim:     rgba(77, 140, 255, 0.12);
+    /* --- COLORS: Accent Alt (Muted Blue) --- */
+    --accent-alt: #4D8CFF;
+    --accent-alt-dim: #2f64cc;
+    --accent-alt-glow: rgba(77, 140, 255, 0.12);
 
-  --color-text-primary:   #F0F0F0;
-  --color-text-secondary: #8A8A9A;
-  --color-text-muted:     #4A4A5A;
+    /* --- COLORS: Text --- */
+    --text-primary: #F0F0FA;
+    --text-secondary: #8888A8;
+    --text-muted: #46465E;
 
-  /* Typography */
-  --font-display: 'Barlow Condensed', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+    /* --- COLORS: Borders --- */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-dim: rgba(255, 255, 255, 0.09);
+    --border-accent: rgba(255, 107, 53, 0.30);
 
-  /* Spacing scale */
-  --space-1:  4px;
-  --space-2:  8px;
-  --space-3:  12px;
-  --space-4:  16px;
-  --space-5:  24px;
-  --space-6:  32px;
-  --space-7:  48px;
-  --space-8:  64px;
-  --space-9:  96px;
-  --space-10: 128px;
+    /* --- TYPOGRAPHY --- */
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
-  /* Layout */
-  --container-max:  1280px;
-  --container-pad:  clamp(24px, 5vw, 80px);
-  --nav-height:     72px;
-  --section-height: 100svh;
+    /* --- SPACING --- */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 40px;
+    --space-2xl: 64px;
+    --space-3xl: 96px;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+    /* --- LAYOUT --- */
+    --max-width: 1200px;
+    --nav-height: 72px;
 
-  /* Transitions */
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --duration-fast:   150ms;
-  --duration-normal: 300ms;
-  --duration-slow:   600ms;
-  
+    /* --- EASING --- */
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-  /* Cursor */
-  --color-accent-rgb: 94, 234, 212;
-
-  /* Z-index layers */
-  --z-base:    0;
-  --z-content: 10;
-  --z-overlay: 50;
-  --z-nav:     100;
-  --z-cursor:  9999;
+    /* Z-index layers */
+    --z-nav: 100;
+    --z-cursor: 9999;
 }

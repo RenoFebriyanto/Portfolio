@@ -1,299 +1,244 @@
-/* ============================================================
-   SKILLS
-   Struktur mengikuti Skills.tsx: .skill-group (4 kolom),
-   .skill-list > .skill-item > .skill-bar-track > .skill-bar-fill
-   Port dari vanilla styles/skills.css, token disesuaikan
-   dengan variables.css React (--color-*, --space-*, dst).
-   ============================================================ */
+/* ================================================
+   SKILLS SECTION — port dari vanilla styles/skills.css
+================================================ */
 
 .skills {
-  background: var(--color-bg-secondary);
-  padding-top: var(--nav-height);
-  position: relative;
+    padding: var(--space-3xl) 0;
+    position: relative;
 }
 
-.skills__inner {
-  padding: var(--space-9) 0;
-}
-
-/* --- Section Header --- */
 .skills-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-7);
-  margin-bottom: var(--space-8);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+    flex-wrap: wrap;
 }
 
 .skills-heading {
-  font-family: var(--font-display);
-  font-size: clamp(38px, 5vw, 64px);
-  font-weight: 800;
-  line-height: 1.0;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-  margin-top: var(--space-4);
+    font-family: var(--font-display);
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-top: var(--space-md);
 }
 
-.skills-heading .accent {
-  color: var(--color-accent);
-}
+.skills-heading .accent { color: var(--accent-primary); }
 
 .skills-sub {
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 1.7;
-  color: var(--color-text-secondary);
-  max-width: 340px;
-  text-align: right;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 340px;
+    text-align: right;
 }
 
-/* --- Skills Grid: 4 columns --- */
 .skills-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
 }
 
-/* --- Skill Group Card --- */
 .skill-group {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s ease;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: var(--space-xl);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
 }
 
-.skill-group:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-}
+.skill-group:hover { border-color: rgba(255,255,255,0.1); }
 
-/* Top accent line — unique color per group */
 .skill-group::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
 }
 
-.skill-group.game::before  { background: linear-gradient(90deg, var(--color-accent), transparent 70%); }
-.skill-group.art::before   { background: linear-gradient(90deg, #a78bfa, transparent 70%); }
-.skill-group.code::before  { background: linear-gradient(90deg, var(--color-blue), transparent 70%); }
-.skill-group.tools::before { background: linear-gradient(90deg, #34d399, transparent 70%); }
+.skill-group.game::before   { background: linear-gradient(90deg, var(--accent-primary), transparent 70%); }
+.skill-group.art::before    { background: linear-gradient(90deg, #a78bfa, transparent 70%); }
+.skill-group.code::before   { background: linear-gradient(90deg, var(--accent-alt), transparent 70%); }
+.skill-group.tools::before  { background: linear-gradient(90deg, #34d399, transparent 70%); }
 
-/* --- Group Header --- */
 .skill-group-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-4);
-  font-size: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
 }
 
 .skill-group-icon-img {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-  display: block;
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+    display: block;
 }
 
-.skill-group.game  .skill-group-icon { background: var(--color-accent-dim); }
-.skill-group.art   .skill-group-icon { background: rgba(167, 139, 250, 0.10); }
-.skill-group.code  .skill-group-icon { background: var(--color-blue-dim); }
-.skill-group.tools .skill-group-icon { background: rgba(52, 211, 153, 0.10); }
+.skill-group.game  .skill-group-icon { background: rgba(255,107,53,0.10); }
+.skill-group.art   .skill-group-icon { background: rgba(167,139,250,0.10); }
+.skill-group.code  .skill-group-icon { background: rgba(77,140,255,0.10); }
+.skill-group.tools .skill-group-icon { background: rgba(52,211,153,0.10); }
 
 .skill-group-title {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-  margin-bottom: 4px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 4px;
 }
 
 .skill-group-count {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-5);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xl);
 }
 
-/* --- Skill Item Row --- */
 .skill-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
 }
 
 .skill-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .skill-item-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .skill-name {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
 }
 
 .skill-level-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
-  transition: opacity 0.4s ease 0.8s;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    transition: opacity 0.4s ease 0.8s;
 }
 
-/* Label fades in after bar fills — visible state controlled by .skill-group.visible */
-.skill-group:not(.visible) .skill-level-label {
-  opacity: 0;
-}
+.skill-group:not(.visible) .skill-level-label { opacity: 0; }
 
-/* --- Skill Bar --- */
 .skill-bar-track {
-  height: 2px;
-  background: var(--color-border);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
+    height: 2px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
 }
 
 .skill-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  width: 0%;
-  transition: width 1.1s var(--ease-out);
+    height: 100%;
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1.1s var(--ease-smooth);
 }
 
-/* Trigger animation when parent group is visible (set by useSectionAnimations retrigger) */
-.skill-group.visible .skill-bar-fill {
-  width: var(--skill-level);
-}
+.skill-group.visible .skill-bar-fill { width: var(--skill-level); }
 
-/* --- Currently Learning Strip --- */
+.skill-group.game  .skill-bar-fill { background: linear-gradient(90deg, var(--accent-primary), var(--accent-bright)); }
+.skill-group.art   .skill-bar-fill { background: linear-gradient(90deg, #a78bfa, #c4b5fd); }
+.skill-group.code  .skill-bar-fill { background: linear-gradient(90deg, var(--accent-alt), #7db3ff); }
+.skill-group.tools .skill-bar-fill { background: linear-gradient(90deg, #34d399, #6ee7b7); }
+
+/* Learning Strip */
 .skills-learning {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-5) var(--space-7);
-  display: flex;
-  align-items: center;
-  gap: var(--space-7);
-  flex-wrap: wrap;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: var(--space-lg) var(--space-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    flex-wrap: wrap;
 }
 
 .skills-learning-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
 }
 
 .skills-learning-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-blue);
-  box-shadow: 0 0 8px rgba(77, 140, 255, 0.6);
-  animation: pulse-dot 2.5s ease-in-out infinite;
-  flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-alt);
+    box-shadow: 0 0 8px rgba(77,140,255,0.6);
+    animation: pulse-dot 2.5s ease-in-out infinite;
+    flex-shrink: 0;
 }
 
 .skills-learning-title {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .skills-learning-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--color-border);
-  flex-shrink: 0;
+    width: 1px;
+    height: 20px;
+    background: var(--border-dim);
+    flex-shrink: 0;
 }
 
 .skills-learning-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
 }
 
 .skills-learning-chip {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-blue);
-  background: var(--color-blue-dim);
-  border: 1px solid rgba(77, 140, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-alt);
+    background: var(--accent-alt-glow);
+    border: 1px solid rgba(77,140,255,0.2);
+    padding: 4px 12px;
+    border-radius: 3px;
 }
 
-/* --- Pulse keyframe (shared with status dots elsewhere) --- */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1;   transform: scale(1); }
-  50%      { opacity: 0.5; transform: scale(0.82); }
-}
-
-/* --- Responsive --- */
 @media (max-width: 1000px) {
-  .skills-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+    .skills-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-  .skills-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .skills-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .skills-sub {
-    text-align: left;
-    max-width: 100%;
-  }
-
-  .skills-learning {
-    gap: var(--space-4);
-  }
-
-  .skills-learning-divider {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skills-learning-dot {
-    animation: none;
-  }
+    .skills-grid { grid-template-columns: 1fr; }
+    .skills-header { flex-direction: column; align-items: flex-start; }
+    .skills-sub { text-align: left; max-width: 100%; }
+    .skills-learning { gap: var(--space-md); }
+    .skills-learning-divider { display: none; }
 }

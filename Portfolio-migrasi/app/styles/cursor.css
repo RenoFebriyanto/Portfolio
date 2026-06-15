@@ -1,59 +1,91 @@
-.cursor__dot,
-.cursor__ring {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-  transform: translate(-100px, -100px);
-  z-index: 9999;
-  will-change: transform;
+/* ================================================
+   CUSTOM CURSOR — port dari vanilla cursor.css
+================================================ */
+
+*, *::before, *::after {
+    cursor: none !important;
 }
 
-.cursor__dot {
-  width: 6px;
-  height: 6px;
-  background: var(--color-accent);
-  margin-left: -3px;
-  margin-top: -3px;
-  transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+.cursor-dot,
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: var(--z-cursor, 9999);
+    will-change: transform;
+    transform: translate(-50%, -50%);
 }
 
-.cursor__ring {
-  width: 36px;
-  height: 36px;
-  border: 1.5px solid rgba(var(--color-accent-rgb), 0.5);
-  margin-left: -18px;
-  margin-top: -18px;
-  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease,
-    opacity 0.25s ease, transform 0.12s linear;
+.cursor-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    transition:
+        width     0.18s var(--ease-smooth),
+        height    0.18s var(--ease-smooth),
+        opacity   0.18s ease,
+        background 0.18s ease;
 }
 
-/* Hover state */
-.cursor__dot--hover {
-  width: 10px;
-  height: 10px;
-  margin-left: -5px;
-  margin-top: -5px;
+.cursor-ring {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-primary);
+    background: transparent;
+    opacity: 0.55;
+    transition:
+        width     0.35s var(--ease-smooth),
+        height    0.35s var(--ease-smooth),
+        opacity   0.25s ease,
+        border-color 0.25s ease,
+        background   0.3s ease;
 }
 
-.cursor__ring--hover {
-  width: 52px;
-  height: 52px;
-  margin-left: -26px;
-  margin-top: -26px;
-  border-color: var(--color-accent);
+body.cursor-hover .cursor-ring {
+    width: 48px;
+    height: 48px;
+    opacity: 0.8;
+    border-color: var(--accent-bright);
+    background: var(--accent-glow);
+}
+body.cursor-hover .cursor-dot {
+    width: 3px;
+    height: 3px;
+    opacity: 0.6;
 }
 
-/* Hidden state */
-.cursor__dot--hidden,
-.cursor__ring--hidden {
-  opacity: 0;
+body.cursor-click .cursor-ring {
+    width: 22px;
+    height: 22px;
+    opacity: 1;
+    border-color: var(--accent-primary);
+    background: rgba(255, 107, 53, 0.2);
+}
+body.cursor-click .cursor-dot {
+    width: 7px;
+    height: 7px;
 }
 
-@media (pointer: coarse) {
-  .cursor__dot,
-  .cursor__ring {
-    display: none;
-  }
+body.cursor-card .cursor-ring {
+    width: 56px;
+    height: 56px;
+    opacity: 0.28;
+    border-color: var(--text-muted);
+    background: transparent;
+}
+body.cursor-card .cursor-dot {
+    background: var(--accent-bright);
+}
+
+body.cursor-hidden .cursor-ring,
+body.cursor-hidden .cursor-dot {
+    opacity: 0;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .cursor-dot, .cursor-ring { display: none; }
+    *, *::before, *::after { cursor: auto !important; }
 }

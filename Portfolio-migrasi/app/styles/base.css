@@ -1,167 +1,193 @@
-/* ============================================================
-   BASE & RESET
-   ============================================================ */
+/* ================================================
+   BASE — Reset, Body, Scrollbar, BG Effects
+   Port dari vanilla portfolio/styles/base.css
+================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.6;
-  overflow-x: hidden;
-  cursor: none;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    overflow: hidden;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 }
 
-img, video {
-  display: block;
-  max-width: 100%;
+img, svg {
+    display: block;
 }
 
 button {
-  background: none;
-  border: none;
-  cursor: none;
-  font-family: inherit;
+    background: none;
+    border: none;
+    font-family: inherit;
 }
 
 ul, ol {
-  list-style: none;
+    list-style: none;
 }
 
-/* Scroll container — full-page snap */
+/* ================================================
+   PAGE WRAPPER — fixed full viewport
+================================================ */
 #scroll-container {
-  height: 100svh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-#scroll-container::-webkit-scrollbar {
-  display: none;
+/* ================================================
+   PAGE PANELS
+================================================ */
+.snap-panel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
 }
 
-/* Section base */
-.section {
-  min-height: var(--section-height);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  position: relative;
-  overflow: hidden;
+.snap-panel.panel-visible {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
 }
 
-/* Scrollable variant for content-heavy sections */
-.section.scrollable {
-  overflow-y: auto;
-  scroll-snap-align: start;
+.snap-panel--scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Container */
+.snap-panel--scroll::-webkit-scrollbar { width: 3px; }
+.snap-panel--scroll::-webkit-scrollbar-track { background: transparent; }
+.snap-panel--scroll::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 2px;
+}
+.snap-panel--scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.snap-panel > section {
+    width: 100%;
+    min-height: 100%;
+}
+
+.snap-panel:not(.snap-panel--scroll) > section {
+    height: 100%;
+    min-height: unset;
+    overflow: hidden;
+}
+
+/* ================================================
+   SNAP PROGRESS INDICATOR (dot nav)
+================================================ */
+.snap-dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.snap-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition:
+        background   0.35s var(--ease-smooth),
+        height       0.35s var(--ease-smooth),
+        border-radius 0.35s var(--ease-smooth);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.snap-dot.active {
+    background: var(--accent-primary);
+    height: 20px;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+}
+
+.snap-dot:hover:not(.active) {
+    background: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .snap-dots { display: none; }
+}
+
+/* --- Background: Grid --- */
+.bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--border-subtle) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 50% 0%, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+}
+
+/* --- Background: Top Glow --- */
+.bg-glow-top {
+    position: fixed;
+    top: -220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 107, 53, 0.05) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- Layout Container --- */
 .container {
-  max-width: var(--container-max);
-  margin: 0 auto;
-  padding: 0 var(--container-pad);
-  width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+    position: relative;
+    z-index: 1;
 }
 
-/* Section label (eyebrow) */
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--color-accent);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-
-.section-label::after {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: var(--color-accent);
-  opacity: 0.6;
-}
-
-/* Section heading */
-.section-heading {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  margin-bottom: var(--space-6);
-}
-
-/* Utility */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Tambahkan di base.css yang sudah ada */
-
-.scroll-container {
-  height: 100vh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-}
-
-.section {
-  scroll-snap-align: start;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-/* Hide default cursor saat custom cursor aktif */
-@media (pointer: fine) {
-  * {
-    cursor: none !important;
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+/* --- Responsive: Mobile base --- */
+@media (max-width: 768px) {
+    :root {
+        --space-xl: 24px;
+        --space-2xl: 48px;
+        --space-3xl: 64px;
+    }
 }
