@@ -6,15 +6,14 @@ import {
   ScrollRestoration,
 } from "react-router";
 import Nav    from "~/components/layout/Nav";
-import Footer from "~/components/layout/Footer";
 import Cursor from "~/components/ui/Cursor";
 import { useCursor } from "~/hooks/useCursor";
 
-/* Core styles */
+/* Core styles — urutan penting */
 import "~/styles/variables.css";
-import "~/styles/animations.css";
 import "~/styles/base.css";
-import "~/styles/snap.css";          /* panel + dot nav system */
+import "~/styles/animations.css";   /* hanya sekali */
+import "~/styles/snap.css";
 import "~/styles/nav.css";
 import "~/styles/cursor.css";
 import "~/styles/motion.css";
@@ -22,10 +21,9 @@ import "~/styles/motion.css";
 /* Section styles */
 import "~/styles/hero.css";
 import "~/styles/about.css";
-import "~/styles/projects-react.css"; /* replaces vanilla projects.css + project3d.css */
+import "~/styles/projects-react.css";
 import "~/styles/skills.css";
 import "~/styles/contact.css";
-import "~/styles/animations.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,11 +41,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           rel="stylesheet"
         />
 
-        {/* EmailJS SDK */}
-        <script
-          src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
-          async
-        />
+        {/* EmailJS SDK — loaded before body scripts */}
+        <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" />
 
         <Meta />
         <Links />
@@ -67,9 +62,10 @@ export default function App() {
   return (
     <>
       <Cursor position={cursorPos} variant={cursorVariant} />
+      {/* Nav di luar panel agar selalu visible */}
       <Nav />
       <Outlet />
-      {/* Footer rendered per-section inside Contact, not globally */}
+      {/* Footer dirender di dalam Contact section, tidak global */}
     </>
   );
 }

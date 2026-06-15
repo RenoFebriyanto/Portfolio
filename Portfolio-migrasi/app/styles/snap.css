@@ -1,102 +1,95 @@
 /* ============================================================
-   SNAP PANEL SYSTEM — React port of pagescroll.js CSS
-   Panels are position:fixed, controlled via SnapPanel.tsx
+   snap.css — Panel System & Background Layers
+   Semua panel position:fixed, visibility dikontrol via
+   data-visible attribute oleh usePageSnap (direct DOM).
    ============================================================ */
 
-/* Prevent default body scroll — panels handle it */
-body {
-  overflow: hidden;
-}
-
-/* Each panel is fixed full-viewport */
+/* ---------- Panel Base ---------- */
 .snap-panel {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   will-change: transform, opacity;
+  -webkit-overflow-scrolling: touch;
+
+  /* Default: hidden */
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* Scrollable panels */
+/* Scrollable variant */
 .snap-panel--scroll {
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
 }
 
-.snap-panel--scroll::-webkit-scrollbar        { width: 3px; }
-.snap-panel--scroll::-webkit-scrollbar-track  { background: transparent; }
-.snap-panel--scroll::-webkit-scrollbar-thumb  {
-  background: var(--color-text-muted, #46465e);
-  border-radius: 2px;
+/* Visible state — diset oleh usePageSnap via data-visible="true" */
+.snap-panel[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 10;
 }
 
-/* ── Dot Nav ── */
+.snap-panel[data-visible="false"] {
+  z-index: 0;
+}
+
+/* ---------- Dot Navigation ---------- */
 .snap-dots {
   position: fixed;
-  right: 24px;
+  right: 1.5rem;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 200;
-  pointer-events: none;
+  gap: 0.75rem;
+  z-index: 100;
 }
 
 .snap-dot {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--color-text-muted, #46465e);
+  background: rgba(255, 255, 255, 0.25);
   border: none;
   padding: 0;
-  transition:
-    background      0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1)),
-    height          0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1)),
-    border-radius   0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1));
-  pointer-events: auto;
   cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
+.snap-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.3);
+}
+
+.snap-dot[data-active="true"],
 .snap-dot.active {
-  background: var(--color-accent, #FF6B35);
-  height: 20px;
-  border-radius: 2px;
-  box-shadow: 0 0 8px rgba(255,107,53,0.5);
+  background: var(--accent, #FF6B35);
+  transform: scale(1.4);
 }
 
-.snap-dot:hover:not(.active) {
-  background: var(--color-text-secondary, #8888a8);
-}
-
-/* ── Background layer ── */
+/* ---------- Background Layers ---------- */
 .bg-grid {
   position: fixed;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
   background-image:
-    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.6) 0%, transparent 70%);
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
 }
 
 .bg-glow-top {
   position: fixed;
-  top: -220px;
+  top: -20%;
   left: 50%;
   transform: translateX(-50%);
-  width: 900px;
-  height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255,107,53,0.05) 0%, transparent 65%);
-  pointer-events: none;
+  width: 60vw;
+  height: 40vh;
+  background: radial-gradient(ellipse at center, rgba(255,107,53,0.08) 0%, transparent 70%);
   z-index: 0;
-}
-
-/* Hide dot nav on mobile */
-@media (max-width: 768px) {
-  .snap-dots { display: none; }
+  pointer-events: none;
 }

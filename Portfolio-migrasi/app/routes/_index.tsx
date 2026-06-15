@@ -12,10 +12,9 @@ import { useSectionAnimations } from '~/hooks/useSectionAnimations';
 export default function Index() {
   const { currentIdx, sections, goTo, registerPanel } = usePageSnap();
 
-  // Port of section-animations.js
   useSectionAnimations();
 
-  // Expose PageNav global for back-to-top button etc.
+  // Expose PageNav global untuk back-to-top button dll
   useEffect(() => {
     (window as unknown as Record<string, unknown>).PageNav = {
       goTo,
@@ -25,7 +24,7 @@ export default function Index() {
     };
   }, [currentIdx, goTo]);
 
-  // Nav link override — anchor clicks → snap
+  // Nav link override — anchor clicks → snap navigation
   useEffect(() => {
     const links = document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]');
     const handlers = new Map<HTMLAnchorElement, (e: Event) => void>();
@@ -47,71 +46,38 @@ export default function Index() {
     };
   }, [sections, goTo, currentIdx]);
 
-  const containerRef = useCallback((el: HTMLDivElement | null) => {
-    // Expose container ref to Hero for parallax ghost
-    if (el) (window as unknown as Record<string, unknown>).__scrollContainer = el;
-  }, []);
-
   return (
     <>
       {/* Background layers */}
       <div className="bg-grid" aria-hidden />
       <div className="bg-glow-top" aria-hidden />
 
-      {/* Scroll container */}
-      <div id="scroll-container" ref={containerRef}>
+      {/* Panel container — tidak perlu scroll, tiap panel position:fixed */}
+      <div id="snap-root">
 
-        <SnapPanel
-          id="hero"
-          scrollable={false}
-          isVisible={currentIdx === 0}
-          onRegister={registerPanel}
-        >
-          <Hero
-            scrollTo={goTo}
-            containerRef={{ current: null }}
-          />
+        <SnapPanel id="hero" scrollable={false} onRegister={registerPanel}>
+          <Hero scrollTo={goTo} />
         </SnapPanel>
 
-        <SnapPanel
-          id="about"
-          scrollable
-          isVisible={currentIdx === 1}
-          onRegister={registerPanel}
-        >
+        <SnapPanel id="about" scrollable onRegister={registerPanel}>
           <About />
         </SnapPanel>
 
-        <SnapPanel
-          id="projects"
-          scrollable
-          isVisible={currentIdx === 2}
-          onRegister={registerPanel}
-        >
+        <SnapPanel id="projects" scrollable onRegister={registerPanel}>
           <Projects />
         </SnapPanel>
 
-        <SnapPanel
-          id="skills"
-          scrollable
-          isVisible={currentIdx === 3}
-          onRegister={registerPanel}
-        >
+        <SnapPanel id="skills" scrollable onRegister={registerPanel}>
           <Skills />
         </SnapPanel>
 
-        <SnapPanel
-          id="contact"
-          scrollable
-          isVisible={currentIdx === 4}
-          onRegister={registerPanel}
-        >
+        <SnapPanel id="contact" scrollable onRegister={registerPanel}>
           <Contact />
         </SnapPanel>
 
       </div>
 
-      {/* Dot navigation */}
+      {/* Dot navigation kanan layar */}
       <DotNav
         sections={sections}
         currentIdx={currentIdx}
