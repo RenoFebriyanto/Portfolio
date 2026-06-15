@@ -3,7 +3,6 @@ import { HeroCanvas } from '~/components/three/HeroCanvas';
 
 interface Props {
   scrollTo: (index: number) => void;
-  containerRef: React.RefObject<HTMLElement | null>;
 }
 
 export function Hero({ scrollTo }: Props) {
