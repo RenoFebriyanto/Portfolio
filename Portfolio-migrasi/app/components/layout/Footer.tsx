@@ -3,29 +3,39 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      <div className="footer__inner">
-        <p className="footer__copy">
-          &copy; {year}{" "}
-          <span className="footer__name">Reno Febriyanto</span>
-          {" "}&mdash; Built with React Router, Three.js &amp; GSAP
-        </p>
-        <div className="footer__links">
-          
-            href="https://github.com/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer__link"
-          >
-            GitHub
-          </a>
-          
-            href="https://linkedin.com/in/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer__link"
-          >
-            LinkedIn
-          </a>
+      <div className="container">
+        <div className="footer__inner">
+          <p className="footer__copy">
+            &copy; {year}{" "}
+            <span>Reno Febriyanto</span>
+            {" "}&mdash; Built with React Router &amp; Three.js
+          </p>
+          <div className="footer__links">
+            <a
+              href="https://github.com/RenoFebriyanto"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__link"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://linkedin.com/in/renofebriyanto/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__link"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://catmounth.itch.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__link"
+            >
+              itch.io
+            </a>
+          </div>
         </div>
       </div>
     </footer>

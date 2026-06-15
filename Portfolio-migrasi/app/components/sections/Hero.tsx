@@ -3,61 +3,86 @@ import { HeroCanvas } from '~/components/three/HeroCanvas';
 
 interface Props {
   scrollTo: (index: number) => void;
-  containerRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: React.RefObject<HTMLElement | null>;
 }
 
-export function Hero({ scrollTo, containerRef }: Props) {
+export function Hero({ scrollTo }: Props) {
   const ghostRef = useRef<HTMLSpanElement>(null);
 
-  // Ghost parallax
+  // Ghost parallax — listen to panelscroll events
   useEffect(() => {
-    const container = containerRef.current;
-    const ghost     = ghostRef.current;
-    if (!container || !ghost) return;
-
     const handler = () => {
-      const y = container.scrollTop;
-      ghost.style.transform = `translateX(-50%) translateY(${y * 0.25}px)`;
+      // Ghost parallax driven by section-animations' ghost text
+      // (Already handled by motion.js port in useSectionAnimations)
     };
-    container.addEventListener('scroll', handler, { passive: true });
-    return () => container.removeEventListener('scroll', handler);
-  }, [containerRef]);
+    window.addEventListener('panelscroll', handler, { passive: true });
+    return () => window.removeEventListener('panelscroll', handler);
+  }, []);
 
   return (
-    <section className="section hero" id="hero">
-      {/* Particle canvas */}
-      <HeroCanvas className="hero__canvas" />
+    <section className="hero" id="hero">
+      {/* Particle canvas behind content */}
+      <HeroCanvas className="" />
 
-      {/* Ghost text */}
-      <span className="hero__ghost" ref={ghostRef} aria-hidden>RENO</span>
+      <div className="hero-inner">
+        {/* Left: text content */}
+        <div className="hero-content">
 
-      {/* Main content */}
-      <div className="hero__content">
-        <p className="hero__eyebrow">Game Tech · 3D · Interactive Web</p>
+          {/* Status badge */}
+          <div className="hero-status">
+            <span className="hero-status-dot" />
+            <span className="hero-status-text">Open for opportunities</span>
+          </div>
 
-        <h1 className="hero__title">
-          Reno
-          <span className="hero__title-accent">Febriyanto</span>
-        </h1>
+          {/* Heading — each line wrapped for reveal animation */}
+          <h1 className="hero-heading">
+            <span className="hero-heading-line"><span>Game Tech</span></span>
+            <span className="hero-heading-line"><span>& <span className="accent">3D</span></span></span>
+            <span className="hero-heading-line"><span>Creator.</span></span>
+          </h1>
 
-        <p className="hero__subtitle">
-          Developer &amp; creator focused on game technology, 3D art, and premium interactive experiences.
-        </p>
+          {/* Description */}
+          <p className="hero-desc">
+            Building immersive experiences at the intersection of game technology,
+            real-time 3D, and interactive web. Turning ideas into playable, visual realities.
+          </p>
 
-        <div className="hero__cta-row">
-          <button className="hero__btn hero__btn--primary" onClick={() => scrollTo(2)}>
-            View Projects
-          </button>
-          <button className="hero__btn hero__btn--outline" onClick={() => scrollTo(4)}>
-            Get In Touch
-          </button>
+          {/* Tags */}
+          <div className="hero-tags">
+            {['Game Dev', '3D Artist', '2D Artist', 'Designer', 'Programmer', 'Web 3'].map(tag => (
+              <span key={tag} className="tag">{tag}</span>
+            ))}
+          </div>
+
+          {/* CTA buttons */}
+          <div className="hero-cta">
+            <a href="#projects" className="btn-primary" onClick={e => { e.preventDefault(); scrollTo(2); }}>
+              View Projects <span className="btn-arrow">→</span>
+            </a>
+            <a href="#about" className="btn-secondary" onClick={e => { e.preventDefault(); scrollTo(1); }}>
+              About Me <span className="btn-arrow">→</span>
+            </a>
+          </div>
         </div>
+
+        {/* Right: 3D sphere canvas (injected by hero3d.js equiv — kept as div for GLB loader) */}
+        <div id="hero-3d-canvas" aria-hidden />
       </div>
 
-      {/* Scroll hint */}
-      <div className="hero__scroll-hint" aria-hidden>
+      {/* Decorative ghost text */}
+      <span className="hero-number" ref={ghostRef} aria-hidden>3D</span>
+
+      {/* Scroll indicator */}
+      <div
+        className="hero-scroll"
+        role="button"
+        tabIndex={0}
+        aria-label="Scroll to projects"
+        onClick={() => scrollTo(2)}
+        onKeyDown={e => e.key === 'Enter' && scrollTo(2)}
+      >
         <span>Scroll</span>
-        <div className="hero__scroll-line" />
+        <div className="scroll-line" />
       </div>
     </section>
   );

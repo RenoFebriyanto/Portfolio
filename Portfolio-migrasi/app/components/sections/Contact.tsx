@@ -1,145 +1,245 @@
 import { useState, type FormEvent } from 'react';
-import { sendContactEmail } from '~/utils/emailjs';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
+const SOCIALS = [
+  { platform: 'GitHub',    handle: 'Reno Febriyanto',     href: 'https://github.com/RenoFebriyanto',          icon: '/Assets/icons/github.png' },
+  { platform: 'LinkedIn',  handle: 'Reno Febriyanto',     href: 'https://www.linkedin.com/in/renofebriyanto/', icon: '/Assets/icons/linkedin.png' },
+  { platform: 'itch.io',   handle: 'catmounth.itch.io',   href: 'https://catmounth.itch.io/',                 icon: '/Assets/icons/itch-io.png' },
+  { platform: 'Instagram', handle: '@norigaken',           href: 'https://www.instagram.com/norigaken/',       icon: '/Assets/icons/instagram.png' },
+];
+
+const EMAILJS_CONFIG = {
+  serviceId:  'service_4gmph37',
+  templateId: 'template_hutxwgq',
+  publicKey:  'FNCDIzpu7wl-Zh3FB',
+};
+
 export function Contact() {
   const [status, setStatus] = useState<Status>('idle');
-  const [form, setForm] = useState({
-    from_name: '', from_email: '', subject: '', message: '',
-  });
+  const [form, setForm]     = useState({ name: '', email: '', subject: '', message: '' });
+  const [errors, setErrors] = useState<Partial<typeof form>>({});
 
   const set = (field: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm(prev => ({ ...prev, [field]: e.target.value }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    };
+
+  const validate = () => {
+    const e: Partial<typeof form> = {};
+    if (!form.name.trim())    e.name    = 'Required';
+    if (!form.email.trim())   e.email   = 'Required';
+    if (!form.message.trim()) e.message = 'Required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     setStatus('sending');
+
     try {
-      await sendContactEmail(form);
+      // EmailJS via CDN script (loaded in root.tsx head)
+      const emailjs = (window as unknown as Record<string, { init: (o: { publicKey: string }) => void; send: (s: string, t: string, p: object) => Promise<void> }>).emailjs;
+      if (!emailjs) throw new Error('EmailJS not loaded');
+
+      emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+
+      await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+        from_name:  form.name,
+        from_email: form.email,
+        subject:    form.subject || '(No subject)',
+        message:    form.message,
+        reply_to:   form.email,
+      });
+
       setStatus('success');
-      setForm({ from_name: '', from_email: '', subject: '', message: '' });
-    } catch {
+    } catch (err) {
+      console.error('[EmailJS]', err);
       setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
   return (
-    <section className="section scrollable contact" id="contact">
+    <section className="contact" id="contact">
       <div className="container">
-        <div className="contact__inner">
 
-          {/* Left — info */}
-          <div className="contact__info reveal">
-            <p className="section-label">04 — Contact</p>
-            <h2 className="section-heading">Let's Work Together</h2>
+        {/* Section divider */}
+        <div className="section-divider reveal" />
 
-            <p className="contact__body">
-              Have a project in mind? Looking for a collaborator in game dev, 3D, or interactive
-              web? I'd love to hear from you.
-            </p>
+        {/* Section label */}
+        <div className="section-label reveal">
+          <span className="section-label-num">04</span>
+          <span className="section-label-line" />
+          <span className="section-label-text">Contact</span>
+        </div>
 
-            <div className="contact__details">
-              <div className="contact__detail">
-                <span className="contact__detail-icon">✉</span>
-                <div>
-                  <span className="contact__detail-label">Email</span>
-                  <span className="contact__detail-value">
-                    <a href="mailto:renofebriyanto94@gmail.com">renofebriyanto94@gmail.com</a>
-                  </span>
-                </div>
-              </div>
-              <div className="contact__detail">
-                <span className="contact__detail-icon">📍</span>
-                <div>
-                  <span className="contact__detail-label">Location</span>
-                  <span className="contact__detail-value">Indonesia</span>
-                </div>
-              </div>
-              <div className="contact__detail">
-                <span className="contact__detail-icon">🎮</span>
-                <div>
-                  <span className="contact__detail-label">itch.io</span>
-                  <span className="contact__detail-value">
-                    <a href="https://catmounth.itch.io" target="_blank" rel="noreferrer">catmounth.itch.io</a>
-                  </span>
-                </div>
-              </div>
+        {/* Closing statement */}
+        <div className="contact-statement reveal reveal-delay-1">
+          <span className="contact-eyebrow">Let's build something together</span>
+          <h2 className="contact-heading">
+            Get In<br />
+            <span className="accent">Touch</span><span className="dim">.</span>
+          </h2>
+          <p className="contact-tagline">
+            Open for freelance projects, collaborations, game jams, or just a good conversation
+            about Game Tech and 3D. Don't hesitate to reach out.
+          </p>
+        </div>
+
+        {/* Contact grid */}
+        <div className="contact-grid">
+
+          {/* Left: info */}
+          <div className="contact-info reveal reveal-delay-1">
+            <p className="contact-info-label">Direct Email</p>
+            <a href="mailto:renofebriyanto94@gmail.com" className="contact-email">
+              renofebriyanto94@gmail.com
+            </a>
+
+            <div className="contact-socials">
+              {SOCIALS.map(s => (
+                <a key={s.platform} href={s.href} target="_blank" rel="noopener noreferrer" className="social-link">
+                  <div className="social-link-left">
+                    <div className="social-link-icon">
+                      <img
+                        src={s.icon}
+                        alt={s.platform}
+                        className="social-icon-img"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </div>
+                    <div className="social-link-info">
+                      <span className="social-link-platform">{s.platform}</span>
+                      <span className="social-link-handle">{s.handle}</span>
+                    </div>
+                  </div>
+                  <span className="social-link-arrow">→</span>
+                </a>
+              ))}
+            </div>
+
+            <div className="contact-avail">
+              <span className="contact-avail-dot" />
+              <span className="contact-avail-text">Currently available for new projects</span>
             </div>
           </div>
 
-          {/* Right — form */}
-          <div className="contact__form-wrapper reveal">
-            <form className="contact__form" onSubmit={handleSubmit} noValidate>
+          {/* Right: form */}
+          <div className="contact-form-wrap reveal reveal-delay-2">
+            {status !== 'success' ? (
+              <>
+                <div className="contact-form-title">Send a Message</div>
+                <p className="contact-form-sub">I usually reply within 24–48 hours.</p>
 
-              <div className="form-row">
-                <div className="form-field">
-                  <label htmlFor="contact-name">Name</label>
-                  <input
-                    id="contact-name"
-                    type="text"
-                    placeholder="Your name"
-                    required
-                    value={form.from_name}
-                    onChange={set('from_name')}
-                  />
-                </div>
-                <div className="form-field">
-                  <label htmlFor="contact-email">Email</label>
-                  <input
-                    id="contact-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                    value={form.from_email}
-                    onChange={set('from_email')}
-                  />
-                </div>
+                <form id="contact-form" onSubmit={handleSubmit} noValidate>
+                  <div className="form-row">
+                    <div className="form-field row-field">
+                      <label className="form-label" htmlFor="cf-name">Name</label>
+                      <input
+                        className="form-input"
+                        id="cf-name" type="text"
+                        placeholder="Your name"
+                        value={form.name}
+                        onChange={set('name')}
+                        style={errors.name ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                      />
+                    </div>
+                    <div className="form-field row-field">
+                      <label className="form-label" htmlFor="cf-email">Email</label>
+                      <input
+                        className="form-input"
+                        id="cf-email" type="email"
+                        placeholder="your@email.com"
+                        value={form.email}
+                        onChange={set('email')}
+                        style={errors.email ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label className="form-label" htmlFor="cf-subject">Subject</label>
+                    <input
+                      className="form-input"
+                      id="cf-subject" type="text"
+                      placeholder="Project idea, collab, game jam…"
+                      value={form.subject}
+                      onChange={set('subject')}
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label className="form-label" htmlFor="cf-message">Message</label>
+                    <textarea
+                      className="form-textarea"
+                      id="cf-message"
+                      placeholder="Tell me about your project or idea…"
+                      value={form.message}
+                      onChange={set('message')}
+                      style={errors.message ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                    />
+                  </div>
+
+                  <button
+                    className="form-submit"
+                    type="submit"
+                    id="form-submit-btn"
+                    disabled={status === 'sending'}
+                    style={status === 'error' ? { background: 'rgba(220,60,60,0.85)', color: '#fff' } : undefined}
+                  >
+                    {status === 'sending'
+                      ? 'Sending…'
+                      : status === 'error'
+                        ? 'Failed — Try Again'
+                        : <>Send Message <span className="form-submit-arrow">→</span></>
+                    }
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="form-success visible">
+                <div className="form-success-icon">✦</div>
+                <div className="form-success-msg">Message Sent!</div>
+                <p className="form-success-sub">Thanks — I'll get back to you soon.</p>
               </div>
-
-              <div className="form-field">
-                <label htmlFor="contact-subject">Subject</label>
-                <input
-                  id="contact-subject"
-                  type="text"
-                  placeholder="Project inquiry / Collaboration / ..."
-                  required
-                  value={form.subject}
-                  onChange={set('subject')}
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="contact-message">Message</label>
-                <textarea
-                  id="contact-message"
-                  placeholder="Tell me about your project..."
-                  required
-                  value={form.message}
-                  onChange={set('message')}
-                />
-              </div>
-
-              {status === 'success' && (
-                <p className="form-status success">Message sent! I'll get back to you soon.</p>
-              )}
-              {status === 'error' && (
-                <p className="form-status error">Something went wrong. Please try again.</p>
-              )}
-
-              <button
-                type="submit"
-                className="form-submit"
-                disabled={status === 'sending'}
-              >
-                {status === 'sending' ? 'Sending...' : 'Send Message →'}
-              </button>
-
-            </form>
+            )}
           </div>
-
         </div>
+
+        {/* Footer inside contact section */}
+        <footer className="footer">
+          <div className="footer-inner">
+            <div className="footer-logo">
+              <img
+                src="/Assets/icons/logo/icon-512.png"
+                alt="Reno Febri"
+                className="footer-logo-img"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+            <p className="footer-copy">
+              &copy; {new Date().getFullYear()} Reno Febri. Built with{' '}
+              <span>♥</span> &amp; vanilla JS / React.
+            </p>
+            <button
+              className="footer-back-top"
+              id="back-to-top"
+              onClick={() => {
+                const nav = (window as unknown as Record<string, { goTo?: (i: number) => void }>).PageNav;
+                nav?.goTo?.(0);
+              }}
+            >
+              <span className="footer-back-top-arrow">↑</span>
+              Back to top
+            </button>
+          </div>
+        </footer>
+
       </div>
     </section>
   );

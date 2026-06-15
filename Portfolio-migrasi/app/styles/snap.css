@@ -1,0 +1,102 @@
+/* ============================================================
+   SNAP PANEL SYSTEM — React port of pagescroll.js CSS
+   Panels are position:fixed, controlled via SnapPanel.tsx
+   ============================================================ */
+
+/* Prevent default body scroll — panels handle it */
+body {
+  overflow: hidden;
+}
+
+/* Each panel is fixed full-viewport */
+.snap-panel {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform, opacity;
+}
+
+/* Scrollable panels */
+.snap-panel--scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-panel--scroll::-webkit-scrollbar        { width: 3px; }
+.snap-panel--scroll::-webkit-scrollbar-track  { background: transparent; }
+.snap-panel--scroll::-webkit-scrollbar-thumb  {
+  background: var(--color-text-muted, #46465e);
+  border-radius: 2px;
+}
+
+/* ── Dot Nav ── */
+.snap-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.snap-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-text-muted, #46465e);
+  border: none;
+  padding: 0;
+  transition:
+    background      0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1)),
+    height          0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1)),
+    border-radius   0.35s var(--ease-out, cubic-bezier(0.16,1,0.3,1));
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.snap-dot.active {
+  background: var(--color-accent, #FF6B35);
+  height: 20px;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255,107,53,0.5);
+}
+
+.snap-dot:hover:not(.active) {
+  background: var(--color-text-secondary, #8888a8);
+}
+
+/* ── Background layer ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.6) 0%, transparent 70%);
+}
+
+.bg-glow-top {
+  position: fixed;
+  top: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,107,53,0.05) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hide dot nav on mobile */
+@media (max-width: 768px) {
+  .snap-dots { display: none; }
+}
