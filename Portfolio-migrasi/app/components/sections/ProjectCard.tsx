@@ -1,43 +1,20 @@
-/* ================================================
-   PROJECT CARD — mirror 1:1 vanilla projects-render.js
-   
-   Struktur:
-   .project-card[featured?]
-     .project-preview
-       img.project-preview-img
-       video.project-preview-video (opsional)
-       .project-preview-overlay
-       .project-preview-noise
-       [canvas.project3d-canvas jika ada glb]
-     .project-card-body
-       .project-card-top   (num + status)
-       .project-category
-       h3.project-title
-       p.project-desc
-       .project-tags
-       .project-card-footer  (link)
-     .card-tilt-glow
-   
-   Three.js canvas per-card DINONAKTIFKAN —
-   diganti dengan preview image + hover overlay sederhana
-   agar konsisten dengan vanilla dan tidak berat.
-================================================ */
-
-import { useEffect, useRef, useCallback } from 'react';
-import type { Project } from '~/data/projects';
+// Portfolio-migrasi/app/components/sections/ProjectCard.tsx
+import { useRef, useCallback } from 'react';
+import type { Project } from '~/components/sections/Projects';
 
 interface ProjectCardProps {
   project: Project;
   index:   number;
+  hidden?: boolean;
 }
 
 const MAX_TILT = 7;
 
-export function ProjectCard({ project, index }: ProjectCardProps) {
+export function ProjectCard({ project, index, hidden = false }: ProjectCardProps) {
   const cardRef  = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  /* ── 3D Tilt on hover (mirror motion.js initCardTilt) ── */
+  /* ── 3D Tilt (mirrors motion.js initCardTilt) ── */
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
@@ -46,11 +23,8 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
     const cy   = rect.top  + rect.height / 2;
     const dx   = (e.clientX - cx) / (rect.width  / 2);
     const dy   = (e.clientY - cy) / (rect.height / 2);
-    const rotX = -dy * MAX_TILT;
-    const rotY =  dx * MAX_TILT;
-    card.style.transform = `perspective(700px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-3px)`;
+    card.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg) translateY(-3px)`;
     card.classList.add('tilting');
-
     const glow = card.querySelector<HTMLElement>('.card-tilt-glow');
     if (glow) {
       const gx = ((e.clientX - rect.left) / rect.width)  * 100;
@@ -65,7 +39,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
     if (!card) return;
     card.style.transform = '';
     card.classList.remove('tilting');
-    /* Pause video saat mouse leave */
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
@@ -73,68 +46,63 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
   }, []);
 
   const onMouseEnter = useCallback(() => {
-    /* Play video saat hover (jika ada, dan tidak punya GLB) */
     if (videoRef.current && !project.modelPath) {
       videoRef.current.play().catch(() => {});
     }
   }, [project.modelPath]);
 
-  /* ── Helpers ── */
-  const num         = String(index + 1).padStart(2, '0');
+  /* ── Derived values ── */
+  const num         = String(project.id).padStart(2, '0');
   const isFeatured  = project.featured === true;
   const accentColor = project.accentColor ?? 'var(--accent-primary)';
-  const delay       = Math.min(index + 1, 5);
+  const revealDelay = Math.min(index + 1, 5);
   const hasImage    = !!project.previewImage;
   const hasVideo    = !!project.previewVideo;
   const hasGlb      = !!project.modelPath;
+  const statusClass = project.status ?? 'completed';
 
-  /* Status badge class */
-  const statusClass: Record<string, string> = {
-    completed: 'completed',
-    wip:       'wip',
-    archived:  'archived',
-    concept:   'concept',
-  };
-  const statusCls = statusClass[project.status ?? 'completed'] ?? 'completed';
-
-  /* Link */
+  /* Link logic — mirrors vanilla */
   const linkHref   = project.link ?? project.itchLink ?? project.detailPath ?? '#';
   const hasLink    = !!(project.link ?? project.itchLink ?? project.detailPath);
-  const linkLabel  = project.link       ? 'View Project'
-                   : project.itchLink   ? 'Play on itch.io'
-                   : project.detailPath ? 'Case Study'
-                   : 'Coming Soon';
+  const isExternal = hasLink && linkHref.startsWith('http');
+  const linkLabel  = project.link
+    ? 'View Project'
+    : project.itchLink
+    ? 'Play on itch.io'
+    : project.detailPath
+    ? 'Case Study'
+    : 'Coming Soon';
+
+  const cardClasses = [
+    'project-card',
+    'reveal',
+    `reveal-delay-${revealDelay}`,
+    isFeatured ? 'featured' : '',
+    hidden     ? 'hidden'   : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div
       ref={cardRef}
-      className={[
-        'project-card',
-        'reveal',
-        `reveal-delay-${delay}`,
-        isFeatured ? 'featured' : '',
-      ].filter(Boolean).join(' ')}
+      className={cardClasses}
       data-category={project.category}
+      data-project-id={project.id}
+      data-has-video={String(hasVideo)}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
       onMouseEnter={onMouseEnter}
     >
-      {/* ── Decorative bg number (featured only) ── */}
+      {/* Decorative bg number (featured only) */}
       {isFeatured && (
         <span className="project-bg-num" aria-hidden="true">{num}</span>
       )}
 
-      {/* ══════════════════════════════════════
-          PREVIEW BLOCK
-          Mirror persis output buildPreview() vanilla
-      ══════════════════════════════════════ */}
+      {/* ══ PREVIEW BLOCK ══ */}
       {hasImage || hasVideo ? (
-        /* Normal preview dengan image / video */
         <div
           className="project-preview"
           style={{ '--preview-color': accentColor } as React.CSSProperties}
         >
-          {/* Image */}
           {hasImage && (
             <img
               className="project-preview-img"
@@ -144,8 +112,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
               draggable={false}
             />
           )}
-
-          {/* Video — autoplay on hover, hidden jika ada GLB */}
           {hasVideo && !hasGlb && (
             <video
               ref={videoRef}
@@ -158,18 +124,14 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
               aria-hidden="true"
             />
           )}
-
-          {/* Gradient overlay */}
           <div
             className="project-preview-overlay"
             style={{ '--preview-color': accentColor } as React.CSSProperties}
           />
-
-          {/* Noise grain */}
           <div className="project-preview-noise" aria-hidden="true" />
         </div>
       ) : (
-        /* Placeholder — tidak ada image maupun video */
+        /* Placeholder when no image/video */
         <div
           className="project-preview project-preview--placeholder"
           style={{ '--preview-color': accentColor } as React.CSSProperties}
@@ -182,16 +144,14 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         </div>
       )}
 
-      {/* ══════════════════════════════════════
-          CARD BODY
-      ══════════════════════════════════════ */}
+      {/* ══ CARD BODY ══ */}
       <div className="project-card-body">
 
-        {/* Top row: project number + status badge */}
+        {/* Top row: number + status badge */}
         <div className="project-card-top">
           <span className="project-num">Project {num}</span>
-          <span className={`project-status ${statusCls}`}>
-            {project.statusLabel ?? project.status ?? 'Completed'}
+          <span className={`project-status ${statusClass}`}>
+            {project.statusLabel}
           </span>
         </div>
 
@@ -206,22 +166,31 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
 
         {/* Tech tags */}
         <div className="project-tags">
-          {(project.tags ?? []).map(tag => (
+          {project.tags.map(tag => (
             <span key={tag} className="project-tag">{tag}</span>
           ))}
         </div>
 
         {/* Footer: link */}
         <div className="project-card-footer">
-          <a
-            href={linkHref}
-            className={`project-link${!hasLink ? ' disabled' : ''}`}
-            {...(hasLink && linkHref.startsWith('http')
-              ? { target: '_blank', rel: 'noopener noreferrer' }
-              : {})}
-          >
-            {linkLabel} <span className="project-link-arrow">&#8594;</span>
-          </a>
+          {isExternal ? (
+            <a
+              href={linkHref}
+              className="project-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {linkLabel} <span className="project-link-arrow">&#8594;</span>
+            </a>
+          ) : hasLink ? (
+            <a href={linkHref} className="project-link">
+              {linkLabel} <span className="project-link-arrow">&#8594;</span>
+            </a>
+          ) : (
+            <span className="project-link disabled">
+              {linkLabel} <span className="project-link-arrow">&#8594;</span>
+            </span>
+          )}
         </div>
 
       </div>{/* end .project-card-body */}

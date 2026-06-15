@@ -21,7 +21,7 @@ import "~/styles/motion.css";
 /* Section styles */
 import "~/styles/hero.css";
 import "~/styles/about.css";
-import "~/styles/projects-react.css";
+import "~/styles/projects.css";
 import "~/styles/skills.css";
 import "~/styles/contact.css";
 
