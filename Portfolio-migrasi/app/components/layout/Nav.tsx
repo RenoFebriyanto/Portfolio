@@ -40,7 +40,7 @@ export default function Nav() {
       {/* Logo */}
       <a href="/" className="nav-logo" onClick={e => { e.preventDefault(); navigateTo("hero"); }}>
         <img
-          src="../../public/icon-512.png"
+          src="/icon-512.png"
           alt="Reno Febri"
           className="nav-logo-img"
           onError={e => {

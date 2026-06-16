@@ -512,6 +512,64 @@
     opacity: 1;
 }
 
+/* ── Project hover-3D overlay ── */
+.project3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    cursor: grab;
+    border-radius: 4px 4px 0 0;
+}
+.project3d-canvas:active { cursor: grabbing; }
+
+.project3d-spinner {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.project3d-spinner-ring {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 107, 53, 0.2);
+    border-top-color: var(--accent-primary);
+    animation: spinner-rotate 0.7s linear infinite;
+}
+
+.project3d-hint {
+    position: absolute;
+    bottom: var(--space-md);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: rgba(4, 4, 10, 0.65);
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--border-dim);
+    backdrop-filter: blur(6px);
+    z-index: 7;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.35s ease 0.2s;
+}
+.project3d-canvas.is-visible ~ .project3d-hint {
+    opacity: 1;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
     .projects-grid {
