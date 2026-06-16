@@ -1,0 +1,50 @@
+/* ================================================
+   skills-fix.css — Fix skill bar CSS variable inheritance
+   
+   MASALAH: vanilla skills.css mendefinisikan rule:
+     .skill-group.visible .skill-bar-fill { width: var(--skill-level); }
+   
+   Tapi --skill-level diset di .skill-bar-fill itu sendiri,
+   bukan di .skill-group. CSS custom properties INHERIT ke bawah,
+   jadi ini seharusnya sudah benar.
+   
+   Fix: Pastikan transition tidak override width=0 yang diset sebelum .visible,
+   dan tambahkan fallback 0% kalau var tidak terdefinisi.
+================================================ */
+
+/* Override: pastikan bar fill punya transition yang benar */
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  /* PENTING: mulai dari 0, transition ke var(--skill-level) saat .visible */
+  width: 0% !important;
+  transition: width 1.1s var(--ease-smooth);
+}
+
+/* Trigger: tambahkan width saat parent group punya .visible */
+.skill-group.visible .skill-bar-fill {
+  width: var(--skill-level, 0%) !important;
+}
+
+/* Warna bar per group — override dengan !important untuk memastikan */
+.skill-group.game  .skill-bar-fill {
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-bright)) !important;
+}
+.skill-group.art   .skill-bar-fill {
+  background: linear-gradient(90deg, #a78bfa, #c4b5fd) !important;
+}
+.skill-group.code  .skill-bar-fill {
+  background: linear-gradient(90deg, var(--accent-alt), #7db3ff) !important;
+}
+.skill-group.tools .skill-bar-fill {
+  background: linear-gradient(90deg, #34d399, #6ee7b7) !important;
+}
+
+/* Skill level label: tampil saat group visible */
+.skill-group .skill-level-label {
+  opacity: 0;
+  transition: opacity 0.4s ease 0.8s;
+}
+.skill-group.visible .skill-level-label {
+  opacity: 1;
+}

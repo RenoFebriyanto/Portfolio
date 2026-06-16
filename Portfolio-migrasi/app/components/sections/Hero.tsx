@@ -1,27 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
+import { Hero3D }     from '~/components/ui/Hero3D';
 
 interface Props {
   scrollTo: (index: number) => void;
 }
 
 export function Hero({ scrollTo }: Props) {
-  const ghostRef = useRef<HTMLSpanElement>(null);
-
-  // Ghost parallax — listen to panelscroll events
-  useEffect(() => {
-    const handler = () => {
-      // Ghost parallax driven by section-animations' ghost text
-      // (Already handled by motion.js port in useSectionAnimations)
-    };
-    window.addEventListener('panelscroll', handler, { passive: true });
-    return () => window.removeEventListener('panelscroll', handler);
-  }, []);
-
   return (
     <section className="hero" id="hero">
       {/* Particle canvas behind content */}
-      <HeroCanvas className="" />
+      <HeroCanvas className="hero-particles-canvas" />
 
       <div className="hero-inner">
         {/* Left: text content */}
@@ -33,7 +22,7 @@ export function Hero({ scrollTo }: Props) {
             <span className="hero-status-text">Open for opportunities</span>
           </div>
 
-          {/* Heading — each line wrapped for reveal animation */}
+          {/* Heading */}
           <h1 className="hero-heading">
             <span className="hero-heading-line"><span>Game Tech</span></span>
             <span className="hero-heading-line"><span>& <span className="accent">3D</span></span></span>
@@ -55,21 +44,29 @@ export function Hero({ scrollTo }: Props) {
 
           {/* CTA buttons */}
           <div className="hero-cta">
-            <a href="#projects" className="btn-primary" onClick={e => { e.preventDefault(); scrollTo(2); }}>
+            <a
+              href="#projects"
+              className="btn-primary"
+              onClick={e => { e.preventDefault(); scrollTo(2); }}
+            >
               View Projects <span className="btn-arrow">→</span>
             </a>
-            <a href="#about" className="btn-secondary" onClick={e => { e.preventDefault(); scrollTo(1); }}>
+            <a
+              href="#about"
+              className="btn-secondary"
+              onClick={e => { e.preventDefault(); scrollTo(1); }}
+            >
               About Me <span className="btn-arrow">→</span>
             </a>
           </div>
         </div>
 
-        {/* Right: 3D sphere canvas (injected by hero3d.js equiv — kept as div for GLB loader) */}
-        <div id="hero-3d-canvas" aria-hidden />
+        {/* Right: 3D GLB viewer */}
+        <Hero3D />
       </div>
 
       {/* Decorative ghost text */}
-      <span className="hero-number" ref={ghostRef} aria-hidden>3D</span>
+      <span className="hero-number" aria-hidden="true">3D</span>
 
       {/* Scroll indicator */}
       <div

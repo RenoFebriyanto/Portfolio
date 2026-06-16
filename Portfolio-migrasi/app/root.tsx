@@ -7,7 +7,6 @@ import {
 } from "react-router";
 import Nav    from "~/components/layout/Nav";
 import Cursor from "~/components/ui/Cursor";
-import { useCursor } from "~/hooks/useCursor";
 
 /* ── Core styles — URUTAN PENTING ── */
 import "~/styles/variables.css";
@@ -21,13 +20,9 @@ import "~/styles/motion.css";
 /* ── Section styles ── */
 import "~/styles/hero.css";
 import "~/styles/about.css";
-import "~/styles/projects.css";   /* SATU-SATUNYA projects CSS — projects-react.css DIHAPUS */
+import "~/styles/projects.css";
 import "~/styles/skills.css";
 import "~/styles/contact.css";
-
-/* CATATAN: projects-react.css TIDAK diimport di sini.
-   File tersebut menyebabkan konflik class dengan projects.css.
-   Semua styling projects sudah ada di projects.css. */
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -61,11 +56,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { cursorPos, cursorVariant } = useCursor();
-
   return (
     <>
-      <Cursor position={cursorPos} variant={cursorVariant} />
+      {/* Cursor: renders nothing in DOM, injects dot+ring directly into body via useEffect */}
+      <Cursor />
       <Nav />
       <Outlet />
     </>

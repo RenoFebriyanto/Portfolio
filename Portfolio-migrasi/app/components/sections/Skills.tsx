@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-/* ── Data (mirrors skills-data.js) ── */
 const SKILLS_DATA = [
   {
     key: 'game', icon: '/Assets/icons/TechGame.png', title: 'Game Dev',
@@ -41,44 +40,48 @@ const SKILLS_DATA = [
 
 const LEARNING = ['Unreal Engine 5', 'Visual Effects', '3D Animation'];
 
-/* Color map per group key */
-const GROUP_COLORS: Record<string, string> = {
-  game:  'var(--color-accent)',
-  art:   '#a78bfa',
-  code:  'var(--color-blue)',
-  tools: '#34d399',
-};
-
 export function Skills() {
-  /* Animate bars when section enters */
+  // Animate skill bars when section enters
   useEffect(() => {
     const onEnter = (e: Event) => {
       if ((e as CustomEvent).detail?.id !== 'skills') return;
-      document.querySelectorAll<HTMLElement>('.skill-bar-fill').forEach(bar => {
-        bar.style.width = '0%';
-        void bar.offsetWidth;
-        bar.style.width = bar.dataset.level ?? '0%';
+
+      // Trigger .visible on all .skill-group elements
+      // CSS rule: .skill-group.visible .skill-bar-fill { width: var(--skill-level); }
+      document.querySelectorAll<HTMLElement>('.skill-group').forEach(group => {
+        group.classList.remove('visible');
+        void group.offsetWidth; // force reflow to restart transition
+        requestAnimationFrame(() => group.classList.add('visible'));
       });
     };
+
     window.addEventListener('sectionenter', onEnter);
-    return () => window.removeEventListener('sectionenter', onEnter);
+
+    // Also run on leave to reset
+    const onLeave = (e: Event) => {
+      if ((e as CustomEvent).detail?.id !== 'skills') return;
+      document.querySelectorAll('.skill-group').forEach(g => g.classList.remove('visible'));
+    };
+    window.addEventListener('sectionleave', onLeave);
+
+    return () => {
+      window.removeEventListener('sectionenter', onEnter);
+      window.removeEventListener('sectionleave', onLeave);
+    };
   }, []);
 
   return (
     <section className="skills" id="skills">
       <div className="container">
 
-        {/* Section divider */}
         <div className="section-divider reveal" />
 
-        {/* Section label */}
         <div className="section-label reveal">
           <span className="section-label-num">03</span>
           <span className="section-label-line" />
           <span className="section-label-text">Skills</span>
         </div>
 
-        {/* Header */}
         <div className="skills-header">
           <div>
             <h2 className="skills-heading reveal reveal-delay-1">
@@ -96,9 +99,9 @@ export function Skills() {
           {SKILLS_DATA.map((group, i) => (
             <div
               key={group.key}
+              /* NOTE: DO NOT add 'visible' here — it's toggled by sectionenter event */
               className={`skill-group ${group.key} reveal reveal-delay-${Math.min(i + 1, 4)}`}
             >
-              {/* Group icon */}
               <div className="skill-group-icon">
                 <img
                   src={group.icon}
@@ -110,7 +113,6 @@ export function Skills() {
               <div className="skill-group-title">{group.title}</div>
               <div className="skill-group-count">{group.skills.length} skills</div>
 
-              {/* Skill list */}
               <div className="skill-list">
                 {group.skills.map(skill => (
                   <div key={skill.name} className="skill-item">
@@ -119,13 +121,15 @@ export function Skills() {
                       <span className="skill-level-label">{skill.label}</span>
                     </div>
                     <div className="skill-bar-track">
+                      {/*
+                        KEY FIX: Set --skill-level on the FILL element itself.
+                        CSS rule in skills.css:
+                          .skill-group.visible .skill-bar-fill { width: var(--skill-level); }
+                        So the var must live on the fill element or an ancestor.
+                      */}
                       <div
                         className="skill-bar-fill"
-                        data-level={`${skill.level}%`}
-                        style={{
-                          '--skill-level': `${skill.level}%`,
-                          background: `linear-gradient(90deg, ${GROUP_COLORS[group.key]}, color-mix(in srgb, ${GROUP_COLORS[group.key]} 70%, white))`,
-                        } as React.CSSProperties}
+                        style={{ '--skill-level': `${skill.level}%` } as React.CSSProperties}
                       />
                     </div>
                   </div>
