@@ -1,13 +1,13 @@
 /* ================================================
-   hero-fixes.css — tambahan fixes untuk:
-   1. Particle canvas positioning (behind content)
-   2. Hero responsive grid (mobile stack)
-   3. Hero 3D canvas sizing
+   hero-fixes.css — Fixes untuk:
+   1. Hero centered vertically & tidak terpotong
+   2. 3D canvas sizing yang benar
+   3. Particle canvas di belakang konten
    
    IMPORT SETELAH hero.css di root.tsx
 ================================================ */
 
-/* Particle canvas — absolute fill, z-index 0 behind hero content */
+/* ── Particle canvas ── */
 .hero-particles-canvas {
   position: absolute !important;
   inset: 0 !important;
@@ -18,13 +18,41 @@
   opacity: 0.55;
 }
 
-/* Hero inner — z-index 1 di atas canvas */
+/* ── Hero section: full height, flex center ── */
+.hero {
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: var(--nav-height);
+  padding-bottom: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Hero inner grid: centered, NO max-height yang cut content ── */
 .hero-inner {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;    /* center vertikal antara text & 3D */
+  gap: var(--space-2xl);
+  /* DIHAPUS: max-height: calc(100vh - ...) — ini yang potong konten */
+}
+
+/* ── Hero content (left column) ── */
+.hero-content {
   position: relative;
   z-index: 1;
 }
 
-/* ── Hero 3D Canvas responsive fixes ── */
+/* ── 3D Canvas container ── */
 #hero-3d-canvas {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -32,7 +60,11 @@
   opacity: 0;
   transition: opacity 1.2s var(--ease-smooth) 0.5s;
   cursor: grab;
-  min-height: 200px;
+  /* Batasi ukuran agar tidak terlalu besar di viewport kecil */
+  max-height: min(45vh, 480px);
+  max-width: min(45vh, 480px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #hero-3d-canvas:active { cursor: grabbing; }
@@ -82,38 +114,102 @@
 
 #hero-3d-canvas.hero-3d-ready:hover::after { opacity: 1; }
 
-/* ── Responsive: tablet ── */
+
+/* ── Viewport pendek: kurangi spacing ── */
+@media (max-height: 820px) {
+  .hero-status {
+    margin-bottom: var(--space-md);
+    padding: 4px 12px;
+  }
+  .hero-heading {
+    font-size: clamp(32px, 5.5vw, 80px);
+    margin-bottom: var(--space-md);
+  }
+  .hero-desc {
+    font-size: 14px;
+    margin-bottom: var(--space-md);
+    line-height: 1.65;
+  }
+  .hero-tags {
+    margin-bottom: var(--space-md);
+    gap: 5px;
+  }
+  .tag { font-size: 10px; padding: 4px 10px; }
+  .btn-primary, .btn-secondary { padding: 10px 20px; font-size: 12px; }
+  .hero-scroll { bottom: var(--space-md); }
+
+  #hero-3d-canvas {
+    max-height: min(38vh, 380px);
+    max-width: min(38vh, 380px);
+  }
+}
+
+@media (max-height: 700px) {
+  .hero-inner { gap: var(--space-lg) !important; }
+  .hero-status { display: none; }
+  .hero-heading {
+    font-size: clamp(28px, 4.5vw, 64px);
+    margin-bottom: var(--space-sm);
+  }
+  .hero-desc {
+    font-size: 13px;
+    margin-bottom: var(--space-sm);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+  }
+  .hero-tags { margin-bottom: var(--space-sm); }
+  .hero-scroll { display: none; }
+
+  #hero-3d-canvas {
+    max-height: min(30vh, 280px);
+    max-width: min(30vh, 280px);
+  }
+}
+
+@media (max-height: 580px) {
+  .hero-tags { display: none; }
+  #hero-3d-canvas {
+    max-height: min(25vh, 220px);
+    max-width: min(25vh, 220px);
+  }
+}
+
+
+/* ── Tablet: stack kolom ── */
 @media (max-width: 900px) {
   .hero-inner {
     grid-template-columns: 1fr !important;
-    max-height: none !important;
+    gap: var(--space-lg) !important;
+    align-items: start !important;
   }
 
   #hero-3d-canvas {
-    max-width: 340px;
+    max-width: 300px;
+    max-height: 300px;
     margin: 0 auto;
-    order: -1; /* Sphere di atas pada mobile */
+    order: -1; /* sphere di atas text di mobile */
     aspect-ratio: 1 / 1;
   }
 }
 
-/* ── Responsive: mobile ── */
+/* ── Mobile ── */
 @media (max-width: 768px) {
-  #hero-3d-canvas {
-    max-width: 260px;
-    opacity: 0.85;
-  }
-
   .hero-inner {
-    gap: var(--space-lg) !important;
     padding: 0 var(--space-md) !important;
   }
-}
 
-/* ── Short viewport ── */
-@media (max-height: 700px) {
+  .hero-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-number { display: none; }
+
   #hero-3d-canvas {
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 240px;
+    max-height: 240px;
+    opacity: 0.85;
   }
 }

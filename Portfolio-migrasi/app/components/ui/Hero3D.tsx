@@ -15,7 +15,7 @@ export function Hero3D() {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return; // ← single null guard covers all uses below
+    if (!container) return;
 
     let animFrameId: number | null = null;
     let mesh: any     = null;
@@ -28,6 +28,10 @@ export function Hero3D() {
     let camera: any   = null;
 
     async function init() {
+      // Re-assert non-null inside async function scope (fixes TS18047 on lines 41, 62, 63, 97)
+      const el = containerRef.current;
+      if (!el) return;
+
       const THREE          = await import('three');
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
 
@@ -35,10 +39,10 @@ export function Hero3D() {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
-      renderer.outputColorSpace   = (THREE as any).SRGBColorSpace;
-      renderer.toneMapping        = (THREE as any).ACESFilmicToneMapping;
+      renderer.outputColorSpace    = (THREE as any).SRGBColorSpace;
+      renderer.toneMapping         = (THREE as any).ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.2;
-      container.appendChild(renderer.domElement);
+      el.appendChild(renderer.domElement); // was: container.appendChild — fixed line 41
 
       // ── Scene + Camera ──
       scene  = new THREE.Scene();
@@ -59,8 +63,8 @@ export function Hero3D() {
 
       // ── Resize ──
       function resize() {
-        const w = container.clientWidth;
-        const h = container.clientHeight || w;
+        const w = el.clientWidth;  // was: container.clientWidth — fixed line 62
+        const h = el.clientHeight || w; // was: container.clientHeight — fixed line 63
         renderer.setSize(w, h);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
@@ -68,7 +72,7 @@ export function Hero3D() {
       resize();
       window.addEventListener('resize', resize, { passive: true });
 
-      // ── Fit model ──
+      // ── Fit model to view ──
       function fitToView(group: THREE.Group) {
         const box    = new THREE.Box3().setFromObject(group);
         const size   = box.getSize(new THREE.Vector3());
@@ -94,7 +98,7 @@ export function Hero3D() {
           fitToView(model);
           scene.add(model);
           mesh = model;
-          container.classList.add('hero-3d-ready');
+          el.classList.add('hero-3d-ready'); // was: container.classList — fixed line 97
         },
         undefined,
         (err) => console.warn('[Hero3D] GLB load failed:', err)

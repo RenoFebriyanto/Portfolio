@@ -1,7 +1,6 @@
 /* ============================================================
-   snap.css — Panel System & Background Layers
-   Semua panel position:fixed, visibility dikontrol via
-   data-visible attribute oleh usePageSnap (direct DOM).
+   snap.css — Panel System & Dot Nav
+   Dot nav style: IDENTIK dengan vanilla portfolio/styles/base.css
    ============================================================ */
 
 /* ---------- Panel Base ---------- */
@@ -25,7 +24,17 @@
   overflow-x: hidden;
 }
 
-/* Visible state — diset oleh usePageSnap via data-visible="true" */
+.snap-panel--scroll::-webkit-scrollbar { width: 3px; }
+.snap-panel--scroll::-webkit-scrollbar-track { background: transparent; }
+.snap-panel--scroll::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 2px;
+}
+.snap-panel--scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Visible state — set via data-visible="true" oleh usePageSnap */
 .snap-panel[data-visible="true"] {
   opacity: 1;
   pointer-events: auto;
@@ -36,38 +45,53 @@
   z-index: 0;
 }
 
-/* ---------- Dot Navigation ---------- */
+/* ---------- DOT NAVIGATION — identik dengan vanilla ---------- */
 .snap-dots {
   position: fixed;
-  right: 1.5rem;
+  right: 24px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  z-index: 100;
+  gap: 10px;
+  z-index: 200;
+  pointer-events: none;
 }
 
 .snap-dot {
-  width: 6px;
-  height: 6px;
+  /* Sama persis dengan vanilla: 4px × 4px lingkaran */
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--text-muted);          /* #46465E */
   border: none;
   padding: 0;
+  transition:
+    background      0.35s var(--ease-smooth),
+    height          0.35s var(--ease-smooth),
+    border-radius   0.35s var(--ease-smooth);
+  pointer-events: auto;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.3s ease;
 }
 
-.snap-dot:hover {
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.3);
-}
-
-.snap-dot[data-active="true"],
+/* Active: jadi pill vertikal 4×20 px dengan orange glow */
 .snap-dot.active {
-  background: var(--accent, #FF6B35);
-  transform: scale(1.4);
+  background: var(--accent-primary);      /* #FF6B35 */
+  height: 20px;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
+}
+
+/* Hover (non-active): jadi text-secondary */
+.snap-dot:hover:not(.active) {
+  background: var(--text-secondary);      /* #8888A8 */
+}
+
+/* Hide on mobile — sama dengan vanilla */
+@media (max-width: 768px) {
+  .snap-dots {
+    display: none;
+  }
 }
 
 /* ---------- Background Layers ---------- */
@@ -75,21 +99,23 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
   pointer-events: none;
+  background-image:
+    linear-gradient(var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 0%, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
 }
 
 .bg-glow-top {
   position: fixed;
-  top: -20%;
+  top: -220px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60vw;
-  height: 40vh;
-  background: radial-gradient(ellipse at center, rgba(255,107,53,0.08) 0%, transparent 70%);
-  z-index: 0;
+  width: 900px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 107, 53, 0.05) 0%, transparent 65%);
   pointer-events: none;
+  z-index: 0;
 }
