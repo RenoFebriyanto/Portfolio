@@ -18,10 +18,14 @@ import "~/styles/cursor.css";
 import "~/styles/motion.css";
 
 /* ── Section styles ── */
+// hero.css diganti dengan versi yang sudah di-patch (no max-height)
 import "~/styles/hero.css";
+// hero-fixes.css: override canvas sizing + layout fixes, SETELAH hero.css
+import "~/styles/hero-fixes.css";
 import "~/styles/about.css";
 import "~/styles/projects.css";
 import "~/styles/skills.css";
+import "~/styles/skills-fix.css";
 import "~/styles/contact.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -58,7 +62,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <>
-      {/* Cursor: renders nothing in DOM, injects dot+ring directly into body via useEffect */}
       <Cursor />
       <Nav />
       <Outlet />

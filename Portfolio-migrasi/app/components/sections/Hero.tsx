@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
 import { Hero3D }     from '~/components/ui/Hero3D';
 
@@ -9,7 +8,7 @@ interface Props {
 export function Hero({ scrollTo }: Props) {
   return (
     <section className="hero" id="hero">
-      {/* Particle canvas behind content */}
+      {/* Particle canvas: absolute behind content, z-index 0 */}
       <HeroCanvas className="hero-particles-canvas" />
 
       <div className="hero-inner">
@@ -61,7 +60,7 @@ export function Hero({ scrollTo }: Props) {
           </div>
         </div>
 
-        {/* Right: 3D GLB viewer */}
+        {/* Right: 3D GLB viewer — single instance */}
         <Hero3D />
       </div>
 

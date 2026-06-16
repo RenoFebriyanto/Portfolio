@@ -1,5 +1,11 @@
 /* ================================================
-   HERO SECTION — port dari vanilla styles/hero.css
+   hero.css (Portfolio-migrasi) — PATCHED VERSION
+   
+   Perubahan dari original:
+   1. Hapus max-height di .hero-inner (yang potong CTA)
+   2. Hapus width/height !important di #hero-3d-canvas canvas
+      (dikontrol oleh hero-fixes.css & Three.js)
+   3. hero padding diatur lewat hero-inner padding-top
 ================================================ */
 
 .hero {
@@ -8,8 +14,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-top: var(--nav-height);
-    padding-bottom: var(--space-xl);
+    padding-top: 0;
+    padding-bottom: 0;
     position: relative;
     overflow: hidden;
 }
@@ -18,14 +24,17 @@
     width: 100%;
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0 var(--space-xl);
+    /* padding-top = nav height agar konten tidak tertutup */
+    padding: var(--nav-height) var(--space-xl) var(--space-xl);
     position: relative;
     z-index: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--space-2xl);
-    max-height: calc(100vh - var(--nav-height) - var(--space-2xl));
+    /* TIDAK ADA max-height — ini yang dulu potong CTA button */
+    min-height: 100%;
+    box-sizing: border-box;
 }
 
 /* 3D Canvas container */
@@ -39,15 +48,11 @@
 }
 
 #hero-3d-canvas:active { cursor: grabbing; }
-
 #hero-3d-canvas.hero-3d-ready { opacity: 1; }
 
-#hero-3d-canvas canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-}
+/* Canvas THREE.js — fill container via hero-fixes.css, no override here */
 
+/* Glow */
 #hero-3d-canvas::before {
     content: '';
     position: absolute;
@@ -69,10 +74,11 @@
     50%       { opacity: 1.2; transform: scale(1.06); }
 }
 
+/* Drag hint */
 #hero-3d-canvas::after {
     content: 'drag to rotate';
     position: absolute;
-    bottom: 0;
+    bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--font-mono);
@@ -91,7 +97,7 @@
 .hero-content {
     position: relative;
     z-index: 1;
-    padding-top: clamp(12px, 3vh, 40px);
+    overflow: visible;
 }
 
 /* Status Badge */
@@ -263,10 +269,8 @@
     transition: transform 0.2s ease;
 }
 
-.btn-primary:hover .btn-arrow,
-.btn-secondary:hover .btn-arrow {
-    transform: translateX(4px);
-}
+.btn-primary:hover  .btn-arrow,
+.btn-secondary:hover .btn-arrow { transform: translateX(4px); }
 
 /* Scroll Indicator */
 .hero-scroll {
@@ -315,7 +319,7 @@
     pointer-events: none;
 }
 
-/* Exit Animations */
+/* Exit animations */
 .hero-status.motion-exit { animation: fade-up-out 0.35s var(--ease-smooth) forwards; }
 .hero-heading-line span.motion-exit { animation: reveal-line-out 0.4s var(--ease-smooth) forwards; }
 .hero-desc.motion-exit,
@@ -332,22 +336,55 @@
     }
 }
 
+/* Responsive — tablet */
 @media (max-width: 900px) {
-    .hero-inner { grid-template-columns: 1fr; }
-    #hero-3d-canvas { max-width: 340px; margin: 0 auto; order: -1; }
+    .hero-inner {
+        grid-template-columns: 1fr !important;
+        align-items: start !important;
+        gap: var(--space-lg) !important;
+        padding-top: calc(var(--nav-height) + var(--space-md));
+        padding-bottom: var(--space-2xl);
+        min-height: unset;
+    }
 }
 
-@media (max-width: 768px) {
-    .hero-cta { flex-direction: column; align-items: flex-start; }
+/* Mobile */
+@media (max-width: 600px) {
+    .hero-inner {
+        padding: calc(var(--nav-height) + var(--space-sm)) var(--space-md) var(--space-xl);
+        gap: var(--space-md) !important;
+    }
+    .hero-cta { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
     .hero-number { display: none; }
-    #hero-3d-canvas { max-width: 260px; opacity: 0.85; }
+    .hero-heading { font-size: clamp(38px, 12vw, 72px); }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
 }
 
+/* Short viewport */
 @media (max-height: 820px) {
+    .hero-inner {
+        padding-top: calc(var(--nav-height) + 8px);
+        gap: var(--space-xl);
+    }
     .hero-status { margin-bottom: var(--space-md); padding: 4px 12px; }
-    .hero-heading { font-size: clamp(36px, 6.5vw, 88px); margin-bottom: var(--space-md); }
-    .hero-desc { font-size: 14px; margin-bottom: var(--space-md); line-height: 1.65; }
-    .hero-tags { margin-bottom: var(--space-lg); gap: 6px; }
+    .hero-heading { font-size: clamp(32px, 5.5vw, 80px); margin-bottom: var(--space-md); }
+    .hero-desc { font-size: 14px; margin-bottom: var(--space-md); }
+    .hero-tags { margin-bottom: var(--space-md); gap: 5px; }
     .tag { font-size: 10px; padding: 4px 10px; }
     .btn-primary, .btn-secondary { padding: 10px 20px; font-size: 12px; }
+}
+
+@media (max-height: 700px) {
+    .hero-status { display: none; }
+    .hero-heading { font-size: clamp(28px, 4.5vw, 64px); margin-bottom: var(--space-sm); }
+    .hero-desc {
+        font-size: 13px; margin-bottom: var(--space-sm);
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .hero-scroll { display: none; }
+}
+
+@media (max-height: 580px) {
+    .hero-tags { display: none; }
 }
