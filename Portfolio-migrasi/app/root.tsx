@@ -9,21 +9,25 @@ import Nav    from "~/components/layout/Nav";
 import Cursor from "~/components/ui/Cursor";
 import { useCursor } from "~/hooks/useCursor";
 
-/* Core styles — urutan penting */
+/* ── Core styles — URUTAN PENTING ── */
 import "~/styles/variables.css";
 import "~/styles/base.css";
-import "~/styles/animations.css";   /* hanya sekali */
+import "~/styles/animations.css";
 import "~/styles/snap.css";
 import "~/styles/nav.css";
 import "~/styles/cursor.css";
 import "~/styles/motion.css";
 
-/* Section styles */
+/* ── Section styles ── */
 import "~/styles/hero.css";
 import "~/styles/about.css";
-import "~/styles/projects.css";
+import "~/styles/projects.css";   /* SATU-SATUNYA projects CSS — projects-react.css DIHAPUS */
 import "~/styles/skills.css";
 import "~/styles/contact.css";
+
+/* CATATAN: projects-react.css TIDAK diimport di sini.
+   File tersebut menyebabkan konflik class dengan projects.css.
+   Semua styling projects sudah ada di projects.css. */
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -41,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           rel="stylesheet"
         />
 
-        {/* EmailJS SDK — loaded before body scripts */}
+        {/* EmailJS SDK */}
         <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" />
 
         <Meta />
@@ -62,10 +66,8 @@ export default function App() {
   return (
     <>
       <Cursor position={cursorPos} variant={cursorVariant} />
-      {/* Nav di luar panel agar selalu visible */}
       <Nav />
       <Outlet />
-      {/* Footer dirender di dalam Contact section, tidak global */}
     </>
   );
 }

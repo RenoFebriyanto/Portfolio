@@ -121,6 +121,7 @@ const PROJECTS: Project[] = [
   },
 ];
 
+/* ── Categories (mirrors vanilla PROJECT_CATEGORIES) ── */
 const CATEGORIES = [
   { key: 'all',   label: 'All'            },
   { key: 'game',  label: 'Game Dev'       },
@@ -137,18 +138,18 @@ export function Projects() {
     setActiveFilter(key);
   }, []);
 
-  const visible = PROJECTS.filter(
-    p => activeFilter === 'all' || p.category === activeFilter,
-  );
+  const visibleCount = activeFilter === 'all'
+    ? PROJECTS.length
+    : PROJECTS.filter(p => p.category === activeFilter).length;
 
   return (
     <section className="projects" id="projects">
       <div className="container">
 
-        {/* Section divider */}
+        {/* Section divider — animated line draw via useSectionAnimations */}
         <div className="section-divider" />
 
-        {/* Section label */}
+        {/* Section label — identical structure to vanilla */}
         <div className="section-label reveal">
           <span className="section-label-num">02</span>
           <span className="section-label-line" />
@@ -164,14 +165,14 @@ export function Projects() {
           </div>
           <div className="reveal reveal-delay-2">
             <p className="projects-count">
-              Showing <span id="project-visible-count">{visible.length}</span> projects
+              Showing <span id="project-visible-count">{visibleCount}</span> projects
             </p>
           </div>
         </div>
 
-        {/* Filter bar */}
+        {/* Filter bar — mirrors vanilla .projects-filter with .filter-btn */}
         <div className="projects-filter reveal reveal-delay-2">
-          {CATEGORIES.map((cat, i) => (
+          {CATEGORIES.map(cat => (
             <button
               key={cat.key}
               className={`filter-btn${activeFilter === cat.key ? ' active' : ''}`}
@@ -183,7 +184,7 @@ export function Projects() {
           ))}
         </div>
 
-        {/* Project grid */}
+        {/* Project grid — identical to vanilla #projects-grid */}
         <div className="projects-grid" id="projects-grid">
           {PROJECTS.map((proj, index) => {
             const isHidden = activeFilter !== 'all' && proj.category !== activeFilter;

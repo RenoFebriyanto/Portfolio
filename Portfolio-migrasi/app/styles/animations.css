@@ -1,8 +1,13 @@
 /* ================================================
-   ANIMATIONS — All @keyframes
+   ANIMATIONS — All @keyframes + reveal system
    Port dari vanilla portfolio/styles/animations.css
+
+   PENTING: .reveal.visible adalah class utama (sama dengan vanilla).
+   .reveal.revealed adalah alias untuk backward compat.
+   Keduanya menghasilkan efek yang sama.
 ================================================ */
 
+/* ── Entrance keyframes ── */
 @keyframes fade-up {
   to { opacity: 1; transform: translateY(0); }
 }
@@ -12,12 +17,12 @@
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1;   transform: scale(1); }
+  0%, 100% { opacity: 1;   transform: scale(1);    }
   50%       { opacity: 0.5; transform: scale(0.82); }
 }
 
 @keyframes scroll-pulse {
-  0%, 100% { opacity: 1; }
+  0%, 100% { opacity: 1;    }
   50%       { opacity: 0.35; }
 }
 
@@ -36,6 +41,7 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
+/* ── Exit keyframes ── */
 @keyframes fade-down-out {
   from { opacity: 1; transform: translateY(0); }
   to   { opacity: 0; transform: translateY(24px); }
@@ -60,37 +66,47 @@
   50%       { opacity: 0.3; }
 }
 
-/* Generic .reveal */
+/* ── Generic .reveal base state ── */
 .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.75s var(--ease-smooth), transform 0.75s var(--ease-smooth);
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity   0.75s var(--ease-smooth),
+    transform 0.75s var(--ease-smooth);
 }
 
+/* ── Visible state — primary (matches vanilla .reveal.visible) ── */
 .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Alias untuk backward compat */
+/* ── Alias — backward compatibility ── */
 .reveal.revealed {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
+/* ── Stagger delays ── */
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 .reveal-delay-4 { transition-delay: 0.4s; }
 .reveal-delay-5 { transition-delay: 0.5s; }
 
+/* ── Exit animation states ── */
 .reveal.exiting {
-    transition: opacity 0.35s var(--ease-smooth), transform 0.35s var(--ease-smooth);
-    opacity: 0;
+  transition:
+    opacity   0.35s var(--ease-smooth),
+    transform 0.35s var(--ease-smooth);
+  opacity: 0;
 }
 
-.reveal.exiting.exit-next  { transform: translateY(-22px); }
-.reveal.exiting.exit-prev  { transform: translateY(22px); }
+/* Direction-based exit transforms */
+.reveal.exiting.exit-next { transform: translateY(-22px); }
+.reveal.exiting.exit-prev { transform: translateY(22px);  }
+
+/* Exit stagger (fast, sequential) */
 .reveal.exiting.exit-stagger-1 { transition-delay: 0s;    }
 .reveal.exiting.exit-stagger-2 { transition-delay: 0.04s; }
 .reveal.exiting.exit-stagger-3 { transition-delay: 0.08s; }

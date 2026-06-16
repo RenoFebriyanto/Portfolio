@@ -46,10 +46,10 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
   }, []);
 
   const onMouseEnter = useCallback(() => {
-    if (videoRef.current && !project.modelPath) {
+    if (videoRef.current && project.previewVideo && !project.modelPath) {
       videoRef.current.play().catch(() => {});
     }
-  }, [project.modelPath]);
+  }, [project.modelPath, project.previewVideo]);
 
   /* ── Derived values ── */
   const num         = String(project.id).padStart(2, '0');
@@ -58,21 +58,21 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
   const revealDelay = Math.min(index + 1, 5);
   const hasImage    = !!project.previewImage;
   const hasVideo    = !!project.previewVideo;
-  const hasGlb      = !!project.modelPath;
   const statusClass = project.status ?? 'completed';
 
-  /* Link logic — mirrors vanilla */
-  const linkHref   = project.link ?? project.itchLink ?? project.detailPath ?? '#';
+  /* ── Link logic — mirrors vanilla exactly ── */
   const hasLink    = !!(project.link ?? project.itchLink ?? project.detailPath);
-  const isExternal = hasLink && linkHref.startsWith('http');
+  const linkHref   = project.link ?? project.itchLink ?? project.detailPath ?? '#';
+  const isExternal = hasLink && (linkHref.startsWith('http') || linkHref.startsWith('//'));
   const linkLabel  = project.link
     ? 'View Project'
     : project.itchLink
-    ? 'Play on itch.io'
-    : project.detailPath
-    ? 'Case Study'
-    : 'Coming Soon';
+      ? 'Play on itch.io'
+      : project.detailPath
+        ? 'Case Study'
+        : 'Coming Soon';
 
+  /* ── Card class — mirrors vanilla exactly ── */
   const cardClasses = [
     'project-card',
     'reveal',
@@ -92,7 +92,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       onMouseLeave={onMouseLeave}
       onMouseEnter={onMouseEnter}
     >
-      {/* Decorative bg number (featured only) */}
+      {/* Decorative bg number — featured only */}
       {isFeatured && (
         <span className="project-bg-num" aria-hidden="true">{num}</span>
       )}
@@ -103,6 +103,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
           className="project-preview"
           style={{ '--preview-color': accentColor } as React.CSSProperties}
         >
+          {/* Image */}
           {hasImage && (
             <img
               className="project-preview-img"
@@ -112,7 +113,9 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
               draggable={false}
             />
           )}
-          {hasVideo && !hasGlb && (
+
+          {/* Video — only when no GLB model */}
+          {hasVideo && !project.modelPath && (
             <video
               ref={videoRef}
               className="project-preview-video"
@@ -124,14 +127,17 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
               aria-hidden="true"
             />
           )}
+
+          {/* Gradient overlay */}
           <div
             className="project-preview-overlay"
             style={{ '--preview-color': accentColor } as React.CSSProperties}
           />
+          {/* Grain noise */}
           <div className="project-preview-noise" aria-hidden="true" />
         </div>
       ) : (
-        /* Placeholder when no image/video */
+        /* ── PLACEHOLDER when no image/video ── */
         <div
           className="project-preview project-preview--placeholder"
           style={{ '--preview-color': accentColor } as React.CSSProperties}
@@ -147,7 +153,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       {/* ══ CARD BODY ══ */}
       <div className="project-card-body">
 
-        {/* Top row: number + status badge */}
+        {/* Top row: project number + status badge */}
         <div className="project-card-top">
           <span className="project-num">Project {num}</span>
           <span className={`project-status ${statusClass}`}>
@@ -173,19 +179,21 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
 
         {/* Footer: link */}
         <div className="project-card-footer">
-          {isExternal ? (
-            <a
-              href={linkHref}
-              className="project-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {linkLabel} <span className="project-link-arrow">&#8594;</span>
-            </a>
-          ) : hasLink ? (
-            <a href={linkHref} className="project-link">
-              {linkLabel} <span className="project-link-arrow">&#8594;</span>
-            </a>
+          {hasLink ? (
+            isExternal ? (
+              <a
+                href={linkHref}
+                className="project-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {linkLabel} <span className="project-link-arrow">&#8594;</span>
+              </a>
+            ) : (
+              <a href={linkHref} className="project-link">
+                {linkLabel} <span className="project-link-arrow">&#8594;</span>
+              </a>
+            )
           ) : (
             <span className="project-link disabled">
               {linkLabel} <span className="project-link-arrow">&#8594;</span>
