@@ -29,13 +29,18 @@
 
 
 /* --- 3D Canvas container --- */
+/* ── 3D Canvas container ── */
 #hero-3d-canvas {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    position: relative;
-    opacity: 0;
-    transition: opacity 1.2s var(--ease-smooth) 0.5s;
-    cursor: grab;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-smooth) 0.5s;
+  cursor: grab;
+  /* Diperbesar dari 500px / 45vh */
+  max-width: min(100%, 620px);
+  max-height: min(62vh, 620px);
+  margin-left: auto;
 }
  
 #hero-3d-canvas:active {
@@ -418,6 +423,11 @@
     .hero-scroll {
         bottom: var(--space-md);
     }
+
+    #hero-3d-canvas {
+    max-height: min(48vh, 460px);
+    max-width:  min(48vh, 460px);
+  }
 }
 
 @media (max-height: 700px) {
@@ -460,6 +470,11 @@
     .hero-scroll {
         display: none;
     }
+
+    #hero-3d-canvas {
+    max-height: min(38vh, 360px);
+    max-width:  min(38vh, 360px);
+  }
 }
 
 @media (max-height: 580px) {
@@ -467,6 +482,12 @@
     .hero-tags {
         display: none;
     }
+
+    
+    #hero-3d-canvas {
+    max-height: min(30vh, 280px);
+    max-width:  min(30vh, 280px);
+  }
 
     .hero-heading {
         font-size: clamp(28px, 5vw, 56px);
@@ -491,12 +512,35 @@
         aspect-ratio: 1 / 1;
         order: -1; /* sphere di atas di mobile */
     }
+
+    #hero-3d-canvas {
+    max-width: 380px;
+    max-height: 380px;
+    width: 380px;
+    height: 380px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    order: -1;
+  }
 }
  
 @media (max-width: 768px) {
     #hero-3d-canvas {
-        max-width: 260px;
-        opacity: 0.85;
-    }
+    max-width: 300px;
+    max-height: 300px;
+    width: 300px;
+    height: 300px;
+    opacity: 0.85;
+  }
+    
+
+  @media (max-width: 380px) {
+  #hero-3d-canvas {
+    max-width: 240px;
+    max-height: 240px;
+    width: 240px;
+    height: 240px;
+  }
+} 
 }
  

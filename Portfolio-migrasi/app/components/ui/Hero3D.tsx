@@ -70,8 +70,8 @@ export function Hero3D() {
 
       // ── Scene + Camera ──
       scene  = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-      camera.position.set(0, 0, 4.5);
+      camera = new THREE.PerspectiveCamera(10, 1, 0.1, 100);
+      camera.position.set(0, 0, 15.5);
 
       // ── Lighting ──
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));

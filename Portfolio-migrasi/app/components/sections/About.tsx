@@ -13,7 +13,7 @@ const ABOUT = {
   name:      'Reno Febri',
   role:      'Game Tech & 3D Creator',
   cornerTag: 'Reno Febri',
-  photo:     '/assets/images/Me.jpeg',
+  photo:     '../public/Assets/images/Me.jpeg',
   headingHTML: `Crafting<br/><span class="accent">Worlds</span> &amp;<br/><span class="dim">Experiences.</span>`,
   bio: [
     `I'm <strong>Reno Febri</strong> — a Game Tech creator and 3D artist based in Indonesia.

@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { ProjectCard } from '~/components/sections/ProjectCard';
 
 /* ── Project Data (mirrors vanilla scripts/data/projects-data.js) ── */
-export type ProjectCategory = 'game' | '3d' | 'vfx' | 'web';
+export type ProjectCategory = 'game' | '3d' | 'vfx' | 'web' | 'app';
 export type ProjectStatus   = 'completed' | 'wip' | 'archived' | 'concept';
 
 export interface Project {
@@ -30,7 +30,7 @@ export interface Project {
 const PROJECTS: Project[] = [
   {
     id:            1,
-    slug:          'game-jam-entry',
+    slug:          'wataswara',
     title:         'Wataswara Project',
     category:      'game',
     categoryLabel: 'Game Dev',
@@ -40,37 +40,39 @@ const PROJECTS: Project[] = [
     accentColor:   '#FF6B35',
     featured: true,
     status:        'wip',
+    previewImage: 'public/Assets/images/WataswaraProject.jpeg',
     statusLabel:   'In Progress',
     year:          2025,
   },
   {
     id:            2,
-    slug:          '3d-scene-art',
-    title:         '3D Character',
+    slug:          '3d-biograph',
+    title:         'Biograph Horizon',
     category:      '3d',
     categoryLabel: '3D Art',
     description:
       'Environment art and product renders exploring material studies, lighting rigs, and procedural texturing pipelines in Blender.',
     tags:          ['Blender', 'Cycles', 'Substance Painter'],
-    previewImage:  '/Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
+    previewImage:  'public/Assets/images/BiographHorizon.png',
     accentColor:   '#a78bfa',
-    modelPath:     '../../public/models/3dSphere.glb',
+    modelPath:     'public/models/BiographHorizon.fbx',
     status:        'completed',
     statusLabel:   'Completed',
     year:          2025,
   },
   {
     id:            3,
-    slug:          'shader-experiment',
-    title:         'Shader Experiment',
-    category:      'vfx',
-    categoryLabel: 'Shader / GLSL',
+    slug:          'flythothemoon',
+    title:         'Fly To The Moon',
+    category:      'game',
+    categoryLabel: 'Web3 / Game Dev',
     description:
-      'Real-time shader experiments — raymarching, noise-based distortion, and SDF compositions rendered live in WebGL.',
-    tags:          ['GLSL', 'WebGL', 'Three.js'],
+      'A Web3 play-to-earn crypto game. I built the initial website, developed the Unity 2D game, and implemented Phantom wallet connect logic bridging the website to the game.',
+    tags:          ['Unity', 'WebGL', 'JavaScript', 'Web3'],
     accentColor:   '#4D8CFF',
-    status:        'completed',
-    statusLabel:   'Completed',
+    status:        'concept',
+    previewImage:  'public/Assets/images/FlyToTheMoon.png',
+    statusLabel:   'Need Update',
     year:          2025,
   },
   {
@@ -85,7 +87,7 @@ const PROJECTS: Project[] = [
     previewImage:  '/Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
     previewVideo:  '',
     accentColor:   '#359aff',
-    link:          '/project-page/ForbiddenSpace/forbidden-space.html',
+    link:          '',
     itchLink:      'https://wubblyduby.itch.io/forbidden-space',
     featured:      true,
     status:        'completed',
@@ -94,31 +96,33 @@ const PROJECTS: Project[] = [
   },
   {
     id:            5,
-    slug:          'interactive-web',
-    title:         'Interactive Web Experience',
-    category:      'web',
-    categoryLabel: 'Web / Interactive',
+    slug:          'augmentedreality',
+    title:         'Augmented Reality',
+    category:      'app',
+    categoryLabel: 'App / Interactive',
     description:
-      'A web-based immersive piece combining particle systems, scroll-driven narrative, and real-time 3D in the browser.',
-    tags:          ['Three.js', 'GSAP', 'WebGL'],
+      'An AR application developed for Picto Grafest 2025 exhibition. I created all 3D models in Blender, integrated into Unity for AR programming by the team. Briefly published on Google Play Store.',
+    tags:          ['Unity', 'C#', 'Blender'],
     accentColor:   '#4D8CFF',
-    status:        'concept',
-    statusLabel:   'Concept',
-    year:          2026,
+    previewImage: 'public/Assets/images/AugmentedReality.jpg',
+    status:        'completed',
+    statusLabel:   'Completed',
+    year:          2025,
   },
   {
     id:            6,
-    slug:          'character-model',
-    title:         'Character / Model Study',
-    category:      '3d',
-    categoryLabel: '3D Art',
+    slug:          'mystiquegroup',
+    title:         'Mystique Banyuwangi Group',
+    category:      'web',
+    categoryLabel: 'Web',
     description:
-      'Character sculpting study focusing on anatomy, stylized topology, and rigging-ready mesh preparation for game engines.',
-    tags:          ['Blender', 'Sculpting', 'Rigging'],
+      'A professional investor-facing website. I built the frontend while the team handled backend. Currently awaiting further development direction from the client.',
+    tags:          ['Blade', 'PHP', 'JavaScript', 'CSS'],
     accentColor:   '#a78bfa',
-    status:        'archived',
-    statusLabel:   'Archived',
-    year:          2024,
+    previewImage: 'public/Assets/images/Mystique.png',
+    status:        'concept',
+    statusLabel:   'Need Update',
+    year:          2025,
   },
 ];
 
@@ -129,6 +133,7 @@ const CATEGORIES = [
   { key: '3d',    label: '3D Art'         },
   { key: 'vfx',   label: 'Visual Effects' },
   { key: 'web',   label: 'Web'            },
+  { key: 'app',   label: 'Application'    },
 ];
 
 /* ── Section Component ── */
