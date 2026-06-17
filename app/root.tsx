@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 import Nav    from "~/components/layout/Nav";
 import Cursor from "~/components/ui/Cursor";
@@ -27,6 +28,8 @@ import "~/styles/projects.css";
 import "~/styles/skills.css";
 import "~/styles/skills-fix.css";
 import "~/styles/contact.css";
+
+
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -62,6 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <>
+      
       <Cursor />
       <Nav />
       <Outlet />

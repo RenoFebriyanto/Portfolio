@@ -122,6 +122,20 @@ function useRevealUp() {
 }
 
 export function ForbiddenSpaceDetail() {
+
+  useEffect(() => {
+  document.body.style.overflowY = "auto";
+  document.body.style.overflowX = "hidden";
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, []);
+
+  useParticles("bgCanvas");
+  useLightbox();
+  useRevealUp();
+
   useParticles('bgCanvas');
   useLightbox();
   useRevealUp();
@@ -148,9 +162,36 @@ export function ForbiddenSpaceDetail() {
           --fs-cyan-glow: rgba(0,200,255,0.4); --fs-orange: #FF6B35;
           --fs-text: #c8dde3; --fs-text-muted: #5a8a96; --fs-text-dim: #2e5a66;
         }
+
+        .fs-hero {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 120px 80px 80px;
+  gap: 60px;
+}
+
+@media (max-width: 900px) {
+  .fs-hero {
+    grid-template-columns: 1fr;
+    padding: 120px 24px 60px;
+    gap: 40px;
+  }
+}
       `}</style>
 
-      <div data-page="forbidden-space" style={{ background: 'var(--fs-void)', minHeight: '100vh', color: 'var(--fs-text)' }}>
+     <div
+  data-page="forbidden-space"
+  style={{
+    background: "var(--fs-void)",
+    minHeight: "100vh",
+    overflowX: "hidden",
+    position: "relative",
+    color: "var(--fs-text)"
+  }}
+>
         <canvas
           id="bgCanvas"
           style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none', opacity: 0.6 }}
@@ -179,7 +220,10 @@ export function ForbiddenSpaceDetail() {
         </nav>
 
         {/* HERO */}
-        <section style={{ position: 'relative', minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', padding: '120px 80px 80px', gap: '60px' }}>
+
+
+
+        <section className="fs-hero">
           <div style={{ position: 'relative', zIndex: 2 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }} className="reveal-up">
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', letterSpacing: '0.1em', padding: '4px 10px', borderRadius: '3px', background: 'rgba(0,200,255,0.1)', border: '1px solid rgba(0,200,255,0.3)', color: 'var(--fs-cyan)' }}>ROGUELIKE · 2D · SHOOTER</span>
@@ -270,7 +314,7 @@ export function ForbiddenSpaceDetail() {
             <div className="reveal-up" style={{ maxWidth: '800px' }}>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '6px', border: '1px solid var(--fs-border)', boxShadow: '0 0 60px rgba(0,200,255,0.06)' }}>
                 <iframe
-                  src="https://www.youtube.com/embed/jWMfVkl7hZA"
+                  src="https://www.youtube.com/watch?v=jWMfVkl7hZA&t=1s"
                   title="Forbidden Space Gameplay"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
