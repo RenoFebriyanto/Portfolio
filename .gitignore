@@ -1,1 +1,4 @@
 /Portfolio-migrasi/node_modules
+
+.vercel
+.env*
