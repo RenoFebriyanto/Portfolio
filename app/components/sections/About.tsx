@@ -25,7 +25,7 @@ const ABOUT = {
      push the boundary between technology and art.`,
   ],
   chips: [
-    'Game Development', '3D Modeling & Art', 'Shader / GLSL',
+    'Game Development', '3D Modeling & Art', 'Shader',
     'Interactive Web', '2D Art & UI Design', 'Visual Effects Graph',
   ],
   meta: [
