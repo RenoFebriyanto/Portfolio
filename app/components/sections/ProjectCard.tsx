@@ -395,10 +395,9 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
         : 'Coming Soon';
 
   const cardClasses = [
-    'project-card', 'reveal', `reveal-delay-${revealDelay}`,
-    isFeatured ? 'featured' : '',
-    hidden     ? 'hidden'   : '',
-  ].filter(Boolean).join(' ');
+  'project-card', 'reveal', `reveal-delay-${revealDelay}`,
+  isFeatured ? 'featured' : '',
+].filter(Boolean).join(' ');
 
   /* ── 3D canvas overlay (rendered when modelPath exists) ── */
   const ThreeDOverlay = project.modelPath ? (
@@ -413,15 +412,16 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
 
   return (
     <div
-      ref={cardRef}
-      className={cardClasses}
-      data-category={project.category}
-      data-project-id={project.id}
-      data-has-video={String(hasVideo && !project.modelPath)}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      onMouseEnter={onMouseEnterVideo}
-    >
+  ref={cardRef}
+  className={cardClasses}
+  data-hidden={hidden}
+  data-category={project.category}
+  data-project-id={project.id}
+  data-has-video={String(hasVideo && !project.modelPath)}
+  onMouseMove={onMouseMove}
+  onMouseLeave={onMouseLeave}
+  onMouseEnter={onMouseEnterVideo}
+>
       {isFeatured && <span className="project-bg-num" aria-hidden="true">{num}</span>}
 
       {hasImage || hasVideo ? (

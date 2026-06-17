@@ -71,6 +71,7 @@ const PROJECTS: Project[] = [
     tags:          ['Unity', 'WebGL', 'JavaScript', 'Web3'],
     accentColor:   '#4D8CFF',
     status:        'concept',
+    link: 'https://game.kulinohouse.com/',
     previewImage:  'Assets/images/FlyToTheMoon.png',
     statusLabel:   'Need Update',
     year:          2025,
