@@ -87,7 +87,7 @@ const PROJECTS: Project[] = [
     previewImage:  '/Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
     previewVideo:  '',
     accentColor:   '#359aff',
-    link:          '',
+    link:          '/project-pages/ForbiddenSpace.tsx',
     itchLink:      'https://wubblyduby.itch.io/forbidden-space',
     featured:      true,
     status:        'completed',
