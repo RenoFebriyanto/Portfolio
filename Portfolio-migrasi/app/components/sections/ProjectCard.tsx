@@ -8,14 +8,13 @@ interface ProjectCardProps {
 }
 
 const MAX_TILT       = 7;
-const FADE_DURATION   = 350;
-const HOVER_DELAY     = 120;
-const AUTO_ROT_SPEED  = 0.004;
-const DRAG_SPEED      = 0.007;
-const DRAG_DAMP       = 0.88;
+const FADE_DURATION  = 350;
+const HOVER_DELAY    = 120;
+const AUTO_ROT_SPEED = 0.004;
+const DRAG_SPEED     = 0.007;
+const DRAG_DAMP      = 0.88;
 
-/* Module-level cache so a model loaded once isn't re-fetched on re-hover
-   or when the user filters the grid and the card remounts. */
+/* Module-level GLB/FBX cache — survives re-renders & filter toggles */
 const modelCache = new Map<string, any>();
 
 export function ProjectCard({ project, index, hidden = false }: ProjectCardProps) {
@@ -25,7 +24,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
 
-  /* ── 3D Tilt (unchanged — mirrors motion.js initCardTilt) ── */
+  /* ── 3D Tilt ── */
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
@@ -56,64 +55,75 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
     }
   }, []);
 
-  const onMouseEnter = useCallback(() => {
-    if (videoRef.current && project.previewVideo && !project.modelPath) {
+  /* ── Video hover (only when no 3D model) ── */
+  const onMouseEnterVideo = useCallback(() => {
+    if (project.modelPath) return;
+    if (videoRef.current && project.previewVideo) {
       videoRef.current.play().catch(() => {});
     }
   }, [project.modelPath, project.previewVideo]);
 
-  /* ── Hover-triggered 3D preview (ported from scripts/data/project3d.js) ──
-     Lazily loads the model on first hover, caches it, fades the canvas in
-     over the static image, and supports drag-to-rotate + idle auto-rotate.
-     Picks GLTFLoader or FBXLoader based on the file extension, so both
-     .glb and .fbx project entries work without extra config. */
+  /* ─────────────────────────────────────────────────
+     3D HOVER PREVIEW — GLB + FBX support
+  ───────────────────────────────────────────────── */
   useEffect(() => {
-    const modelPath = project.modelPath;
-    if (!modelPath) return;
-    if (window.matchMedia('(hover: none)').matches) return; // skip on touch
+    if (!project.modelPath) return;
+    const modelPath: string = project.modelPath;
+    if (window.matchMedia('(hover: none)').matches) return;
 
     const card    = cardRef.current;
     const preview = previewRef.current;
     const canvas  = canvasRef.current;
     if (!card || !preview || !canvas) return;
 
+    // ---------- typed local refs (non-null inside this closure) ----------
+    const cardEl:    HTMLDivElement    = card;
+    const previewEl: HTMLDivElement    = preview;
+    const canvasEl:  HTMLCanvasElement = canvas;
+    // ---------------------------------------------------------------------
+
     const state = {
-      renderer: null as any,
-      scene:    null as any,
-      camera:   null as any,
-      model:    null as any,
-      animId:   null as number | null,
-      loaded:   false,
-      loading:  false,
-      hovered:  false,
-      showing3d: false,
-      rotVel:    { x: 0, y: 0 },
+      renderer:   null as any,
+      scene:      null as any,
+      camera:     null as any,
+      model:      null as any,
+      animId:     null as number | null,
+      loaded:     false,
+      loading:    false,
+      hovered:    false,
+      showing3d:  false,
+      rotVel:     { x: 0, y: 0 },
       isDragging: false,
       prevMouse:  { x: 0, y: 0 },
       hoverTimer: null as ReturnType<typeof setTimeout> | null,
       destroyed:  false,
     };
 
-    let resizeObserver: ResizeObserver | null = null;
+    let resizeObs: ResizeObserver | null = null;
 
     function showSpinner(visible: boolean) {
       if (spinnerRef.current) spinnerRef.current.style.opacity = visible ? '1' : '0';
     }
 
-    function ensureRenderer(THREE: any) {
+    /* ── Init renderer (lazy, once) ── */
+    async function ensureRenderer() {
       if (state.renderer) return;
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      const THREE = await import('three');
+      if (state.destroyed) return;
+
+      const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace    = THREE.SRGBColorSpace;
       renderer.toneMapping         = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.15;
 
-      const w = preview.clientWidth, h = preview.clientHeight || 1;
+      const w = previewEl.clientWidth;
+      const h = previewEl.clientHeight || w;
       renderer.setSize(w, h);
 
       const scene  = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+      const camera = new THREE.PerspectiveCamera(40, w / (h || 1), 0.1, 100);
       camera.position.set(0, 0, 4.5);
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -131,14 +141,15 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       state.scene    = scene;
       state.camera   = camera;
 
-      resizeObserver = new ResizeObserver(() => {
+      resizeObs = new ResizeObserver(() => {
         if (!state.renderer || !state.camera) return;
-        const w2 = preview.clientWidth, h2 = preview.clientHeight || 1;
+        const w2 = previewEl.clientWidth;
+        const h2 = previewEl.clientHeight || w2;
         state.renderer.setSize(w2, h2);
-        state.camera.aspect = w2 / h2;
+        state.camera.aspect = w2 / (h2 || 1);
         state.camera.updateProjectionMatrix();
       });
-      resizeObserver.observe(preview);
+      resizeObs.observe(previewEl);
     }
 
     function fitToView(THREE: any, group: any) {
@@ -150,43 +161,52 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       group.position.copy(center.multiplyScalar(-scale));
     }
 
+    /* ── Load model (GLB or FBX) ── */
     async function loadModel() {
       if (state.loading || state.loaded) return;
       state.loading = true;
       showSpinner(true);
 
-      const THREE = await import('three');
-      if (state.destroyed) return;
-      ensureRenderer(THREE);
-
-      const cached = modelCache.get(modelPath);
-      if (cached) {
-        onModelReady(THREE, cached);
-        return;
-      }
-
-      const ext = modelPath.split('.').pop()?.toLowerCase();
-
       try {
+        await ensureRenderer();
+        if (state.destroyed) return;
+
+        const THREE = await import('three');
+        if (state.destroyed) return;
+
+        const cached = modelCache.get(modelPath);
+        if (cached) {
+          onModelReady(THREE, cached);
+          return;
+        }
+
+        const ext = modelPath.split('.').pop()?.toLowerCase() ?? '';
         let object: any;
+
         if (ext === 'fbx') {
-          const { FBXLoader } = await import('three/examples/jsm/loaders/FBXLoader.js');
+          const { FBXLoader } = await import('three/addons/loaders/FBXLoader.js');
+          if (state.destroyed) return;
           object = await new FBXLoader().loadAsync(modelPath);
         } else {
-          const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+          const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+          if (state.destroyed) return;
           const gltf = await new GLTFLoader().loadAsync(modelPath);
           object = gltf.scene;
         }
+
         if (state.destroyed) return;
 
         object.traverse((child: any) => {
           if (!child.isMesh || !child.material) return;
-          if (child.material.map) child.material.map.colorSpace = THREE.SRGBColorSpace;
-          child.material.needsUpdate = true;
+          const mat = child.material;
+          if (mat.map)         mat.map.colorSpace         = THREE.SRGBColorSpace;
+          if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+          mat.needsUpdate = true;
         });
 
         modelCache.set(modelPath, object);
         onModelReady(THREE, object);
+
       } catch (err) {
         console.error('[ProjectCard3D] Load error:', modelPath, err);
         showSpinner(false);
@@ -194,22 +214,25 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       }
     }
 
-    function onModelReady(THREE: any, source: any) {
+    function onModelReady(_THREE: any, source: any) {
       state.loading = false;
       state.loaded  = true;
       showSpinner(false);
+      if (state.destroyed) return;
 
       const model = source.clone(true);
-      fitToView(THREE, model);
+      fitToView(_THREE, model);
       state.scene.add(model);
       state.model = model;
 
       if (state.hovered) show3D();
     }
 
+    /* ── RAF loop ── */
     function startLoop() {
       if (state.animId) return;
       function tick() {
+        if (state.destroyed) return;
         state.animId = requestAnimationFrame(tick);
         if (state.model) {
           state.rotVel.x *= DRAG_DAMP;
@@ -229,47 +252,51 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
     }
 
     function stopLoop() {
-      if (state.animId) { cancelAnimationFrame(state.animId); state.animId = null; }
+      if (state.animId !== null) {
+        cancelAnimationFrame(state.animId);
+        state.animId = null;
+      }
     }
 
+    /* ── Show / hide 3D ── */
     function show3D() {
       if (state.showing3d) return;
       state.showing3d = true;
       startLoop();
 
-      const imgEl = preview.querySelector<HTMLElement>('.project-preview-img');
+      const imgEl = previewEl.querySelector<HTMLElement>('.project-preview-img');
       if (imgEl) {
         imgEl.style.transition = `opacity ${FADE_DURATION}ms ease`;
         imgEl.style.opacity    = '0';
       }
-      canvas.style.transition    = `opacity ${FADE_DURATION}ms ease`;
-      canvas.style.opacity       = '1';
-      canvas.style.pointerEvents = 'auto';
-      canvas.classList.add('is-visible');
+      canvasEl.style.transition    = `opacity ${FADE_DURATION}ms ease`;
+      canvasEl.style.opacity       = '1';
+      canvasEl.style.pointerEvents = 'auto';
+      canvasEl.classList.add('is-visible');
     }
 
     function hide3D() {
       if (!state.showing3d) return;
       state.showing3d = false;
 
-      canvas.style.transition    = `opacity ${FADE_DURATION}ms ease`;
-      canvas.style.opacity       = '0';
-      canvas.style.pointerEvents = 'none';
-      canvas.classList.remove('is-visible');
+      canvasEl.style.transition    = `opacity ${FADE_DURATION}ms ease`;
+      canvasEl.style.opacity       = '0';
+      canvasEl.style.pointerEvents = 'none';
+      canvasEl.classList.remove('is-visible');
 
-      const imgEl = preview.querySelector<HTMLElement>('.project-preview-img');
+      const imgEl = previewEl.querySelector<HTMLElement>('.project-preview-img');
       if (imgEl) {
         imgEl.style.transition = `opacity ${FADE_DURATION}ms ease`;
         imgEl.style.opacity    = '1';
       }
-
       setTimeout(() => { if (!state.showing3d) stopLoop(); }, FADE_DURATION + 50);
     }
 
+    /* ── Hover handlers (native DOM — no React synthetic conflict) ── */
     function onCardEnter() {
       state.hovered = true;
       state.hoverTimer = setTimeout(() => {
-        if (!state.hovered) return;
+        if (!state.hovered || state.destroyed) return;
         if (state.loaded) show3D();
         else loadModel();
       }, HOVER_DELAY);
@@ -282,13 +309,16 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       showSpinner(false);
     }
 
+    /* ── Drag to rotate ── */
     function onCanvasMouseDown(e: MouseEvent) {
       state.isDragging = true;
       state.prevMouse  = { x: e.clientX, y: e.clientY };
       state.rotVel     = { x: 0, y: 0 };
-      canvas.style.cursor = 'grabbing';
+      canvasEl.style.cursor = 'grabbing';
       e.preventDefault();
+      e.stopPropagation();
     }
+
     function onWindowMouseMove(e: MouseEvent) {
       if (!state.isDragging || !state.model) return;
       const dx = e.clientX - state.prevMouse.x;
@@ -299,31 +329,50 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       state.model.rotation.x += state.rotVel.x;
       state.prevMouse = { x: e.clientX, y: e.clientY };
     }
+
     function onWindowMouseUp() {
-      if (state.isDragging) { state.isDragging = false; canvas.style.cursor = 'grab'; }
+      if (state.isDragging) {
+        state.isDragging = false;
+        canvasEl.style.cursor = 'grab';
+      }
     }
 
-    card.addEventListener('mouseenter', onCardEnter);
-    card.addEventListener('mouseleave', onCardLeave);
-    canvas.addEventListener('mousedown', onCanvasMouseDown);
-    window.addEventListener('mousemove', onWindowMouseMove);
-    window.addEventListener('mouseup',   onWindowMouseUp);
+    /* ── Section lifecycle ── */
+    function onSectionLeave(e: Event) {
+      if ((e as CustomEvent).detail?.id !== 'projects') return;
+      hide3D();
+    }
+
+    /* ── Attach all listeners ── */
+    cardEl.addEventListener('mouseenter', onCardEnter);
+    cardEl.addEventListener('mouseleave', onCardLeave);
+    canvasEl.addEventListener('mousedown', onCanvasMouseDown);
+    window.addEventListener('mousemove',     onWindowMouseMove);
+    window.addEventListener('mouseup',       onWindowMouseUp);
+    window.addEventListener('sectionleave',  onSectionLeave);
 
     return () => {
       state.destroyed = true;
-      card.removeEventListener('mouseenter', onCardEnter);
-      card.removeEventListener('mouseleave', onCardLeave);
-      canvas.removeEventListener('mousedown', onCanvasMouseDown);
-      window.removeEventListener('mousemove', onWindowMouseMove);
-      window.removeEventListener('mouseup',   onWindowMouseUp);
       if (state.hoverTimer) clearTimeout(state.hoverTimer);
       stopLoop();
-      resizeObserver?.disconnect();
+      resizeObs?.disconnect();
+
+      cardEl.removeEventListener('mouseenter',   onCardEnter);
+      cardEl.removeEventListener('mouseleave',   onCardLeave);
+      canvasEl.removeEventListener('mousedown',  onCanvasMouseDown);
+      window.removeEventListener('mousemove',    onWindowMouseMove);
+      window.removeEventListener('mouseup',      onWindowMouseUp);
+      window.removeEventListener('sectionleave', onSectionLeave);
+
       state.renderer?.dispose();
+      state.renderer = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project.modelPath]);
 
-  /* ── Derived values ── */
+  /* ─────────────────────────────────────────────────
+     DERIVED VALUES
+  ───────────────────────────────────────────────── */
   const num         = String(project.id).padStart(2, '0');
   const isFeatured  = project.featured === true;
   const accentColor = project.accentColor ?? 'var(--accent-primary)';
@@ -349,16 +398,27 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
     hidden     ? 'hidden'   : '',
   ].filter(Boolean).join(' ');
 
+  /* ── 3D canvas overlay (rendered when modelPath exists) ── */
+  const ThreeDOverlay = project.modelPath ? (
+    <>
+      <canvas ref={canvasRef} className="project3d-canvas" aria-hidden="true" />
+      <div ref={spinnerRef} className="project3d-spinner" aria-hidden="true">
+        <div className="project3d-spinner-ring" />
+      </div>
+      <span className="project3d-hint">drag to rotate</span>
+    </>
+  ) : null;
+
   return (
     <div
       ref={cardRef}
       className={cardClasses}
       data-category={project.category}
       data-project-id={project.id}
-      data-has-video={String(hasVideo)}
+      data-has-video={String(hasVideo && !project.modelPath)}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      onMouseEnter={onMouseEnter}
+      onMouseEnter={onMouseEnterVideo}
     >
       {isFeatured && <span className="project-bg-num" aria-hidden="true">{num}</span>}
 
@@ -396,19 +456,11 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
             style={{ '--preview-color': accentColor } as React.CSSProperties}
           />
           <div className="project-preview-noise" aria-hidden="true" />
-
-          {project.modelPath && (
-            <>
-              <canvas ref={canvasRef} className="project3d-canvas" aria-hidden="true" />
-              <div ref={spinnerRef} className="project3d-spinner" aria-hidden="true">
-                <div className="project3d-spinner-ring" />
-              </div>
-              <span className="project3d-hint">drag to rotate</span>
-            </>
-          )}
+          {ThreeDOverlay}
         </div>
       ) : (
         <div
+          ref={previewRef}
           className="project-preview project-preview--placeholder"
           style={{ '--preview-color': accentColor } as React.CSSProperties}
         >
@@ -417,6 +469,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
             <span className="project-preview-placeholder-cat">{project.categoryLabel}</span>
           </div>
           <div className="project-preview-noise" aria-hidden="true" />
+          {ThreeDOverlay}
         </div>
       )}
 
