@@ -160,9 +160,6 @@
     color: var(--text-secondary);
     max-width: 520px;
     margin-bottom: var(--space-xl);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fade-up 0.9s var(--ease-smooth) 0.9s forwards;
 }
 
 /* Tags */
@@ -171,9 +168,6 @@
     flex-wrap: wrap;
     gap: var(--space-sm);
     margin-bottom: var(--space-2xl);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fade-up 0.9s var(--ease-smooth) 1.05s forwards;
 }
 
 .tag {
@@ -198,9 +192,6 @@
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fade-up 0.9s var(--ease-smooth) 1.2s forwards;
 }
 
 .btn-primary {

@@ -11,45 +11,47 @@ export function Hero({ scrollTo }: Props) {
   const heroRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // Timeline entrance: badge -> heading (stagger per baris) -> desc -> tags -> cta -> scroll hint
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
 
-    tl.from('.hero-status', { y: 16, opacity: 0, duration: 0.6 })
-      .from('.hero-heading-line span', {
-        yPercent: 105,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
-      }, '-=0.25')
-      .from('.hero-desc',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.35')
-      .from('.hero-tags',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
-      .from('.hero-cta',    { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
-      .from('.hero-scroll', { y: 12, opacity: 0, duration: 0.5 }, '-=0.2');
+  tl.from('.hero-status', { y: 16, opacity: 0, duration: 0.6 })
+    .from('.hero-heading-line span', {
+      yPercent: 105,
+      opacity: 0,
+      duration: 0.7,
+      stagger: 0.12,
+    }, '-=0.25')
+    .from('.hero-desc',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.35')
+    .from('.hero-tags',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
+    .from('.hero-cta',    { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
+    .from('.hero-scroll', { y: 12, opacity: 0, duration: 0.5 }, '-=0.2');
 
-    function playExit() {
-      gsap.to(
-        ['.hero-status', '.hero-heading-line span', '.hero-desc', '.hero-tags', '.hero-cta', '.hero-scroll'],
-        { y: -16, opacity: 0, duration: 0.3, ease: 'power2.in', overwrite: true }
-      );
-    }
+  const onEnter = (e: Event) => {
+    if ((e as CustomEvent).detail?.id !== 'hero') return;
+    tl.timeScale(1);
+    tl.play(0);
+  };
 
-    const onEnter = (e: Event) => {
-      if ((e as CustomEvent).detail?.id === 'hero') tl.play(0);
-    };
-    const onLeave = (e: Event) => {
-      if ((e as CustomEvent).detail?.id === 'hero') playExit();
-    };
+  const onLeave = (e: Event) => {
+    if ((e as CustomEvent).detail?.id !== 'hero') return;
+    // Reverse timeline yang sama — bukan tween terpisah dengan overwrite:true.
+    // overwrite:true sebelumnya bisa kill child tween di dalam tl kalau exit
+    // terjadi saat intro masih jalan, dan tween yang sudah ke-kill lepas
+    // permanen dari tl sehingga play(0) berikutnya tidak bisa animasikan
+    // properti itu lagi — itu penyebab heading hilang selamanya.
+    tl.timeScale(2.4); // exit lebih cepat dari intro
+    tl.reverse();
+  };
 
-    window.addEventListener('sectionenter', onEnter);
-    window.addEventListener('sectionleave', onLeave);
+  window.addEventListener('sectionenter', onEnter);
+  window.addEventListener('sectionleave', onLeave);
 
-    return () => {
-      window.removeEventListener('sectionenter', onEnter);
-      window.removeEventListener('sectionleave', onLeave);
-    };
-  }, { scope: heroRef });
+  return () => {
+    window.removeEventListener('sectionenter', onEnter);
+    window.removeEventListener('sectionleave', onLeave);
+  };
+}, { scope: heroRef });
 
   return (
     <section className="hero" id="hero" ref={heroRef}>
