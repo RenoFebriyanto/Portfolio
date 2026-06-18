@@ -62,104 +62,6 @@ export function useSectionAnimations() {
       sectionEl.querySelector('.section-divider')?.classList.remove('line-drawn');
     }
 
-    /* ── HERO ── */
-    const HERO_SELECTORS = [
-      '.hero-status',
-      '.hero-heading-line span',
-      '.hero-desc',
-      '.hero-tags',
-      '.hero-cta',
-      '.hero-scroll',
-    ];
-
-    function enterHero(sectionEl: HTMLElement) {
-      sectionEl.querySelectorAll<HTMLElement>(HERO_SELECTORS.join(',')).forEach(el => {
-        el.classList.remove('motion-exit');
-        el.style.animation = 'none';
-        void el.offsetWidth;
-        el.style.animation = '';
-      });
-    }
-
-    function leaveHero(sectionEl: HTMLElement) {
-      HERO_SELECTORS.forEach(sel => {
-        sectionEl.querySelectorAll<HTMLElement>(sel).forEach(el => {
-          el.classList.add('motion-exit');
-        });
-      });
-    }
-
-    /* ── ABOUT ── */
-    function enterAbout(sectionEl: HTMLElement) {
-      enterReveal(sectionEl);
-
-      // Identity card shimmer
-      const identity = sectionEl.querySelector('.about-identity');
-      if (identity) retrigger(identity, 'shimmer-ready');
-
-      // Avatar photo reveal
-      const avatar = sectionEl.querySelector<HTMLElement>('#avatar-wrap');
-      if (avatar) retrigger(avatar, 'photo-ready', 200);
-
-      // Stat counters — count up from 0
-      sectionEl.querySelectorAll<HTMLElement>('.stat-num').forEach(el => {
-        const card   = el.closest('.stat-card');
-        const rawKey = el.dataset.raw ?? '';
-        card?.classList.remove('counted');
-
-        let resolvedNum: string;
-        if (rawKey === 'YEARS_ACTIVE') {
-          const d         = (window as unknown as Record<string, { startYear?: number; startMonth?: number }>).ABOUT_DATA ?? {};
-          const startYear  = d.startYear  ?? 2023;
-          const startMonth = (d.startMonth ?? 1) - 1;
-          const start      = new Date(startYear, startMonth, 1);
-          const diffYears  = (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-          resolvedNum = diffYears.toFixed(1);
-        } else if (rawKey === 'PROJECT_COUNT') {
-          const pd = (window as unknown as Record<string, unknown[]>).PROJECTS_DATA;
-          resolvedNum = String(Array.isArray(pd) ? pd.length : 6);
-        } else {
-          const raw = el.textContent?.replace(/[^0-9.]/g, '') ?? '';
-          resolvedNum = raw || '';
-        }
-
-        const accentEl = el.querySelector('.stat-accent');
-        const suffix   = accentEl ? accentEl.outerHTML : '';
-
-        if (!resolvedNum || isNaN(parseFloat(resolvedNum))) {
-          card?.classList.add('counted');
-          return;
-        }
-
-        const isDecimal = resolvedNum.includes('.');
-        const end       = parseFloat(resolvedNum);
-        const decimals  = isDecimal ? (resolvedNum.split('.')[1]?.length ?? 1) : 0;
-        el.innerHTML    = `${(0).toFixed(decimals)}${suffix}`;
-
-        const duration  = 900;
-        const startTime = performance.now();
-
-        function tick(now: number) {
-          const progress = Math.min((now - startTime) / duration, 1);
-          const eased    = 1 - Math.pow(1 - progress, 2);
-          el.innerHTML   = `${(eased * end).toFixed(decimals)}${suffix}`;
-          if (progress < 1) {
-            requestAnimationFrame(tick);
-          } else {
-            el.innerHTML = `${end.toFixed(decimals)}${suffix}`;
-            card?.classList.add('counted');
-          }
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-
-    function leaveAbout(sectionEl: HTMLElement, direction?: string) {
-      leaveReveal(sectionEl, direction);
-      sectionEl.querySelector('.about-identity')?.classList.remove('shimmer-ready');
-      sectionEl.querySelector('#avatar-wrap')?.classList.remove('photo-ready');
-    }
-
     /* ── PROJECTS ── */
     function enterProjects(sectionEl: HTMLElement) {
       enterReveal(sectionEl);
@@ -225,22 +127,17 @@ export function useSectionAnimations() {
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     }
 
-    /* ── Dispatch table ── */
     const ENTER: Record<string, (el: HTMLElement, dir?: string) => void> = {
-      hero:     enterHero,
-      about:    enterAbout,
-      projects: enterProjects,
-      skills:   enterSkills,
-      contact:  enterContact,
-    };
+  projects: enterProjects,
+  skills:   enterSkills,
+  contact:  enterContact,
+};
 
-    const LEAVE: Record<string, (el: HTMLElement, dir?: string) => void> = {
-      hero:     leaveHero,
-      about:    leaveAbout,
-      projects: leaveProjects,
-      skills:   leaveSkills,
-      contact:  leaveContact,
-    };
+const LEAVE: Record<string, (el: HTMLElement, dir?: string) => void> = {
+  projects: leaveProjects,
+  skills:   leaveSkills,
+  contact:  leaveContact,
+};
 
     const onEnter = (e: Event) => {
       const detail    = (e as CustomEvent).detail as { id?: string; direction?: string };

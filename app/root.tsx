@@ -19,9 +19,7 @@ import "~/styles/cursor.css";
 import "~/styles/motion.css";
 
 /* ── Section styles ── */
-// hero.css diganti dengan versi yang sudah di-patch (no max-height)
 import "~/styles/hero.css";
-// hero-fixes.css: override canvas sizing + layout fixes, SETELAH hero.css
 import "~/styles/hero-fixes.css";
 import "~/styles/about.css";
 import "~/styles/projects.css";
@@ -29,9 +27,12 @@ import "~/styles/skills.css";
 import "~/styles/skills-fix.css";
 import "~/styles/contact.css";
 
-
-
 export function Layout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  // Home page pakai snap-panel system (body harus dikunci full-viewport).
+  // Project detail page (/projects/:slug) butuh scroll halaman normal.
+  const isProjectPage = location.pathname.startsWith("/projects/");
+
   return (
     <html lang="en">
       <head>
@@ -39,7 +40,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>RenoFebri — Game Tech & 3D Creator</title>
 
-        {/* Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -47,13 +47,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           rel="stylesheet"
         />
 
-        {/* EmailJS SDK */}
         <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" />
 
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className={isProjectPage ? "route-project" : "route-home"}>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -63,11 +62,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const location = useLocation();
+  const isProjectPage = location.pathname.startsWith("/projects/");
+
   return (
     <>
-      
       <Cursor />
-      <Nav />
+      {/* Nav global hanya untuk home page.
+          Project detail page (ForbiddenSpace, dll) sudah punya nav sendiri (.fs-nav),
+          jadi tidak perlu Nav global yang akan numpuk di atasnya. */}
+      {!isProjectPage && <Nav />}
       <Outlet />
     </>
   );

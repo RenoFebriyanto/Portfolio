@@ -110,9 +110,6 @@
     border-radius: 100px;
     padding: 6px 16px;
     margin-bottom: var(--space-xl);
-    opacity: 0;
-    transform: translateY(16px);
-    animation: fade-up 0.8s var(--ease-smooth) 0.2s forwards;
 }
 
 .hero-status-dot {
@@ -151,14 +148,7 @@
 
 .hero-heading-line span {
     display: block;
-    opacity: 0;
-    transform: translateY(105%);
-    animation: reveal-line 0.9s var(--ease-smooth) forwards;
 }
-
-.hero-heading-line:nth-child(1) span { animation-delay: 0.4s; }
-.hero-heading-line:nth-child(2) span { animation-delay: 0.52s; }
-.hero-heading-line:nth-child(3) span { animation-delay: 0.64s; }
 
 .hero-heading .accent { color: var(--accent-primary); }
 
@@ -282,8 +272,6 @@
     flex-direction: column;
     align-items: center;
     gap: var(--space-sm);
-    opacity: 0;
-    animation: fade-up 1s var(--ease-smooth) 2s forwards;
     cursor: pointer;
 }
 
@@ -318,14 +306,6 @@
     user-select: none;
     pointer-events: none;
 }
-
-/* Exit animations */
-.hero-status.motion-exit { animation: fade-up-out 0.35s var(--ease-smooth) forwards; }
-.hero-heading-line span.motion-exit { animation: reveal-line-out 0.4s var(--ease-smooth) forwards; }
-.hero-desc.motion-exit,
-.hero-tags.motion-exit,
-.hero-cta.motion-exit { animation: fade-down-out 0.35s var(--ease-smooth) forwards; }
-.hero-scroll.motion-exit { animation: fade-down-out 0.3s var(--ease-smooth) forwards; }
 
 @media (prefers-reduced-motion: reduce) {
     .hero-status, .hero-desc, .hero-tags, .hero-cta, .hero-scroll {

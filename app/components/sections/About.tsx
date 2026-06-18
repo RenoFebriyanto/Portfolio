@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useRef } from 'react';
+import { gsap, useGSAP } from '~/utils/gsap';
 
 const startYear  = 2023;
 const startMonth = 1;
@@ -51,10 +52,30 @@ function resolveStatNum(num: string): string {
 }
 
 export function About() {
-  useEffect(() => {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 0.7 } });
+
+    if (!reduced) {
+      tl.from('.section-label',          { y: 16, opacity: 0, duration: 0.5 })
+        .from('.about-heading',          { y: 28, opacity: 0 }, '-=0.2')
+        .from('.about-bio',              { y: 22, opacity: 0, stagger: 0.12 }, '-=0.4')
+        .from('.about-doing',            { y: 16, opacity: 0 }, '-=0.3')
+        .from('.about-identity',         { y: 24, opacity: 0 }, '-=0.5')
+        .from('.about-stats .stat-card', { y: 20, opacity: 0, stagger: 0.08 }, '-=0.45')
+        .from('.about-status',           { y: 16, opacity: 0 }, '-=0.3');
+    }
+
     function onEnter(e: Event) {
-      const id = (e as CustomEvent).detail?.id as string;
-      if (id !== 'about') return;
+      if ((e as CustomEvent).detail?.id !== 'about') return;
+
+      tl.play(0);
+      // Underline kecil di bawah "01 About" itu CSS biasa (.section-label.visible),
+      // gak perlu dikonversi ke GSAP, cukup tambah class-nya manual:
+      sectionRef.current?.querySelector('.section-label')?.classList.add('visible');
 
       // Avatar photo reveal
       const avatarWrap = document.getElementById('avatar-wrap');
@@ -72,7 +93,7 @@ export function About() {
         identity.classList.add('shimmer-ready');
       }
 
-      // Stat count-up
+      // Stat count-up — logic lama, tetap dipakai
       document.querySelectorAll<HTMLElement>('.stat-num').forEach(el => {
         const card   = el.closest('.stat-card');
         const rawKey = el.dataset.raw ?? '';
@@ -109,34 +130,40 @@ export function About() {
       });
     }
 
+    function onLeave(e: Event) {
+      if ((e as CustomEvent).detail?.id !== 'about') return;
+      document.getElementById('avatar-wrap')?.classList.remove('photo-ready');
+      document.querySelector('.about-identity')?.classList.remove('shimmer-ready');
+    }
+
     window.addEventListener('sectionenter', onEnter);
-    return () => window.removeEventListener('sectionenter', onEnter);
-  }, []);
+    window.addEventListener('sectionleave', onLeave);
+
+    return () => {
+      window.removeEventListener('sectionenter', onEnter);
+      window.removeEventListener('sectionleave', onLeave);
+    };
+  }, { scope: sectionRef });
 
   return (
-    <section className="about" id="about">
+    <section className="about" id="about" ref={sectionRef}>
       <div className="container">
 
-        <div className="section-label reveal">
+        <div className="section-label">
           <span className="section-label-num">01</span>
           <span className="section-label-line"></span>
           <span className="section-label-text">About</span>
         </div>
 
         <div className="about-grid">
-
           <div className="about-left">
-            <h2
-              className="about-heading reveal reveal-delay-1"
-              dangerouslySetInnerHTML={{ __html: ABOUT.headingHTML }}
-            />
+            <h2 className="about-heading" dangerouslySetInnerHTML={{ __html: ABOUT.headingHTML }} />
             <div className="about-bio-container">
               {ABOUT.bio.map((text, i) => (
-                <p key={i} className="about-bio reveal reveal-delay-2"
-                   dangerouslySetInnerHTML={{ __html: text }} />
+                <p key={i} className="about-bio" dangerouslySetInnerHTML={{ __html: text }} />
               ))}
             </div>
-            <div className="about-doing reveal reveal-delay-3">
+            <div className="about-doing">
               {ABOUT.chips.map(chip => (
                 <div key={chip} className="about-doing-chip">
                   <span className="about-doing-chip-dot"></span>
@@ -147,8 +174,7 @@ export function About() {
           </div>
 
           <div className="about-panel">
-
-            <div className="about-identity reveal reveal-delay-2">
+            <div className="about-identity">
               <div className="about-identity-avatar" id="avatar-wrap">
                 <img src={ABOUT.photo} alt={ABOUT.name} className="avatar-photo"
                      draggable={false}
@@ -170,7 +196,7 @@ export function About() {
               </div>
             </div>
 
-            <div className="about-stats reveal reveal-delay-3">
+            <div className="about-stats">
               {ABOUT.stats.map(s => (
                 <div key={s.label} className="stat-card">
                   <div className="stat-num" data-raw={s.num}>
@@ -182,14 +208,13 @@ export function About() {
               ))}
             </div>
 
-            <div className="about-status reveal reveal-delay-4">
+            <div className="about-status">
               <div className="about-status-left">
                 <span className="about-status-dot"></span>
                 <span className="about-status-text">{ABOUT.statusText}</span>
               </div>
               <span className="about-status-tag">{ABOUT.statusTag}</span>
             </div>
-
           </div>
         </div>
       </div>

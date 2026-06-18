@@ -24,9 +24,22 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Home page — snap-panel system butuh body dikunci full-viewport */
+body.route-home {
     height: 100%;
     overflow: hidden;
 }
+
+/* Project detail page (/projects/:slug) — scroll halaman normal */
+body.route-project {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+}
+
+
 
 a {
     color: inherit;
