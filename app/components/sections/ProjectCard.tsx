@@ -114,7 +114,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
       if (state.destroyed) return;
 
       const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace    = THREE.SRGBColorSpace;
       renderer.toneMapping         = THREE.ACESFilmicToneMapping;
@@ -148,87 +148,106 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
         const w2 = previewEl.clientWidth;
         const h2 = previewEl.clientHeight || w2;
         state.renderer.setSize(w2, h2);
-        state.camera.aspect = w2 / (h2 || 1);
+        state.camera.aspect = w2 / (h2 || 1.5);
         state.camera.updateProjectionMatrix();
       });
       resizeObs.observe(previewEl);
     }
 
-    function fitToView(THREE: any, group: any) {
-      const box    = new THREE.Box3().setFromObject(group);
-      const size   = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      const scale  = 2.0 / Math.max(size.x, size.y, size.z);
-      group.scale.setScalar(scale);
-      group.position.copy(center.multiplyScalar(-scale));
-    }
-
-    /* ── Load model (GLB or FBX) ── */
     async function loadModel() {
-      if (state.loading || state.loaded) return;
-      state.loading = true;
-      showSpinner(true);
+  if (state.loading || state.loaded) return;
+  state.loading = true;
+  showSpinner(true);
 
-      try {
-        await ensureRenderer();
-        if (state.destroyed) return;
+  try {
+    await ensureRenderer();
+    if (state.destroyed) return;
 
-        const THREE = await import('three');
-        if (state.destroyed) return;
+    const THREE = await import('three');
+    const SkeletonUtils = await import('three/addons/utils/SkeletonUtils.js');
+    if (state.destroyed) return;
 
-        const cached = modelCache.get(modelPath);
-        if (cached) {
-          onModelReady(THREE, cached);
-          return;
-        }
-
-        const ext = modelPath.split('.').pop()?.toLowerCase() ?? '';
-        let object: any;
-
-        if (ext === 'fbx') {
-          const { FBXLoader } = await import('three/addons/loaders/FBXLoader.js');
-          if (state.destroyed) return;
-          object = await new FBXLoader().loadAsync(modelPath);
-        } else {
-          const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-          if (state.destroyed) return;
-          const gltf = await new GLTFLoader().loadAsync(modelPath);
-          object = gltf.scene;
-        }
-
-        if (state.destroyed) return;
-
-        object.traverse((child: any) => {
-          if (!child.isMesh || !child.material) return;
-          const mat = child.material;
-          if (mat.map)         mat.map.colorSpace         = THREE.SRGBColorSpace;
-          if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
-          mat.needsUpdate = true;
-        });
-
-        modelCache.set(modelPath, object);
-        onModelReady(THREE, object);
-
-      } catch (err) {
-        console.error('[ProjectCard3D] Load error:', modelPath, err);
-        showSpinner(false);
-        state.loading = false;
-      }
+    const cached = modelCache.get(modelPath);
+    if (cached) {
+      onModelReady(THREE, SkeletonUtils, cached);
+      return;
     }
 
-    function onModelReady(_THREE: any, source: any) {
-      state.loading = false;
-      state.loaded  = true;
-      showSpinner(false);
+    const ext = modelPath.split('.').pop()?.toLowerCase() ?? '';
+    let object: any;
+
+    if (ext === 'fbx') {
+      const { FBXLoader } = await import('three/addons/loaders/FBXLoader.js');
       if (state.destroyed) return;
-
-      const model = source.clone(true);
-      fitToView(_THREE, model);
-      state.scene.add(model);
-      state.model = model;
-
-      if (state.hovered) show3D();
+      object = await new FBXLoader().loadAsync(modelPath);
+    } else {
+      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      if (state.destroyed) return;
+      const gltf = await new GLTFLoader().loadAsync(modelPath);
+      object = gltf.scene;
     }
+
+    if (state.destroyed) return;
+
+    object.traverse((child: any) => {
+      if (!child.isMesh || !child.material) return;
+      const mat = child.material;
+      if (mat.map)         mat.map.colorSpace         = THREE.SRGBColorSpace;
+      if (mat.emissiveMap) mat.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+      mat.needsUpdate = true;
+    });
+
+    modelCache.set(modelPath, object);
+    onModelReady(THREE, SkeletonUtils, object);
+
+  } catch (err) {
+    console.error('[ProjectCard3D] Load error:', modelPath, err);
+    showSpinner(false);
+    state.loading = false;
+  }
+}
+
+/* Auto-fit kamera berdasarkan bounding box asli — tidak peduli skala asli model dari Blender berapa pun */
+function frameObject(THREE: any, camera: any, object: any, fitOffset = 1.5) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+
+  // guard kalau geometry korup / kosong (size 0 atau NaN) — fallback ke jarak aman
+  const maxSize = Math.max(size.x, size.y, size.z);
+  if (!isFinite(maxSize) || maxSize <= 0) {
+    camera.position.set(0, 0, 4.5);
+    camera.updateProjectionMatrix();
+    return;
+  }
+
+  const center = box.getCenter(new THREE.Vector3());
+  object.position.sub(center); // pusatkan object di origin (biar rotasi pas di tengah)
+
+  const fovRad = (camera.fov * Math.PI) / 180;
+  const fitHeightDist = (maxSize / 2) / Math.tan(fovRad / 2);
+  const fitWidthDist  = fitHeightDist / camera.aspect;
+  const distance       = fitOffset * Math.max(fitHeightDist, fitWidthDist);
+
+  camera.position.set(0, 0, distance);
+  camera.near = distance / 100;
+  camera.far  = distance * 100;
+  camera.updateProjectionMatrix();
+}
+
+    function onModelReady(_THREE: any, SkeletonUtils: any, source: any) {
+  state.loading = false;
+  state.loaded  = true;
+  showSpinner(false);
+  if (state.destroyed) return;
+
+  // SkeletonUtils.clone aman untuk SkinnedMesh DAN mesh biasa — pengganti source.clone(true)
+  const model = SkeletonUtils.clone(source);
+  state.scene.add(model);
+  frameObject(_THREE, state.camera, model);
+  state.model = model;
+
+  if (state.hovered) show3D();
+}
 
     /* ── RAF loop ── */
     function startLoop() {

@@ -55,7 +55,7 @@ const PROJECTS: Project[] = [
     tags:          ['Blender', 'Cycles', 'Substance Painter'],
     previewImage:  'Assets/images/BiographHorizon.png',
     accentColor:   '#a78bfa',
-    modelPath:     'models/BiographHorizon.glb',
+    modelPath:     '/models/Biograph.glb',
     status:        'completed',
     statusLabel:   'Completed',
     year:          2025,
