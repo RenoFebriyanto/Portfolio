@@ -3,9 +3,11 @@ import { projects }  from '~/data/projects';
 
 /* Per-project detail components */
 import { ForbiddenSpaceDetail } from '~/components/project-pages/ForbiddenSpace';
+import { BiographHorizonDetail } from '~/components/project-pages/BiographHorizon';
 
 const PROJECT_PAGES: Record<string, React.ComponentType> = {
   'forbidden-space': ForbiddenSpaceDetail,
+  'biographhorizon':  BiographHorizonDetail,
 };
 
 export default function ProjectSlug() {
