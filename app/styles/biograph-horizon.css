@@ -1,0 +1,984 @@
+/* ============================================================
+   BIOGRAPH HORIZON — Project Detail Page
+   Style: Cinematic medical / 3D art showcase
+   Accent: Gold/Amber #C9912B + Teal #00B5CC
+   ============================================================ */
+
+[data-page="biograph-horizon"] {
+  /* ── Gold accent overrides ── */
+  --bh-gold:        #C9912B;
+  --bh-gold-dim:    #a07020;
+  --bh-gold-bright: #E8B84B;
+  --bh-gold-glow:   rgba(201, 145, 43, 0.12);
+  --bh-gold-glow-strong: rgba(201, 145, 43, 0.22);
+  --bh-teal:        #00B5CC;
+  --bh-teal-glow:   rgba(0, 181, 204, 0.10);
+  --bh-white:       #F5F5F0;
+  --bh-gray:        #8C8C9A;
+}
+
+/* ── Page Shell ── */
+[data-page="biograph-horizon"] .bh-page {
+  background: #04040A;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── NAV ── */
+[data-page="biograph-horizon"] .bh-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  background: rgba(4,4,10,0);
+  transition: background 0.4s ease, border-bottom 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+
+[data-page="biograph-horizon"] .bh-nav.scrolled {
+  background: rgba(4,4,10,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-page="biograph-horizon"] .bh-nav-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+[data-page="biograph-horizon"] .bh-nav-back:hover { color: var(--bh-white); }
+
+[data-page="biograph-horizon"] .bh-nav-back-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+[data-page="biograph-horizon"] .bh-nav-back:hover .bh-nav-back-arrow {
+  transform: translateX(-4px);
+}
+
+[data-page="biograph-horizon"] .bh-nav-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+  opacity: 0.8;
+}
+
+/* ════════════════════════════════════════
+   HERO — Full-bleed cinematic
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+/* Render image fills the hero */
+[data-page="biograph-horizon"] .bh-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  filter: brightness(0.65) saturate(0.9);
+  transform: scale(1.06);
+  transform-origin: center center;
+  transition: transform 12s ease-out;
+  will-change: transform;
+}
+
+[data-page="biograph-horizon"] .bh-hero-bg.loaded {
+  transform: scale(1.0);
+}
+
+/* Gradient vignette over image */
+[data-page="biograph-horizon"] .bh-hero-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(4,4,10,0.45) 0%,
+      transparent 30%,
+      transparent 50%,
+      rgba(4,4,10,0.75) 80%,
+      rgba(4,4,10,0.98) 100%
+    ),
+    linear-gradient(to right, rgba(4,4,10,0.55) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Scan-line texture */
+[data-page="biograph-horizon"] .bh-hero-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 3px
+  );
+  opacity: 0.4;
+}
+
+/* Hero content */
+[data-page="biograph-horizon"] .bh-hero-content {
+  position: relative;
+  z-index: 3;
+  padding: 0 64px 80px;
+  max-width: 900px;
+}
+
+[data-page="biograph-horizon"] .bh-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+}
+
+[data-page="biograph-horizon"] .bh-hero-eyebrow.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-page="biograph-horizon"] .bh-hero-eyebrow-line {
+  width: 32px;
+  height: 1px;
+  background: var(--bh-gold);
+  opacity: 0.7;
+}
+
+[data-page="biograph-horizon"] .bh-hero-eyebrow-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+}
+
+[data-page="biograph-horizon"] .bh-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 9vw, 130px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--bh-white);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+[data-page="biograph-horizon"] .bh-hero-title-line {
+  display: block;
+  overflow: hidden;
+}
+
+[data-page="biograph-horizon"] .bh-hero-title-line span {
+  display: block;
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform 0.85s cubic-bezier(0.16,1,0.3,1), opacity 0.6s ease;
+}
+
+[data-page="biograph-horizon"] .bh-hero-title-line.visible span {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+[data-page="biograph-horizon"] .bh-hero-title .gold { color: var(--bh-gold); }
+
+[data-page="biograph-horizon"] .bh-hero-sub {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(245,245,240,0.65);
+  max-width: 520px;
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease 0.8s, transform 0.7s ease 0.8s;
+}
+
+[data-page="biograph-horizon"] .bh-hero-sub.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-page="biograph-horizon"] .bh-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease 1s, transform 0.7s ease 1s;
+}
+
+[data-page="biograph-horizon"] .bh-hero-meta.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-page="biograph-horizon"] .bh-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-page="biograph-horizon"] .bh-meta-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+}
+
+[data-page="biograph-horizon"] .bh-meta-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--bh-white);
+}
+
+[data-page="biograph-horizon"] .bh-meta-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Scroll indicator */
+[data-page="biograph-horizon"] .bh-hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  right: 64px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.6s ease 1.4s;
+}
+
+[data-page="biograph-horizon"] .bh-hero-scroll.visible {
+  opacity: 1;
+}
+
+[data-page="biograph-horizon"] .bh-hero-scroll-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+  writing-mode: vertical-rl;
+}
+
+[data-page="biograph-horizon"] .bh-hero-scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--bh-gold), transparent);
+  animation: bh-scroll-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes bh-scroll-pulse {
+  0%, 100% { opacity: 0.8; }
+  50%       { opacity: 0.2; }
+}
+
+/* ════════════════════════════════════════
+   OVERVIEW STRIP — stats bar
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-overview {
+  position: relative;
+  padding: 80px 64px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-page="biograph-horizon"] .bh-overview-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--bh-white);
+  margin-bottom: 20px;
+}
+
+[data-page="biograph-horizon"] .bh-overview-text h2 .gold { color: var(--bh-gold); }
+
+[data-page="biograph-horizon"] .bh-overview-text p {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--bh-gray);
+  max-width: 440px;
+}
+
+[data-page="biograph-horizon"] .bh-overview-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+[data-page="biograph-horizon"] .bh-stat {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-stat:hover {
+  border-color: rgba(201,145,43,0.25);
+  background: rgba(201,145,43,0.04);
+}
+
+[data-page="biograph-horizon"] .bh-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--bh-gold), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-stat:hover::before { opacity: 1; }
+
+[data-page="biograph-horizon"] .bh-stat-num {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--bh-white);
+  margin-bottom: 6px;
+}
+
+[data-page="biograph-horizon"] .bh-stat-num .gold { color: var(--bh-gold); }
+
+[data-page="biograph-horizon"] .bh-stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+}
+
+/* ════════════════════════════════════════
+   GALLERY — multi-angle renders
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-gallery {
+  padding: 0 0 100px;
+  position: relative;
+}
+
+[data-page="biograph-horizon"] .bh-section-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 64px;
+  margin-bottom: 40px;
+}
+
+[data-page="biograph-horizon"] .bh-section-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--bh-gold);
+}
+
+[data-page="biograph-horizon"] .bh-section-line {
+  width: 32px;
+  height: 1px;
+  background: var(--bh-gold);
+  opacity: 0.4;
+}
+
+[data-page="biograph-horizon"] .bh-section-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+}
+
+[data-page="biograph-horizon"] .bh-gallery-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 3px;
+  margin: 0;
+}
+
+[data-page="biograph-horizon"] .bh-gallery-item {
+  position: relative;
+  overflow: hidden;
+  background: #0a0a12;
+  cursor: pointer;
+}
+
+[data-page="biograph-horizon"] .bh-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.88) saturate(0.85);
+  transition: transform 0.8s cubic-bezier(0.16,1,0.3,1), filter 0.4s ease;
+}
+
+[data-page="biograph-horizon"] .bh-gallery-item:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.0) saturate(1.0);
+}
+
+[data-page="biograph-horizon"] .bh-gallery-item--main { aspect-ratio: 4/3; }
+[data-page="biograph-horizon"] .bh-gallery-item--side { aspect-ratio: 3/4; }
+
+[data-page="biograph-horizon"] .bh-gallery-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 24px 28px;
+  background: linear-gradient(to top, rgba(4,4,10,0.85) 0%, transparent 100%);
+  z-index: 2;
+  transform: translateY(8px);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-gallery-item:hover .bh-gallery-caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-page="biograph-horizon"] .bh-gallery-caption-angle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+  margin-bottom: 4px;
+}
+
+[data-page="biograph-horizon"] .bh-gallery-caption-desc {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(245,245,240,0.75);
+}
+
+/* ════════════════════════════════════════
+   3D VIEWER
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-viewer {
+  padding: 100px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--bh-white);
+}
+
+[data-page="biograph-horizon"] .bh-viewer-title .gold { color: var(--bh-gold); }
+
+[data-page="biograph-horizon"] .bh-viewer-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-hint-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--bh-gold);
+  animation: bh-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bh-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+[data-page="biograph-horizon"] .bh-viewer-canvas-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  position: relative;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,145,43,0.05) 0%, transparent 70%),
+    #07070F;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-canvas-wrap:active { cursor: grabbing; }
+
+[data-page="biograph-horizon"] .bh-viewer-canvas-wrap canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Grid overlay */
+[data-page="biograph-horizon"] .bh-viewer-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 75%);
+}
+
+/* Corner decorations */
+[data-page="biograph-horizon"] .bh-viewer-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.5;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-corner::before,
+[data-page="biograph-horizon"] .bh-viewer-corner::after {
+  content: '';
+  position: absolute;
+  background: var(--bh-gold);
+}
+
+[data-page="biograph-horizon"] .bh-viewer-corner::before { width: 100%; height: 1px; }
+[data-page="biograph-horizon"] .bh-viewer-corner::after  { width: 1px; height: 100%; }
+
+[data-page="biograph-horizon"] .bh-viewer-corner.tl { top: 12px; left: 12px; }
+[data-page="biograph-horizon"] .bh-viewer-corner.tr { top: 12px; right: 12px; transform: scaleX(-1); }
+[data-page="biograph-horizon"] .bh-viewer-corner.bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+[data-page="biograph-horizon"] .bh-viewer-corner.br { bottom: 12px; right: 12px; transform: scale(-1); }
+
+/* Loading state */
+[data-page="biograph-horizon"] .bh-viewer-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+  background: #07070F;
+  transition: opacity 0.5s ease;
+}
+
+[data-page="biograph-horizon"] .bh-viewer-loading.hidden { opacity: 0; pointer-events: none; }
+
+[data-page="biograph-horizon"] .bh-viewer-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201,145,43,0.2);
+  border-top-color: var(--bh-gold);
+  animation: bh-spin 0.8s linear infinite;
+}
+
+@keyframes bh-spin { to { transform: rotate(360deg); } }
+
+[data-page="biograph-horizon"] .bh-viewer-loading-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+}
+
+/* ════════════════════════════════════════
+   SPECS / BREAKDOWN
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-specs {
+  padding: 0 64px 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-page="biograph-horizon"] .bh-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-top: 48px;
+}
+
+[data-page="biograph-horizon"] .bh-spec-block {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-spec-block:hover {
+  border-color: rgba(201,145,43,0.2);
+}
+
+[data-page="biograph-horizon"] .bh-spec-block::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--bh-gold), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-spec-block:hover::after { opacity: 0.5; }
+
+[data-page="biograph-horizon"] .bh-spec-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(201,145,43,0.08);
+  border: 1px solid rgba(201,145,43,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+[data-page="biograph-horizon"] .bh-spec-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bh-white);
+  margin-bottom: 8px;
+}
+
+[data-page="biograph-horizon"] .bh-spec-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+[data-page="biograph-horizon"] .bh-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+[data-page="biograph-horizon"] .bh-spec-row:last-child { border-bottom: none; }
+
+[data-page="biograph-horizon"] .bh-spec-key {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--bh-gray);
+}
+
+[data-page="biograph-horizon"] .bh-spec-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--bh-white);
+}
+
+[data-page="biograph-horizon"] .bh-spec-val.gold { color: var(--bh-gold); }
+
+/* ════════════════════════════════════════
+   TOOLS USED
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-tools {
+  padding: 0 64px 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-page="biograph-horizon"] .bh-tools-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+[data-page="biograph-horizon"] .bh-tool-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 14px 20px;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+[data-page="biograph-horizon"] .bh-tool-chip:hover {
+  border-color: rgba(201,145,43,0.3);
+  background: rgba(201,145,43,0.05);
+  transform: translateY(-2px);
+}
+
+[data-page="biograph-horizon"] .bh-tool-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bh-gold);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+[data-page="biograph-horizon"] .bh-tool-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--bh-white);
+}
+
+[data-page="biograph-horizon"] .bh-tool-role {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--bh-gray);
+}
+
+[data-page="biograph-horizon"] .bh-tool-chip-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* ════════════════════════════════════════
+   PROCESS TIMELINE
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-process {
+  padding: 0 64px 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+[data-page="biograph-horizon"] .bh-process-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  margin-top: 48px;
+}
+
+[data-page="biograph-horizon"] .bh-step {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+[data-page="biograph-horizon"] .bh-step:hover {
+  border-color: rgba(201,145,43,0.2);
+  background: rgba(201,145,43,0.03);
+}
+
+[data-page="biograph-horizon"] .bh-step-num {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 800;
+  color: rgba(201,145,43,0.07);
+  line-height: 1;
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+}
+
+[data-page="biograph-horizon"] .bh-step-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bh-white);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+[data-page="biograph-horizon"] .bh-step-desc {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--bh-gray);
+  position: relative;
+  z-index: 1;
+}
+
+[data-page="biograph-horizon"] .bh-step-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bh-gold);
+  background: rgba(201,145,43,0.08);
+  border: 1px solid rgba(201,145,43,0.2);
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin-top: 14px;
+}
+
+/* ════════════════════════════════════════
+   FOOTER / BACK
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 48px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+[data-page="biograph-horizon"] .bh-footer-copy {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+}
+
+[data-page="biograph-horizon"] .bh-footer-copy span { color: var(--bh-gold); }
+
+[data-page="biograph-horizon"] .bh-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bh-gray);
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 24px;
+  border-radius: 3px;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+[data-page="biograph-horizon"] .bh-back-btn:hover {
+  color: var(--bh-white);
+  border-color: rgba(201,145,43,0.3);
+  transform: translateX(-3px);
+}
+
+/* ════════════════════════════════════════
+   REVEAL SYSTEM
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
+}
+
+[data-page="biograph-horizon"] .bh-reveal.bh-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-page="biograph-horizon"] .bh-reveal-d1 { transition-delay: 0.1s; }
+[data-page="biograph-horizon"] .bh-reveal-d2 { transition-delay: 0.2s; }
+[data-page="biograph-horizon"] .bh-reveal-d3 { transition-delay: 0.3s; }
+[data-page="biograph-horizon"] .bh-reveal-d4 { transition-delay: 0.4s; }
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media (max-width: 900px) {
+  [data-page="biograph-horizon"] .bh-hero-content { padding: 0 32px 64px; }
+  [data-page="biograph-horizon"] .bh-hero-scroll  { right: 32px; }
+  [data-page="biograph-horizon"] .bh-overview     { grid-template-columns: 1fr; gap: 40px; padding: 60px 32px; }
+  [data-page="biograph-horizon"] .bh-gallery-grid { grid-template-columns: 1fr; }
+  [data-page="biograph-horizon"] .bh-gallery-item--side { aspect-ratio: 16/9; }
+  [data-page="biograph-horizon"] .bh-section-label,
+  [data-page="biograph-horizon"] .bh-viewer,
+  [data-page="biograph-horizon"] .bh-specs,
+  [data-page="biograph-horizon"] .bh-tools,
+  [data-page="biograph-horizon"] .bh-process,
+  [data-page="biograph-horizon"] .bh-footer       { padding-left: 32px; padding-right: 32px; }
+  [data-page="biograph-horizon"] .bh-specs-grid   { grid-template-columns: 1fr; }
+  [data-page="biograph-horizon"] .bh-process-steps { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  [data-page="biograph-horizon"] .bh-hero-content { padding: 0 20px 48px; }
+  [data-page="biograph-horizon"] .bh-hero-meta    { flex-wrap: wrap; gap: 20px; }
+  [data-page="biograph-horizon"] .bh-meta-divider { display: none; }
+  [data-page="biograph-horizon"] .bh-section-label,
+  [data-page="biograph-horizon"] .bh-viewer,
+  [data-page="biograph-horizon"] .bh-specs,
+  [data-page="biograph-horizon"] .bh-tools,
+  [data-page="biograph-horizon"] .bh-process,
+  [data-page="biograph-horizon"] .bh-footer       { padding-left: 20px; padding-right: 20px; }
+  [data-page="biograph-horizon"] .bh-overview     { padding: 48px 20px; }
+  [data-page="biograph-horizon"] .bh-overview-stats { grid-template-columns: 1fr 1fr; }
+  [data-page="biograph-horizon"] .bh-process-steps { grid-template-columns: 1fr; }
+  [data-page="biograph-horizon"] .bh-footer        { flex-direction: column; align-items: flex-start; }
+}
