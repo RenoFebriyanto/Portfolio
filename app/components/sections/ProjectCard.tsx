@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
-// tambahkan import di atas
-import { Link } from 'react-router';
-import type { Project } from '~/components/sections/Projects';
+// tambahkan import di atas 
+import { Link } from 'react-router';    
+import type { Project } from '~/data/projects';
 
 interface ProjectCardProps {
   project: Project;

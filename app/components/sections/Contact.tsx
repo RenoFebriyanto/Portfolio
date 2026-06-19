@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { sendContactEmail } from '~/utils/emailjs';
 
 type Status = 'idle' | 'sending' | 'success' | 'error';
 
@@ -8,12 +9,6 @@ const SOCIALS = [
   { platform: 'itch.io',   handle: 'catmounth.itch.io',   href: 'https://catmounth.itch.io/',                 icon: '/Assets/icons/itch-io.png' },
   { platform: 'Instagram', handle: '@norigaken',           href: 'https://www.instagram.com/norigaken/',       icon: '/Assets/icons/instagram.png' },
 ];
-
-const EMAILJS_CONFIG = {
-  serviceId:  'service_4gmph37',
-  templateId: 'template_hutxwgq',
-  publicKey:  'FNCDIzpu7wl-Zh3FB',
-};
 
 export function Contact() {
   const [status, setStatus] = useState<Status>('idle');
@@ -36,33 +31,26 @@ export function Contact() {
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
 
-    setStatus('sending');
+  setStatus('sending');
 
-    try {
-      // EmailJS via CDN script (loaded in root.tsx head)
-      const emailjs = (window as unknown as Record<string, { init: (o: { publicKey: string }) => void; send: (s: string, t: string, p: object) => Promise<void> }>).emailjs;
-      if (!emailjs) throw new Error('EmailJS not loaded');
+  try {
+    await sendContactEmail({
+      from_name:  form.name,
+      from_email: form.email,
+      subject:    form.subject || '(No subject)',
+      message:    form.message,
+    });
 
-      emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
-
-      await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
-        from_name:  form.name,
-        from_email: form.email,
-        subject:    form.subject || '(No subject)',
-        message:    form.message,
-        reply_to:   form.email,
-      });
-
-      setStatus('success');
-    } catch (err) {
-      console.error('[EmailJS]', err);
-      setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
-    }
-  };
+    setStatus('success');
+  } catch (err) {
+    console.error('[EmailJS]', err);
+    setStatus('error');
+    setTimeout(() => setStatus('idle'), 3000);
+  }
+};
 
   return (
     <section className="contact" id="contact">

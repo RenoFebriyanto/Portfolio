@@ -452,7 +452,7 @@ export function BiographHorizonDetail() {
         </BhPanel>
 
         {/* ══ PANEL 4: 3D VIEWER ══ */}
-        <BhPanel id="bh-viewer" onRegister={registerPanel}>
+        <BhPanel id="bh-viewer" scrollable onRegister={registerPanel}>
           <section className="bh-viewer">
             <div className="bh-viewer-header bh-anim">
               <h2 className="bh-viewer-title">
