@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+
 
 const SKILLS_DATA = [
   {
@@ -41,34 +41,6 @@ const SKILLS_DATA = [
 const LEARNING = ['Unreal Engine 5', 'Visual Effects', '3D Animation'];
 
 export function Skills() {
-  // Animate skill bars when section enters
-  useEffect(() => {
-    const onEnter = (e: Event) => {
-      if ((e as CustomEvent).detail?.id !== 'skills') return;
-
-      // Trigger .visible on all .skill-group elements
-      // CSS rule: .skill-group.visible .skill-bar-fill { width: var(--skill-level); }
-      document.querySelectorAll<HTMLElement>('.skill-group').forEach(group => {
-        group.classList.remove('visible');
-        void group.offsetWidth; // force reflow to restart transition
-        requestAnimationFrame(() => group.classList.add('visible'));
-      });
-    };
-
-    window.addEventListener('sectionenter', onEnter);
-
-    // Also run on leave to reset
-    const onLeave = (e: Event) => {
-      if ((e as CustomEvent).detail?.id !== 'skills') return;
-      document.querySelectorAll('.skill-group').forEach(g => g.classList.remove('visible'));
-    };
-    window.addEventListener('sectionleave', onLeave);
-
-    return () => {
-      window.removeEventListener('sectionenter', onEnter);
-      window.removeEventListener('sectionleave', onLeave);
-    };
-  }, []);
 
   return (
     <section className="skills" id="skills">

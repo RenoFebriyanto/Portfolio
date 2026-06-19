@@ -265,6 +265,14 @@
     color: var(--text-muted);
 }
 
+.form-error {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: #ff6b6b;
+    margin-top: -2px;
+}
+
 .form-input, .form-textarea {
     width: 100%;
     background: var(--bg-elevated);

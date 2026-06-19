@@ -21,14 +21,28 @@ export function Contact() {
       setErrors(prev => ({ ...prev, [field]: '' }));
     };
 
-  const validate = () => {
-    const e: Partial<typeof form> = {};
-    if (!form.name.trim())    e.name    = 'Required';
-    if (!form.email.trim())   e.email   = 'Required';
-    if (!form.message.trim()) e.message = 'Required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const validate = () => {
+  const e: Partial<typeof form> = {};
+
+  if (!form.name.trim()) {
+    e.name = 'Please enter your name';
+  }
+
+  if (!form.email.trim()) {
+    e.email = 'Please enter your email';
+  } else if (!EMAIL_RE.test(form.email.trim())) {
+    e.email = 'Please enter a valid email address';
+  }
+
+  if (!form.message.trim()) {
+    e.message = 'Please write a message';
+  }
+
+  setErrors(e);
+  return Object.keys(e).length === 0;
+};
 
   const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
@@ -127,27 +141,37 @@ export function Contact() {
                 <form id="contact-form" onSubmit={handleSubmit} noValidate>
                   <div className="form-row">
                     <div className="form-field row-field">
-                      <label className="form-label" htmlFor="cf-name">Name</label>
-                      <input
-                        className="form-input"
-                        id="cf-name" type="text"
-                        placeholder="Your name"
-                        value={form.name}
-                        onChange={set('name')}
-                        style={errors.name ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
-                      />
-                    </div>
-                    <div className="form-field row-field">
-                      <label className="form-label" htmlFor="cf-email">Email</label>
-                      <input
-                        className="form-input"
-                        id="cf-email" type="email"
-                        placeholder="your@email.com"
-                        value={form.email}
-                        onChange={set('email')}
-                        style={errors.email ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
-                      />
-                    </div>
+                        <label className="form-label" htmlFor="cf-name">Name</label>
+                        <input
+                          className="form-input"
+                          id="cf-name" type="text"
+                          placeholder="Your name"
+                          value={form.name}
+                          onChange={set('name')}
+                          aria-invalid={!!errors.name}
+                          aria-describedby={errors.name ? 'cf-name-error' : undefined}
+                          style={errors.name ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                        />
+                        {errors.name && (
+                          <span className="form-error" id="cf-name-error">{errors.name}</span>
+                        )}
+                      </div>
+                      <div className="form-field row-field">
+                        <label className="form-label" htmlFor="cf-email">Email</label>
+                        <input
+                          className="form-input"
+                          id="cf-email" type="email"
+                          placeholder="your@email.com"
+                          value={form.email}
+                          onChange={set('email')}
+                          aria-invalid={!!errors.email}
+                          aria-describedby={errors.email ? 'cf-email-error' : undefined}
+                          style={errors.email ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                        />
+                        {errors.email && (
+                          <span className="form-error" id="cf-email-error">{errors.email}</span>
+                        )}
+                      </div>
                   </div>
 
                   <div className="form-field">
@@ -162,16 +186,21 @@ export function Contact() {
                   </div>
 
                   <div className="form-field">
-                    <label className="form-label" htmlFor="cf-message">Message</label>
-                    <textarea
-                      className="form-textarea"
-                      id="cf-message"
-                      placeholder="Tell me about your project or idea…"
-                      value={form.message}
-                      onChange={set('message')}
-                      style={errors.message ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
-                    />
-                  </div>
+                        <label className="form-label" htmlFor="cf-message">Message</label>
+                        <textarea
+                          className="form-textarea"
+                          id="cf-message"
+                          placeholder="Tell me about your project or idea…"
+                          value={form.message}
+                          onChange={set('message')}
+                          aria-invalid={!!errors.message}
+                          aria-describedby={errors.message ? 'cf-message-error' : undefined}
+                          style={errors.message ? { borderColor: 'rgba(255,80,80,0.6)' } : undefined}
+                        />
+                        {errors.message && (
+                          <span className="form-error" id="cf-message-error">{errors.message}</span>
+                        )}
+                      </div>
 
                   <button
                     className="form-submit"
