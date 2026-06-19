@@ -73,10 +73,8 @@
   align-content: center;
 }
 
-[data-page="biograph-horizon"] .bh-panel .bh-viewer {
-  height: 100%;
-  min-height: unset;
-  justify-content: center;
+[data-page="biograph-horizon"] .bh-panel--scroll .bh-viewer {
+  padding-top: 100px;
 }
 
 [data-page="biograph-horizon"] .bh-panel--scroll > * {

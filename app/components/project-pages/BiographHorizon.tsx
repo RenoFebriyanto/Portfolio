@@ -5,13 +5,15 @@ import { useProjectSnap, PROJECT_ENTER, PROJECT_LEAVE } from '~/hooks/useProject
 import { BiographViewer } from './BiographViewer';
 import '~/styles/biograph-horizon.css';
 
-/* ── Panel definitions ── */
+/* ── Panel definitions — DEFINISIKAN DI LUAR KOMPONEN agar referensi stabil ── */
+// FIX BUG 1: BH_PANELS di luar komponen → array tidak dibuat ulang tiap render,
+// dan [...BH_PANELS] tidak perlu lagi karena langsung pakai konstanta ini.
 const BH_PANELS = [
   { id: 'bh-hero',     label: 'Hero',      scrollable: false },
   { id: 'bh-overview', label: 'Overview',  scrollable: false },
   { id: 'bh-gallery',  label: 'Gallery',   scrollable: true  },
   { id: 'bh-bts',      label: 'Process',   scrollable: true  },
-  { id: 'bh-viewer',   label: '3D View',   scrollable: false },
+  { id: 'bh-viewer',   label: '3D View',   scrollable: true },
   { id: 'bh-specs',    label: 'Specs',     scrollable: true  },
 ] as const;
 
@@ -121,9 +123,12 @@ function BhPanel({
 ════════════════════════════════════════ */
 export function BiographHorizonDetail() {
   const pageRef = useRef<HTMLDivElement>(null);
-  const { currentIdx, goTo, registerPanel } = useProjectSnap([...BH_PANELS]);
 
-  /* ── Lock body scroll for snap system, restore on unmount ── */
+  // FIX BUG 1: Langsung pass BH_PANELS (konstanta di luar komponen),
+  // tidak pakai [...BH_PANELS] spread yang buat array baru tiap render.
+  const { currentIdx, goTo, registerPanel } = useProjectSnap(BH_PANELS as unknown as { id: string; label: string; scrollable?: boolean }[]);
+
+  /* ── Lock body scroll untuk snap system ── */
   useEffect(() => {
     const body = document.body;
     const html = document.documentElement;
@@ -149,7 +154,7 @@ export function BiographHorizonDetail() {
     return () => { document.title = prev; };
   }, []);
 
-  /* ── ALL ANIMATIONS — GSAP, event-driven per panel ── */
+  /* ── ALL ANIMATIONS ── */
   useGSAP(() => {
 
     const onEnter = (e: Event) => {
@@ -163,24 +168,66 @@ export function BiographHorizonDetail() {
 
       /* ── HERO ── */
       if (id === 'bh-hero') {
-        /* Cinematic bg drift — kill on leave */
-        gsap.to(panel.querySelector('.bh-hero-parallax'), {
-          yPercent: -4, duration: 20,
-          ease: 'sine.inOut', yoyo: true, repeat: -1,
-          overwrite: true,
-        });
+        const parallax  = panel.querySelector<HTMLElement>('.bh-hero-parallax');
+        const eyebrow   = panel.querySelector<HTMLElement>('.bh-hero-eyebrow');
+        const titleLines = Array.from(panel.querySelectorAll<HTMLElement>('.bh-hero-title-line span'));
+        const sub       = panel.querySelector<HTMLElement>('.bh-hero-sub');
+        const meta      = panel.querySelector<HTMLElement>('.bh-hero-meta');
+        const scroll    = panel.querySelector<HTMLElement>('.bh-hero-scroll');
 
-        gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.15 })
-          .from(panel.querySelector('.bh-hero-eyebrow'),
-            { y: 24, autoAlpha: 0, duration: 0.7 })
-          .from(panel.querySelectorAll('.bh-hero-title-line span'),
-            { yPercent: 110, duration: 0.9, stagger: 0.14 }, '-=0.4')
-          .from(panel.querySelector('.bh-hero-sub'),
-            { y: 20, autoAlpha: 0, duration: 0.7 }, '-=0.5')
-          .from(panel.querySelector('.bh-hero-meta'),
-            { y: 16, autoAlpha: 0, duration: 0.65 }, '-=0.45')
-          .from(panel.querySelector('.bh-hero-scroll'),
-            { y: 8, autoAlpha: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2');
+        // Parallax drift
+        if (parallax) {
+          gsap.killTweensOf(parallax);
+          gsap.to(parallax, {
+            yPercent: -4, duration: 20,
+            ease: 'sine.inOut', yoyo: true, repeat: -1,
+          });
+        }
+
+        // FIX: Gunakan set() untuk initial state SEBELUM timeline berjalan,
+        // lalu to() menuju final state. Ini memastikan elemen ter-set
+        // bahkan ketika panel baru saja menjadi visible.
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.1 });
+
+        if (eyebrow) {
+          gsap.set(eyebrow, { y: 24, autoAlpha: 0 });
+          tl.to(eyebrow, { y: 0, autoAlpha: 1, duration: 0.7 });
+        }
+
+        if (titleLines.length > 0) {
+          // Set overflow visible pada title container agar clip tidak memotong
+          // elemen saat yPercent > 0 (sebelum animasi mulai)
+          panel.querySelectorAll<HTMLElement>('.bh-hero-title-line').forEach(el => {
+            el.style.overflow = 'visible';
+          });
+          gsap.set(titleLines, { yPercent: 105, autoAlpha: 0 });
+          tl.to(titleLines, {
+            yPercent: 0, autoAlpha: 1,
+            duration: 0.9, stagger: 0.14,
+            onComplete: () => {
+              // Kembalikan overflow ke hidden setelah animasi selesai
+              panel.querySelectorAll<HTMLElement>('.bh-hero-title-line').forEach(el => {
+                el.style.overflow = '';
+              });
+            },
+          }, '-=0.4');
+        }
+
+        if (sub) {
+          gsap.set(sub, { y: 20, autoAlpha: 0 });
+          tl.to(sub, { y: 0, autoAlpha: 1, duration: 0.7 }, '-=0.5');
+        }
+
+        if (meta) {
+          gsap.set(meta, { y: 16, autoAlpha: 0 });
+          tl.to(meta, { y: 0, autoAlpha: 1, duration: 0.65 }, '-=0.45');
+        }
+
+        if (scroll) {
+          gsap.set(scroll, { y: 8, autoAlpha: 0 });
+          tl.to(scroll, { y: 0, autoAlpha: 1, duration: 0.5, ease: 'power2.out' }, '-=0.2');
+        }
+
         return;
       }
 
@@ -199,7 +246,7 @@ export function BiographHorizonDetail() {
               if (isNaN(end)) return;
               const obj = { val: 0 };
               gsap.to(obj, {
-                val: end, duration: 1.4, ease: 'power2.out', overwrite: true,
+                val: end, duration: 1.4, ease: 'power2.out',
                 onUpdate() { el.textContent = `${Math.round(obj.val)}${suffix}`; },
               });
             });
@@ -207,34 +254,40 @@ export function BiographHorizonDetail() {
         return;
       }
 
-      /* ── DEFAULT: stagger all .bh-anim elements inside the panel ── */
+      /* ── DEFAULT: stagger .bh-anim elements ── */
       const anims = panel.querySelectorAll<HTMLElement>('.bh-anim');
       if (anims.length) {
+        // FIX: Set autoAlpha 0 dulu sebelum animate, pastikan tidak stuck di state lama
+        gsap.set(anims, { clearProps: 'all' });
         gsap.from(anims, {
           y: 28, autoAlpha: 0,
           duration: 0.75, stagger: 0.1,
-          ease: 'power3.out', overwrite: true, delay: 0.1,
+          ease: 'power3.out', delay: 0.1,
         });
       }
     };
 
     const onLeave = (e: Event) => {
       const { id } = (e as CustomEvent).detail as { id: string };
-      /* Kill bg drift when leaving hero */
       if (id === 'bh-hero') {
         const panel = pageRef.current?.querySelector<HTMLElement>(`[data-panel-id="${id}"]`);
-        if (panel) gsap.killTweensOf(panel.querySelector('.bh-hero-parallax'));
+        if (panel) {
+          const parallax = panel.querySelector('.bh-hero-parallax');
+          if (parallax) gsap.killTweensOf(parallax);
+        }
       }
     };
 
-    /* Auto-trigger first panel */
-    requestAnimationFrame(() => {
+    /* Auto-trigger first panel — tambah delay agar panel sudah visible
+       sebelum GSAP set() initial states dipanggil */
+    const initTimer = setTimeout(() => {
       window.dispatchEvent(new CustomEvent(PROJECT_ENTER, { detail: { id: 'bh-hero' } }));
-    });
+    }, 80);
 
     window.addEventListener(PROJECT_ENTER, onEnter);
     window.addEventListener(PROJECT_LEAVE, onLeave);
     return () => {
+      clearTimeout(initTimer);
       window.removeEventListener(PROJECT_ENTER, onEnter);
       window.removeEventListener(PROJECT_LEAVE, onLeave);
     };
@@ -247,7 +300,7 @@ export function BiographHorizonDetail() {
   return (
     <div data-page="biograph-horizon">
 
-      {/* ── Fixed nav (outside pageRef, position:fixed) ── */}
+      {/* ── Fixed nav ── */}
       <nav className="bh-nav">
         <Link to="/" className="bh-nav-back">
           <span className="bh-nav-back-arrow">←</span> Back to Portfolio
@@ -315,7 +368,6 @@ export function BiographHorizonDetail() {
               </div>
             </div>
 
-            {/* Click advances to next panel */}
             <div
               className="bh-hero-scroll"
               role="button" tabIndex={0} aria-label="Next section"

@@ -12,9 +12,22 @@ const NAV_COOL  = 800;
 export const PROJECT_ENTER = 'projectenter';
 export const PROJECT_LEAVE = 'projectleave';
 
-function isAtTop(el: HTMLElement)    { return el.scrollTop <= 2; }
+function isAtTop(el: HTMLElement) {
+  return el.scrollTop <= 4;
+}
+
 function isAtBottom(el: HTMLElement) {
-  return el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+  // Tambah threshold lebih besar (8px) untuk handle sub-pixel rendering
+  // dan kasus di mana konten pas-pasan / sedikit overflow
+  return el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+}
+
+/**
+ * Cek apakah panel benar-benar BISA di-scroll (ada overflow content).
+ * Panel scrollable: true tapi konten pendek → langsung treat sebagai non-scrollable.
+ */
+function hasScrollableContent(el: HTMLElement): boolean {
+  return el.scrollHeight > el.clientHeight + 8;
 }
 
 export function useProjectSnap(panels: ProjectPanel[]) {
@@ -24,6 +37,13 @@ export function useProjectSnap(panels: ProjectPanel[]) {
   const currentIdxRef = useRef(0);
   const panelsRef     = useRef<Map<string, HTMLElement>>(new Map());
 
+  // FIX BUG 1: Simpan panels ke ref yang stabil agar useEffect tidak
+  // re-register setiap render ketika parent pass array literal baru.
+  const panelDefsRef = useRef(panels);
+  useEffect(() => {
+    panelDefsRef.current = panels;
+  }, [panels]);
+
   const getPanel = useCallback((id: string) => panelsRef.current.get(id), []);
 
   const setPanelVisible = (el: HTMLElement, visible: boolean) => {
@@ -31,6 +51,7 @@ export function useProjectSnap(panels: ProjectPanel[]) {
   };
 
   const goTo = useCallback((toIdx: number, dir?: 'next' | 'prev') => {
+    const panels = panelDefsRef.current;
     if (toIdx < 0 || toIdx >= panels.length) return;
     const now = performance.now();
     if (isAnimating.current || now - lastNav.current < NAV_COOL) return;
@@ -86,31 +107,39 @@ export function useProjectSnap(panels: ProjectPanel[]) {
       toEl.style.pointerEvents = '';
       isAnimating.current      = false;
     }, TRANS_DUR + 60);
-  }, [panels, getPanel]);
+  // FIX BUG 1: Hapus 'panels' dari deps, pakai panelDefsRef saja
+  }, [getPanel]);
 
   const next = useCallback(() => goTo(currentIdxRef.current + 1, 'next'), [goTo]);
   const prev = useCallback(() => goTo(currentIdxRef.current - 1, 'prev'), [goTo]);
 
   const registerPanel = useCallback((id: string, el: HTMLElement | null) => {
+    const panels = panelDefsRef.current;
     if (el) {
       panelsRef.current.set(id, el);
       setPanelVisible(el, id === panels[0]?.id);
     } else {
       panelsRef.current.delete(id);
     }
-  }, [panels]);
+  // FIX BUG 1: Tidak butuh panels di deps, pakai panelDefsRef
+  }, []);
 
   /* ── Wheel ── */
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       if (isAnimating.current) { e.preventDefault(); return; }
+
       const idx   = currentIdxRef.current;
-      const panel = panels[idx];
+      const panel = panelDefsRef.current[idx];
       const el    = getPanel(panel.id);
-      if (el && panel.scrollable) {
-        if (e.deltaY > 0 && !isAtBottom(el)) return;
-        if (e.deltaY < 0 && !isAtTop(el))    return;
+
+      // FIX BUG 2 & 3: Cek apakah panel BENAR-BENAR punya scrollable content.
+      // Kalau panel.scrollable tapi konten tidak overflow → langsung snap.
+      if (el && panel.scrollable && hasScrollableContent(el)) {
+        if (e.deltaY > 0 && !isAtBottom(el)) return; // masih bisa scroll down
+        if (e.deltaY < 0 && !isAtTop(el))    return; // masih bisa scroll up
       }
+
       e.preventDefault();
       const now = performance.now();
       if (now - lastNav.current < NAV_COOL) return;
@@ -118,7 +147,8 @@ export function useProjectSnap(panels: ProjectPanel[]) {
     };
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
-  }, [next, prev, getPanel, panels]);
+  // FIX BUG 1: Tidak ada 'panels' di deps, hanya fungsi stabil
+  }, [next, prev, getPanel]);
 
   /* ── Touch ── */
   useEffect(() => {
@@ -129,16 +159,19 @@ export function useProjectSnap(panels: ProjectPanel[]) {
       const dy  = startY - e.changedTouches[0].clientY;
       const now = performance.now();
       if (Math.abs(dy) < 60 || now - lastNav.current < NAV_COOL) return;
+
       const idx   = currentIdxRef.current;
-      const panel = panels[idx];
+      const panel = panelDefsRef.current[idx];
       const el    = getPanel(panel.id);
+
+      // FIX BUG 2 & 3: Sama — cek hasScrollableContent dulu
       if (dy > 0) {
-        if (idx >= panels.length - 1) return;
-        if (el && panel.scrollable && !isAtBottom(el)) return;
+        if (idx >= panelDefsRef.current.length - 1) return;
+        if (el && panel.scrollable && hasScrollableContent(el) && !isAtBottom(el)) return;
         next();
       } else {
         if (idx <= 0) return;
-        if (el && panel.scrollable && !isAtTop(el)) return;
+        if (el && panel.scrollable && hasScrollableContent(el) && !isAtTop(el)) return;
         prev();
       }
     };
@@ -148,7 +181,7 @@ export function useProjectSnap(panels: ProjectPanel[]) {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchend',   onTouchEnd);
     };
-  }, [next, prev, getPanel, panels]);
+  }, [next, prev, getPanel]);
 
   /* ── Keyboard ── */
   useEffect(() => {
@@ -157,26 +190,29 @@ export function useProjectSnap(panels: ProjectPanel[]) {
       if (tag === 'input' || tag === 'textarea') return;
       const now = performance.now();
       if (isAnimating.current || now - lastNav.current < NAV_COOL) return;
+
       const idx   = currentIdxRef.current;
-      const panel = panels[idx];
+      const panel = panelDefsRef.current[idx];
       const el    = getPanel(panel.id);
+      const scrollable = el && panel.scrollable && hasScrollableContent(el);
+
       if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-        if (el && panel.scrollable && !isAtBottom(el)) return;
+        if (scrollable && !isAtBottom(el!)) return;
         e.preventDefault();
-        if (idx < panels.length - 1) next();
+        if (idx < panelDefsRef.current.length - 1) next();
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-        if (el && panel.scrollable && !isAtTop(el)) return;
+        if (scrollable && !isAtTop(el!)) return;
         e.preventDefault();
         if (idx > 0) prev();
       } else if (e.key === 'Home') {
         e.preventDefault(); goTo(0, 'prev');
       } else if (e.key === 'End') {
-        e.preventDefault(); goTo(panels.length - 1, 'next');
+        e.preventDefault(); goTo(panelDefsRef.current.length - 1, 'next');
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, prev, goTo, getPanel, panels]);
+  }, [next, prev, goTo, getPanel]);
 
   return { currentIdx, goTo, next, prev, registerPanel };
 }
