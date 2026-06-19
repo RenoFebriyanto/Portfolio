@@ -54,20 +54,21 @@ export const projects: Project[] = [
     accentColor:   '#359aff',
   },
   {
-    slug:          '3d-scene-art',
-    title:         '3D Scene / Art',
+    slug:          'biographhorizon',
+    title:         'Biograph Horizon',
     category:      '3d',
     categoryLabel: '3D Art',
     description:
-      'Environment art and product renders exploring material studies, lighting rigs, and procedural texturing pipelines in Blender.',
+      'Cinematic medical-equipment render exploring material studies, studio lighting, and procedural texturing — fully modeled and rendered in Blender Cycles.',
     tags:          ['Blender', 'Cycles', 'Substance Painter'],
-    sceneType:     'art',
-    modelPath:     '/Assets/project/3d/3dSphere.glb',
-    previewImage:  '/Assets/project/game/ForbiddenSpace/ForbiddenSpacePreview.png',
+    sceneType:     'art',          // ← ada di interface data/projects.ts
+    modelPath:     '/models/Biograph.glb',
+    previewImage:  '/Assets/images/BiographHorizon.png',
+    detailPath:    '/projects/biographhorizon',
     status:        'completed',
     statusLabel:   'Completed',
     year:          2025,
-    accentColor:   '#a78bfa',
+    accentColor:   '#C9912B',
   },
   {
     slug:          'shader-experiment',

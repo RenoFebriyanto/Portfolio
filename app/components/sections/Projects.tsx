@@ -45,6 +45,7 @@ const PROJECTS: Project[] = [
     year:          2025,
   },
   {
+    id:            2,
     slug:          'biographhorizon',
     title:         'Biograph Horizon',
     category:      '3d',
@@ -52,7 +53,6 @@ const PROJECTS: Project[] = [
     description:
       'Cinematic medical-equipment render exploring material studies, studio lighting, and procedural texturing in Blender Cycles.',
     tags:          ['Blender', 'Cycles', 'Substance Painter'],
-    sceneType:     'art',
     modelPath:     '/models/Biograph.glb',
     previewImage:  '/Assets/images/BiographHorizon.png',
     detailPath:    '/projects/biographhorizon',

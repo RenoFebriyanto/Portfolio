@@ -6,24 +6,30 @@ const DRAG_SPEED  = 0.007;
 const DRAG_DAMP   = 0.88;
 
 export function BiographViewer() {
-  const wrapRef   = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapRef        = useRef<HTMLDivElement>(null);
+  const canvasRef      = useRef<HTMLCanvasElement>(null);
   const initializedRef = useRef(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const wrap   = wrapRef.current;
     const canvas = canvasRef.current;
+
+    // ── Early guard — TypeScript + runtime safety ──
     if (!wrap || !canvas) return;
     if (initializedRef.current) return;
     initializedRef.current = true;
 
+    // Typed local copies (non-null, used everywhere below)
+    const wrapEl:   HTMLDivElement    = wrap;
+    const canvasEl: HTMLCanvasElement = canvas;
+
     let destroyed = false;
-    let renderer: any = null;
-    let scene: any = null;
-    let camera: any = null;
-    let mesh: any = null;
-    let animId: number | null = null;
+    let renderer: any          = null;
+    let scene: any             = null;
+    let camera: any            = null;
+    let mesh: any              = null;
+    let animId: number | null  = null;
     let ro: ResizeObserver | null = null;
 
     let isDragging = false;
@@ -36,7 +42,8 @@ export function BiographViewer() {
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       if (destroyed) return;
 
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      // canvas is HTMLCanvasElement — satisfies WebGLRenderer({ canvas })
+      renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace    = THREE.SRGBColorSpace;
@@ -60,28 +67,29 @@ export function BiographViewer() {
 
       function resize() {
         if (!renderer || !camera) return;
-        const w = wrap!.clientWidth;
-        const h = wrap!.clientHeight || w;
+        const w = wrapEl.clientWidth;
+        const h = wrapEl.clientHeight || w;
         renderer.setSize(w, h, false);
         camera.aspect = w / (h || 1);
         camera.updateProjectionMatrix();
       }
+      // wrapEl is HTMLDivElement — satisfies Element
       ro = new ResizeObserver(resize);
-      ro.observe(wrap);
+      ro.observe(wrapEl);
       resize();
 
       function frameObject(object: any, fitOffset = 1.4) {
-        const box  = new THREE.Box3().setFromObject(object);
-        const size = box.getSize(new THREE.Vector3());
+        const box     = new THREE.Box3().setFromObject(object);
+        const size    = box.getSize(new THREE.Vector3());
         const maxSize = Math.max(size.x, size.y, size.z);
         if (!isFinite(maxSize) || maxSize <= 0) return;
 
         const center = box.getCenter(new THREE.Vector3());
         object.position.sub(center);
 
-        const fovRad = (camera.fov * Math.PI) / 180;
-        const fitH = (maxSize / 2) / Math.tan(fovRad / 2);
-        const fitW = fitH / camera.aspect;
+        const fovRad   = (camera.fov * Math.PI) / 180;
+        const fitH     = (maxSize / 2) / Math.tan(fovRad / 2);
+        const fitW     = fitH / camera.aspect;
         const distance = fitOffset * Math.max(fitH, fitW);
 
         camera.position.set(0, 0, distance);
@@ -132,11 +140,12 @@ export function BiographViewer() {
       }
       tick();
 
+      // ── Event handlers — canvasEl is guaranteed non-null ──
       const onDown = (e: MouseEvent) => {
-        isDragging = true;
-        prevMouse  = { x: e.clientX, y: e.clientY };
-        rotVel     = { x: 0, y: 0 };
-        canvas!.style.cursor = 'grabbing';
+        isDragging          = true;
+        prevMouse           = { x: e.clientX, y: e.clientY };
+        rotVel              = { x: 0, y: 0 };
+        canvasEl.style.cursor = 'grabbing';
       };
       const onMove = (e: MouseEvent) => {
         if (!isDragging || !mesh) return;
@@ -146,17 +155,20 @@ export function BiographViewer() {
         mesh.rotation.x += rotVel.x;
         prevMouse = { x: e.clientX, y: e.clientY };
       };
-      const onUp = () => { isDragging = false; if (canvas) canvas.style.cursor = 'grab'; };
+      const onUp = () => {
+        isDragging            = false;
+        canvasEl.style.cursor = 'grab';
+      };
 
-      canvas.addEventListener('mousedown', onDown);
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
+      canvasEl.addEventListener('mousedown', onDown);
+      window.addEventListener('mousemove',   onMove);
+      window.addEventListener('mouseup',     onUp);
 
       let tp = { x: 0, y: 0 };
       const onTStart = (e: TouchEvent) => {
         isDragging = true;
-        tp = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        rotVel = { x: 0, y: 0 };
+        tp         = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        rotVel     = { x: 0, y: 0 };
       };
       const onTMove = (e: TouchEvent) => {
         if (!isDragging || !mesh) return;
@@ -168,28 +180,29 @@ export function BiographViewer() {
       };
       const onTEnd = () => { isDragging = false; };
 
-      canvas.addEventListener('touchstart', onTStart, { passive: true });
-      canvas.addEventListener('touchmove',  onTMove,  { passive: true });
-      canvas.addEventListener('touchend',   onTEnd);
+      canvasEl.addEventListener('touchstart', onTStart, { passive: true });
+      canvasEl.addEventListener('touchmove',  onTMove,  { passive: true });
+      canvasEl.addEventListener('touchend',   onTEnd);
 
-      (wrap as any).__bhCleanup = () => {
-        canvas!.removeEventListener('mousedown', onDown);
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup',   onUp);
-        canvas!.removeEventListener('touchstart', onTStart);
-        canvas!.removeEventListener('touchmove',  onTMove);
-        canvas!.removeEventListener('touchend',   onTEnd);
+      // Store cleanup on wrapEl for the return callback below
+      (wrapEl as any).__bhCleanup = () => {
+        canvasEl.removeEventListener('mousedown',  onDown);
+        window.removeEventListener('mousemove',    onMove);
+        window.removeEventListener('mouseup',      onUp);
+        canvasEl.removeEventListener('touchstart', onTStart);
+        canvasEl.removeEventListener('touchmove',  onTMove);
+        canvasEl.removeEventListener('touchend',   onTEnd);
       };
     }
 
     init();
 
     return () => {
-      destroyed = true;
+      destroyed              = true;
       initializedRef.current = false;
       if (animId !== null) cancelAnimationFrame(animId);
       ro?.disconnect();
-      (wrap as any).__bhCleanup?.();
+      (wrapEl as any).__bhCleanup?.();
       if (renderer) { renderer.dispose(); renderer = null; }
     };
   }, []);
