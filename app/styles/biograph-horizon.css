@@ -20,11 +20,111 @@
 /* ── Page Shell ── */
 [data-page="biograph-horizon"] .bh-page {
   background: #04040A;
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
+  color: var(--text-primary);min-height: unset;
+  overflow: hidden;
+  height: 100%;
+  
 }
+
+[data-page="biograph-horizon"] .bh-panel {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+[data-page="biograph-horizon"] .bh-panel--scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-page="biograph-horizon"] .bh-panel--scroll::-webkit-scrollbar { width: 3px; }
+[data-page="biograph-horizon"] .bh-panel--scroll::-webkit-scrollbar-track { background: transparent; }
+[data-page="biograph-horizon"] .bh-panel--scroll::-webkit-scrollbar-thumb {
+  background: var(--bh-gray);
+  border-radius: 2px;
+}
+
+
+[data-page="biograph-horizon"] .bh-panel[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+[data-page="biograph-horizon"] .bh-panel[data-visible="false"] {
+  z-index: 0;
+}
+
+/* ── Section height di dalam panel ── */
+[data-page="biograph-horizon"] .bh-panel .bh-hero {
+  height: 100%;
+  min-height: unset;
+}
+
+[data-page="biograph-horizon"] .bh-panel .bh-overview {
+  height: 100%;
+  min-height: unset;
+  align-content: center;
+}
+
+[data-page="biograph-horizon"] .bh-panel .bh-viewer {
+  height: 100%;
+  min-height: unset;
+  justify-content: center;
+}
+
+[data-page="biograph-horizon"] .bh-panel--scroll > * {
+  padding-bottom: var(--space-3xl, 96px);
+}
+
+
+/* ════════════════════════════════════════
+   DOT NAVIGATION — gold theme
+════════════════════════════════════════ */
+[data-page="biograph-horizon"] .bh-dot-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+  pointer-events: none;
+}
+
+[data-page="biograph-horizon"] .bh-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(201, 145, 43, 0.35);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    background     0.35s ease,
+    height         0.35s ease,
+    border-radius  0.35s ease;
+}
+
+[data-page="biograph-horizon"] .bh-dot.active {
+  background: var(--bh-gold);
+  height: 20px;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(201, 145, 43, 0.5);
+}
+
+[data-page="biograph-horizon"] .bh-dot:hover:not(.active) {
+  background: rgba(201, 145, 43, 0.6);
+}
+
 
 /* ── NAV ── */
 [data-page="biograph-horizon"] .bh-nav {
@@ -158,14 +258,6 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
-}
-
-[data-page="biograph-horizon"] .bh-hero-eyebrow.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 [data-page="biograph-horizon"] .bh-hero-eyebrow-line {
@@ -202,14 +294,6 @@
 
 [data-page="biograph-horizon"] .bh-hero-title-line span {
   display: block;
-  transform: translateY(110%);
-  opacity: 0;
-  transition: transform 0.85s cubic-bezier(0.16,1,0.3,1), opacity 0.6s ease;
-}
-
-[data-page="biograph-horizon"] .bh-hero-title-line.visible span {
-  transform: translateY(0);
-  opacity: 1;
 }
 
 [data-page="biograph-horizon"] .bh-hero-title .gold { color: var(--bh-gold); }
@@ -221,28 +305,12 @@
   color: rgba(245,245,240,0.65);
   max-width: 520px;
   margin-bottom: 40px;
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.7s ease 0.8s, transform 0.7s ease 0.8s;
-}
-
-[data-page="biograph-horizon"] .bh-hero-sub.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 [data-page="biograph-horizon"] .bh-hero-meta {
   display: flex;
   align-items: center;
   gap: 32px;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.7s ease 1s, transform 0.7s ease 1s;
-}
-
-[data-page="biograph-horizon"] .bh-hero-meta.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 [data-page="biograph-horizon"] .bh-meta-item {
@@ -282,8 +350,6 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  opacity: 0;
-  transition: opacity 0.6s ease 1.4s;
 }
 
 [data-page="biograph-horizon"] .bh-hero-scroll.visible {
@@ -929,24 +995,6 @@
   transform: translateX(-3px);
 }
 
-/* ════════════════════════════════════════
-   REVEAL SYSTEM
-════════════════════════════════════════ */
-[data-page="biograph-horizon"] .bh-reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
-}
-
-[data-page="biograph-horizon"] .bh-reveal.bh-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-[data-page="biograph-horizon"] .bh-reveal-d1 { transition-delay: 0.1s; }
-[data-page="biograph-horizon"] .bh-reveal-d2 { transition-delay: 0.2s; }
-[data-page="biograph-horizon"] .bh-reveal-d3 { transition-delay: 0.3s; }
-[data-page="biograph-horizon"] .bh-reveal-d4 { transition-delay: 0.4s; }
 
 /* ── Parallax wrapper untuk hero background ── */
 [data-page="biograph-horizon"] .bh-hero-parallax {
@@ -961,9 +1009,17 @@
   color: var(--bh-gold);
 }
 
+
+
 /* ════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════ */
+
+
+@media (max-width: 768px) {
+  [data-page="biograph-horizon"] .bh-dot-nav { display: none; }
+}
+
 @media (max-width: 900px) {
   [data-page="biograph-horizon"] .bh-hero-content { padding: 0 32px 64px; }
   [data-page="biograph-horizon"] .bh-hero-scroll  { right: 32px; }

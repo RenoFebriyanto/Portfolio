@@ -39,7 +39,11 @@ body.route-project {
     overflow-x: hidden;
 }
 
-
+/* Override html height constraint untuk project pages agar konten bisa scroll */
+html:has(body.route-project) {
+  height: auto;
+  overflow-y: auto;
+}
 
 a {
     color: inherit;
