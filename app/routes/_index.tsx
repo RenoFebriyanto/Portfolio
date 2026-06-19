@@ -24,28 +24,6 @@ export default function Index() {
     };
   }, [currentIdx, goTo]);
 
-  // Nav link override — anchor clicks → snap navigation
-  useEffect(() => {
-    const links = document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]');
-    const handlers = new Map<HTMLAnchorElement, (e: Event) => void>();
-
-    links.forEach(link => {
-      const targetId = link.getAttribute('href')?.replace('#', '');
-      const idx = sections.findIndex(s => s.id === targetId);
-      if (idx === -1) return;
-      const handler = (e: Event) => {
-        e.preventDefault();
-        goTo(idx, idx > currentIdx ? 'next' : 'prev');
-      };
-      link.addEventListener('click', handler);
-      handlers.set(link, handler);
-    });
-
-    return () => {
-      handlers.forEach((handler, link) => link.removeEventListener('click', handler));
-    };
-  }, [sections, goTo, currentIdx]);
-
   return (
     <>
       {/* Background layers */}

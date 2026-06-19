@@ -34,6 +34,22 @@
   background: var(--text-secondary);
 }
 
+.snap-panel--scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Inner <section> sizing — dipindah dari base.css (satu-satunya tempat) */
+.snap-panel > section {
+  width: 100%;
+  min-height: 100%;
+}
+
+.snap-panel:not(.snap-panel--scroll) > section {
+  height: 100%;
+  min-height: unset;
+  overflow: hidden;
+}
+
 /* Visible state — set via data-visible="true" oleh usePageSnap */
 .snap-panel[data-visible="true"] {
   opacity: 1;

@@ -21,19 +21,16 @@ export default function Nav() {
     return () => window.removeEventListener("sectionenter", onEnter);
   }, []);
 
+  const SECTION_IDS = ["hero", "about", "projects", "skills", "contact"];
+
   const navigateTo = (id: string) => {
-    // Dispatch a click-equivalent via anchor href="#id"
-    // usePageSnap's nav-link override picks this up
-    const anchor = document.querySelector<HTMLAnchorElement>(`a[href="#${id}"]`);
-    if (anchor) {
-      anchor.click();
-    } else {
-      // Fallback: use PageNav if available
-      const nav = (window as unknown as Record<string, { goTo?: (i: number) => void }>).PageNav;
-      const idx = ["hero", "about", "projects", "skills", "contact"].indexOf(id);
-      if (nav?.goTo && idx !== -1) nav.goTo(idx);
-    }
-  };
+  // Langsung pakai window.PageNav (di-expose oleh _index.tsx) —
+  // tidak perlu lagi cari & klik ulang anchor (rawan rekursi
+  // karena anchor Nav sendiri bisa ke-match oleh querySelector).
+  const nav = (window as unknown as Record<string, { goTo?: (i: number) => void }>).PageNav;
+  const idx = SECTION_IDS.indexOf(id);
+  if (nav?.goTo && idx !== -1) nav.goTo(idx);
+};
 
   return (
     <nav className={`nav${scrolled ? " scrolled" : ""}`} id="nav">

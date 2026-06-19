@@ -42,12 +42,7 @@
 
 @keyframes shimmer-sweep { to { left: 140%; } }
 
-/* Section divider animated */
-.section-label-line {
-    width: 0;
-    transition: width 0.8s var(--ease-smooth) 0.35s;
-}
-.section-label.visible .section-label-line { width: 40px; }
+
 
 /* Project card tilt */
 .project-card {

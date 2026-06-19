@@ -17,10 +17,10 @@ export default function ProjectSlug() {
   if (!project) {
     return (
       <div style={{ padding: '120px 40px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>
           PROJECT NOT FOUND
         </p>
-        <a href="/" style={{ color: 'var(--color-accent)', marginTop: '24px', display: 'inline-block' }}>
+        <a href="/" style={{ color: 'var(--accent-primary)', marginTop: '24px', display: 'inline-block' }}>
           ← Back to Portfolio
         </a>
       </div>
@@ -51,7 +51,7 @@ export default function ProjectSlug() {
         ← Back to Portfolio
       </a>
 
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--color-accent)', marginBottom: '12px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.12em', color: 'var(--accent-primary)', marginBottom: '12px' }}>
         {project.categoryLabel.toUpperCase()}
       </p>
 
@@ -62,12 +62,12 @@ export default function ProjectSlug() {
         textTransform: 'uppercase',
         lineHeight: 0.95,
         marginBottom: '32px',
-        color: 'var(--color-text-primary)',
+        color: 'var(--text-primary)',
       }}>
         {project.title}
       </h1>
 
-      <p style={{ fontSize: '1.1rem', fontWeight: 300, lineHeight: 1.75, color: 'var(--color-text-secondary)', marginBottom: '40px' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 300, lineHeight: 1.75, color: 'var(--text-secondary)', marginBottom: '40px' }}>
         {project.description}
       </p>
 
@@ -93,20 +93,17 @@ export default function ProjectSlug() {
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         {project.link && (
-          <a href={project.link} target="_blank" rel="noopener noreferrer"
-            className="hero__btn hero__btn--primary">
+          <a href={project.link} target="_blank" rel="noopener noreferrer" className="btn-primary">
             View Project ↗
           </a>
         )}
         {project.itchLink && (
-          <a href={project.itchLink} target="_blank" rel="noopener noreferrer"
-            className="hero__btn hero__btn--primary">
+          <a href={project.itchLink} target="_blank" rel="noopener noreferrer" className="btn-primary">
             Play on itch.io ↗
           </a>
         )}
         {project.githubLink && (
-          <a href={project.githubLink} target="_blank" rel="noopener noreferrer"
-            className="hero__btn hero__btn--outline">
+          <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="btn-secondary">
             GitHub →
           </a>
         )}
