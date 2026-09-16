@@ -148,13 +148,16 @@ export function useSnapNavigation({
   /* ── Wheel ── */
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
+      if (e.defaultPrevented) return;
       if (isAnimating.current) { e.preventDefault(); return; }
 
       const idx   = currentIdxRef.current;
       const panelEl = getPanel(panelDefsRef.current[idx].id);
       const el = panelEl ? getScrollableTarget(e.target, panelEl) : null;
+      const inProjectCarousel = e.target instanceof Element
+        && e.target.closest('[data-horizontal-projects]');
 
-      if (el && hasScrollableContent(el)) {
+      if (!inProjectCarousel && el && hasScrollableContent(el)) {
         if (e.deltaY > 0 && !isAtBottom(el)) return;
         if (e.deltaY < 0 && !isAtTop(el))    return;
       }
@@ -177,6 +180,7 @@ export function useSnapNavigation({
       startTarget = e.target;
     };
     const onTouchEnd   = (e: TouchEvent) => {
+      if (e.defaultPrevented) return;
       if (isAnimating.current) return;
       const dy  = startY - e.changedTouches[0].clientY;
       const now = performance.now();

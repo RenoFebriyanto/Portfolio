@@ -106,11 +106,19 @@
     background: var(--accent-glow);
 }
 
-/* ── PROJECT GRID — 3 columns ── */
+/* ── PROJECT CAROUSEL ── */
+.projects-grid-viewport {
+    overflow: hidden;
+    width: 100%;
+    cursor: ew-resize;
+}
+
 .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: var(--space-md);
+    width: max-content;
+    min-width: 100%;
+    will-change: transform;
 }
 
 /* ── PROJECT CARD ── */
@@ -130,6 +138,7 @@
         transform     0.3s var(--ease-smooth),
         box-shadow    0.3s ease;
     cursor: default;
+    flex: 0 0 clamp(280px, 31vw, 430px);
 }
 
 .project-card::before {
@@ -157,7 +166,7 @@
 
 /* Featured: span 2 columns */
 .project-card.featured {
-    grid-column: span 2;
+    flex-basis: clamp(360px, 48vw, 660px);
 }
 
 /* Hidden (filtered out) */

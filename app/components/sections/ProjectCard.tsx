@@ -434,6 +434,7 @@ function frameObject(THREE: any, camera: any, object: any, fitOffset = 1.5) {
   ref={cardRef}
   className={cardClasses}
   data-hidden={hidden}
+  data-project-card
   data-category={project.category}
   data-project-id={project.id}
   data-has-video={String(hasVideo && !project.modelPath)}
