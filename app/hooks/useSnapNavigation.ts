@@ -29,6 +29,20 @@ function hasScrollableContent(el: HTMLElement): boolean {
   return el.scrollHeight > el.clientHeight + 8;
 }
 
+function getScrollableTarget(target: EventTarget | null, panelEl: HTMLElement): HTMLElement {
+  let el = target instanceof HTMLElement ? target : null;
+
+  while (el && el !== panelEl) {
+    const overflowY = window.getComputedStyle(el).overflowY;
+    if ((overflowY === 'auto' || overflowY === 'scroll') && hasScrollableContent(el)) {
+      return el;
+    }
+    el = el.parentElement;
+  }
+
+  return panelEl;
+}
+
 /**
  * Generic snap-scroll panel navigation engine.
  * Dipakai oleh usePageSnap (homepage) dan useProjectSnap (halaman detail
@@ -137,10 +151,10 @@ export function useSnapNavigation({
       if (isAnimating.current) { e.preventDefault(); return; }
 
       const idx   = currentIdxRef.current;
-      const panel = panelDefsRef.current[idx];
-      const el    = getPanel(panel.id);
+      const panelEl = getPanel(panelDefsRef.current[idx].id);
+      const el = panelEl ? getScrollableTarget(e.target, panelEl) : null;
 
-      if (el && panel.scrollable && hasScrollableContent(el)) {
+      if (el && hasScrollableContent(el)) {
         if (e.deltaY > 0 && !isAtBottom(el)) return;
         if (e.deltaY < 0 && !isAtTop(el))    return;
       }
@@ -157,7 +171,11 @@ export function useSnapNavigation({
   /* ── Touch ── */
   useEffect(() => {
     let startY = 0;
-    const onTouchStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
+    let startTarget: EventTarget | null = null;
+    const onTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      startTarget = e.target;
+    };
     const onTouchEnd   = (e: TouchEvent) => {
       if (isAnimating.current) return;
       const dy  = startY - e.changedTouches[0].clientY;
@@ -165,16 +183,16 @@ export function useSnapNavigation({
       if (Math.abs(dy) < 60 || now - lastNav.current < navCooldown) return;
 
       const idx   = currentIdxRef.current;
-      const panel = panelDefsRef.current[idx];
-      const el    = getPanel(panel.id);
+      const panelEl = getPanel(panelDefsRef.current[idx].id);
+      const el = panelEl ? getScrollableTarget(startTarget, panelEl) : null;
 
       if (dy > 0) {
         if (idx >= panelDefsRef.current.length - 1) return;
-        if (el && panel.scrollable && hasScrollableContent(el) && !isAtBottom(el)) return;
+        if (el && hasScrollableContent(el) && !isAtBottom(el)) return;
         next();
       } else {
         if (idx <= 0) return;
-        if (el && panel.scrollable && hasScrollableContent(el) && !isAtTop(el)) return;
+        if (el && hasScrollableContent(el) && !isAtTop(el)) return;
         prev();
       }
     };
