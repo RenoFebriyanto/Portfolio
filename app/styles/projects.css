@@ -110,6 +110,7 @@
 .projects-grid-viewport {
     overflow: hidden;
     width: 100%;
+    padding-bottom: var(--space-sm);
     cursor: ew-resize;
 }
 
@@ -582,22 +583,51 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
     .projects-grid {
-        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
     }
     .project-card.featured {
-        grid-column: span 2;
+        flex-basis: clamp(320px, 72vw, 560px);
     }
 }
 
 @media (max-width: 600px) {
     .projects-grid {
-        grid-template-columns: 1fr;
+        gap: var(--space-sm);
     }
     .project-card.featured {
-        grid-column: span 1;
+        flex-basis: min(84vw, 420px);
     }
     .projects-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* Keep the first card fully readable on short desktop viewports. */
+@media (min-width: 901px) and (max-height: 760px) {
+    .projects {
+        padding: 40px 0 56px;
+    }
+
+    .projects .section-divider {
+        margin-bottom: 32px;
+    }
+
+    .projects-header {
+        margin-bottom: 20px;
+    }
+
+    .projects-filter {
+        margin-bottom: 24px;
+    }
+
+    .project-card-body {
+        padding: 24px;
+    }
+
+    .project-card-top,
+    .project-desc,
+    .project-tags {
+        margin-bottom: 16px;
     }
 }
