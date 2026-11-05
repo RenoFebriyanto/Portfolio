@@ -443,6 +443,7 @@ function frameObject(THREE: any, camera: any, object: any, fitOffset = 1.5) {
   onMouseEnter={onMouseEnterVideo}
 >
       {isFeatured && <span className="project-bg-num" aria-hidden="true">{num}</span>}
+      <span className={`project-status ${statusClass}`}>{project.statusLabel}</span>
 
       {hasImage || hasVideo ? (
         <div
@@ -498,7 +499,6 @@ function frameObject(THREE: any, camera: any, object: any, fitOffset = 1.5) {
       <div className="project-card-body">
         <div className="project-card-top">
           <span className="project-num">Project {num}</span>
-          <span className={`project-status ${statusClass}`}>{project.statusLabel}</span>
         </div>
 
         <div className="project-category">{project.categoryLabel}</div>
