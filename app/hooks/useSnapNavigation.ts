@@ -59,6 +59,7 @@ export function useSnapNavigation({
   const [currentIdx, setCurrentIdx] = useState(0);
   const isAnimating   = useRef(false);
   const lastNav       = useRef(0);
+  const lastNavDirection = useRef<'next' | 'prev' | null>(null);
   const currentIdxRef = useRef(0);
   const panelsRef     = useRef<Map<string, HTMLElement>>(new Map());
   const panelScrollPositions = useRef<Map<string, number>>(new Map());
@@ -87,6 +88,7 @@ export function useSnapNavigation({
     lastNav.current     = now;
 
     const direction = dir ?? (toIdx > fromIdx ? 'next' : 'prev');
+    lastNavDirection.current = direction;
     const from = defs[fromIdx];
     const to   = defs[toIdx];
     const fromEl = getPanel(from.id);
@@ -153,6 +155,9 @@ export function useSnapNavigation({
 
   /* ── Wheel ── */
   useEffect(() => {
+    let wheelDelta = 0;
+    let wheelResetTimer = 0;
+
     const onWheel = (e: WheelEvent) => {
       if (e.defaultPrevented) return;
       if (isAnimating.current) { e.preventDefault(); return; }
@@ -171,10 +176,34 @@ export function useSnapNavigation({
       e.preventDefault();
       const now = performance.now();
       if (now - lastNav.current < navCooldown) return;
-      if (e.deltaY > 0) next(); else prev();
+
+      const direction = e.deltaY > 0 ? 'next' : 'prev';
+
+      // Ignore trackpad/momentum events going against a navigation that just
+      // started. This prevents a fast positive flick from immediately turning
+      // into a reverse navigation.
+      if (
+        lastNavDirection.current
+        && direction !== lastNavDirection.current
+        && now - lastNav.current < 350
+      ) {
+        return;
+      }
+
+      wheelDelta += e.deltaY;
+      window.clearTimeout(wheelResetTimer);
+      wheelResetTimer = window.setTimeout(() => { wheelDelta = 0; }, 220);
+
+      if (Math.abs(wheelDelta) < 45) return;
+      wheelDelta = 0;
+
+      if (direction === 'next') next(); else prev();
     };
     window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
+    return () => {
+      window.clearTimeout(wheelResetTimer);
+      window.removeEventListener('wheel', onWheel);
+    };
   }, [next, prev, getPanel, navCooldown]);
 
   /* ── Touch ── */
