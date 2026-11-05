@@ -9,7 +9,7 @@
     min-height: 100%;
     padding: clamp(16px, 3.5vh, 48px) 0 clamp(16px, 3vh, 40px);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .projects > .container {
@@ -123,7 +123,7 @@
 
 /* ── PROJECT CAROUSEL ── */
 .projects-grid-viewport {
-    overflow: hidden;
+    overflow: visible;
     width: 100%;
     min-height: 0;
     flex: 1;
@@ -160,7 +160,7 @@
         transform     0.3s var(--ease-smooth),
         box-shadow    0.3s ease;
     cursor: default;
-    flex: 0 0 clamp(280px, 31vw, 430px);
+    flex: 0 0 clamp(300px, 34vw, 480px);
     min-height: 0;
     height: 100%;
 }
@@ -190,7 +190,7 @@
 
 /* Featured: span 2 columns */
 .project-card.featured {
-    flex-basis: clamp(360px, 48vw, 660px);
+    flex-basis: clamp(400px, 52vw, 720px);
 }
 
 /* Hidden (filtered out) */
