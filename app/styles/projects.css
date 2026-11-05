@@ -128,7 +128,7 @@
     min-height: 0;
     flex: 1;
     display: flex;
-    padding-bottom: var(--space-sm);
+    padding-bottom: clamp(24px, 4vh, 48px);
     cursor: ew-resize;
 }
 
@@ -180,7 +180,6 @@
 
 .project-card:hover {
     border-color: var(--border-accent);
-    transform: translateY(-3px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-accent);
 }
 

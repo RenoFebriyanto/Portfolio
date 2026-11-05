@@ -35,7 +35,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
     const cy   = rect.top  + rect.height / 2;
     const dx   = (e.clientX - cx) / (rect.width  / 2);
     const dy   = (e.clientY - cy) / (rect.height / 2);
-    card.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg) translateY(-3px)`;
+    card.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg)`;
     card.classList.add('tilting');
     const glow = card.querySelector<HTMLElement>('.card-tilt-glow');
     if (glow) {
