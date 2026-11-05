@@ -61,6 +61,7 @@ export function useSnapNavigation({
   const lastNav       = useRef(0);
   const currentIdxRef = useRef(0);
   const panelsRef     = useRef<Map<string, HTMLElement>>(new Map());
+  const panelScrollPositions = useRef<Map<string, number>>(new Map());
 
   const panelDefsRef = useRef(panels);
   useEffect(() => {
@@ -92,6 +93,11 @@ export function useSnapNavigation({
     const toEl   = getPanel(to.id);
     if (!fromEl || !toEl) { isAnimating.current = false; return; }
 
+    // Preserve the content position of the panel the user is leaving.
+    // Otherwise a returning navigation always jumps back to the bottom/top
+    // and can appear as if the snap system moved to the previous page.
+    panelScrollPositions.current.set(from.id, fromEl.scrollTop);
+
     const exitY  = direction === 'next' ? '-8%' : '8%';
     const enterY = direction === 'next' ?  '8%' : '-8%';
 
@@ -109,7 +115,7 @@ export function useSnapNavigation({
     setPanelVisible(toEl, true);
 
     if (to.scrollable) {
-      toEl.scrollTop = direction === 'next' ? 0 : toEl.scrollHeight;
+      toEl.scrollTop = panelScrollPositions.current.get(to.id) ?? 0;
     }
 
     void toEl.getBoundingClientRect(); // force reflow

@@ -1,9 +1,9 @@
+import { useEffect } from "react";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration,
   useLocation,
 } from "react-router";
 import Nav    from "~/components/layout/Nav";
@@ -50,7 +50,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className={isProjectPage ? "route-project" : "route-home"}>
         {children}
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>
@@ -60,6 +59,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const location = useLocation();
   const isProjectPage = location.pathname.startsWith("/projects/");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.history.scrollRestoration = "manual";
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.pathname]);
 
   return (
     <>
