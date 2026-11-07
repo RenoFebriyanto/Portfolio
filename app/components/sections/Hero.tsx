@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { gsap, useGSAP } from '~/utils/gsap';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
+import { Hero3D } from '~/components/ui/Hero3D';
 
 interface Props {
   scrollTo: (index: number) => void;
@@ -15,7 +16,15 @@ export function Hero({ scrollTo }: Props) {
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
 
   tl.from('.hero-scene-background', { opacity: 0, scale: 1.04, duration: 1.2, ease: 'power2.out' }, 0)
-    .from('.hero-object--tablet', { yPercent: 120, rotate: -5, opacity: 0, duration: 1.15, ease: 'power4.out' }, 0.12)
+    .from('.hero-object--tablet', {
+      xPercent: 38,
+      yPercent: 115,
+      rotate: -38,
+      opacity: 0,
+      transformOrigin: '50% 92%',
+      duration: 1.35,
+      ease: 'power4.out',
+    }, 0.12)
     .from('.hero-object--pen', { xPercent: 115, yPercent: -18, rotate: 8, opacity: 0, duration: 0.95, ease: 'power3.out' }, 0.3)
     .from('.hero-object--suzanne', { yPercent: -115, rotate: -8, opacity: 0, duration: 1, ease: 'power3.out' }, 0.38)
     .from('.hero-object--cube', { xPercent: -125, rotate: -18, opacity: 0, duration: 0.95, ease: 'power3.out' }, 0.48)
@@ -105,6 +114,7 @@ export function Hero({ scrollTo }: Props) {
           </div>
         </div>
 
+        <Hero3D />
       </div>
 
       <div className="hero-scene" aria-hidden="true">
