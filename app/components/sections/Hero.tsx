@@ -17,19 +17,19 @@ export function Hero({ scrollTo }: Props) {
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
   const heroObjects = gsap.utils.toArray<HTMLElement>('.hero-object');
   const pointerHandlers = heroObjects.map(object => {
-    const tiltX = gsap.quickTo(object, 'rotationX', { duration: 0.45, ease: 'power3.out' });
-    const tiltY = gsap.quickTo(object, 'rotationY', { duration: 0.45, ease: 'power3.out' });
+    const moveX = gsap.quickTo(object, 'x', { duration: 0.45, ease: 'power3.out' });
+    const moveY = gsap.quickTo(object, 'y', { duration: 0.45, ease: 'power3.out' });
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return;
       const bounds = object.getBoundingClientRect();
       const pointerX = gsap.utils.clamp(-1, 1, (event.clientX - bounds.left - bounds.width / 2) / (bounds.width / 2));
       const pointerY = gsap.utils.clamp(-1, 1, (event.clientY - bounds.top - bounds.height / 2) / (bounds.height / 2));
-      tiltX(pointerY * -5);
-      tiltY(pointerX * 6);
+      moveX(pointerX * 12);
+      moveY(pointerY * 10);
     };
     const onPointerLeave = () => {
-      tiltX(0);
-      tiltY(0);
+      moveX(0);
+      moveY(0);
     };
 
     object.addEventListener('pointermove', onPointerMove);
@@ -78,8 +78,8 @@ export function Hero({ scrollTo }: Props) {
   const onLeave = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
     heroObjects.forEach(object => gsap.to(object, {
-      rotationX: 0,
-      rotationY: 0,
+      x: 0,
+      y: 0,
       duration: 0.35,
       overwrite: 'auto',
     }));

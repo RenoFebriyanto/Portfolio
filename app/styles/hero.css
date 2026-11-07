@@ -33,8 +33,6 @@
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
-  perspective: 1200px;
-  perspective-origin: center;
 }
 
 .hero-scene::after {
