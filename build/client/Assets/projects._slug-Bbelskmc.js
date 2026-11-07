@@ -1,5 +1,5 @@
 const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/GLTFLoader-nBVbhmug.js","assets/three.module-BX2Vlr8r.js"])))=>i.map(i=>d[i]);
-import{r as g,j as e,a as V,w as re,b as te}from"./jsx-runtime-CFh6JGtC.js";import{a as ne,_ as Y,u as ie,g as _,p as oe}from"./useSnapNavigation-CuErLzPL.js";function le(){g.useEffect(()=>{const n=document.createElement("style");return n.id="fs-cursor-override",n.textContent=`
+import{r as g,j as e,a as V,w as re,b as te}from"./jsx-runtime-CFh6JGtC.js";import{a as ne,_ as Y,u as ie,g as _,p as oe}from"./useSnapNavigation-DSUpJw01.js";function le(){g.useEffect(()=>{const n=document.createElement("style");return n.id="fs-cursor-override",n.textContent=`
       [data-page="forbidden-space"] ~ * .cursor-dot,
       body.fs-page-active .cursor-dot {
         background: #00c8ff !important;

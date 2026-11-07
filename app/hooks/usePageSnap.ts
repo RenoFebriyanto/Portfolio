@@ -11,6 +11,9 @@ const SECTIONS: SectionDef[] = [
 ];
 
 export function usePageSnap() {
-  const snap = useSnapNavigation({ panels: SECTIONS });
+  const snap = useSnapNavigation({
+    panels: SECTIONS,
+    leaveDelay: panelId => panelId === 'hero' ? 180 : 0,
+  });
   return { ...snap, sections: SECTIONS };
 }

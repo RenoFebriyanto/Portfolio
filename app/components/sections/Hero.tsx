@@ -13,6 +13,7 @@ export function Hero({ scrollTo }: Props) {
   useGSAP(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  const sceneTl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
   const heroObjects = gsap.utils.toArray<HTMLElement>('.hero-object');
   const pointerHandlers = heroObjects.map(object => {
@@ -37,7 +38,7 @@ export function Hero({ scrollTo }: Props) {
     };
   });
 
-  tl.from('.hero-scene-background', { opacity: 0, scale: 1.04, duration: 1.2, ease: 'power2.out' }, 0)
+  sceneTl.from('.hero-scene-background', { opacity: 0, scale: 1.04, duration: 1.2, ease: 'power2.out' }, 0)
     .from('.hero-object--tablet', {
       xPercent: 38,
       yPercent: 115,
@@ -51,7 +52,7 @@ export function Hero({ scrollTo }: Props) {
     .from('.hero-object--suzanne', { yPercent: -115, rotate: -8, opacity: 0, duration: 1, ease: 'power3.out' }, 0.38)
     .from('.hero-object--cube', { xPercent: -125, rotate: -18, opacity: 0, duration: 0.95, ease: 'power3.out' }, 0.48)
     .from('.hero-object--torus', { yPercent: 125, rotate: 18, opacity: 0, duration: 1, ease: 'power3.out' }, 0.58)
-    .from('.hero-status', { y: 16, scale: 0.9, opacity: 0, duration: 0.6 }, 0.25)
+  tl.from('.hero-status', { y: 16, scale: 0.9, opacity: 0, duration: 0.6 }, 0.25)
     .from('.hero-heading-line > span', {
       yPercent: 105,
       scale: 0.82,
@@ -66,6 +67,8 @@ export function Hero({ scrollTo }: Props) {
 
   const onEnter = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
+    sceneTl.timeScale(1);
+    sceneTl.play(0);
     tl.timeScale(1);
     tl.play(0);
   };
@@ -78,7 +81,8 @@ export function Hero({ scrollTo }: Props) {
       duration: 0.2,
       overwrite: 'auto',
     }));
-    // Finish the reverse before snap navigation hides the outgoing panel.
+    sceneTl.timeScale(sceneTl.duration() / 0.55);
+    sceneTl.reverse();
     tl.timeScale(tl.duration() / 0.42);
     tl.reverse();
   };
@@ -89,6 +93,7 @@ export function Hero({ scrollTo }: Props) {
   initialEnterFrame = window.requestAnimationFrame(() => {
     const heroPanel = heroRef.current?.closest<HTMLElement>('[data-panel-id="hero"]');
     if (heroPanel?.dataset.visible === 'true' && tl.paused() && tl.progress() === 0) {
+      sceneTl.play(0);
       tl.play(0);
     }
   });

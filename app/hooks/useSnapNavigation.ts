@@ -10,6 +10,7 @@ export interface SnapNavigationOptions {
   panels:              SnapPanelDef[];
   enterEvent?:         string;
   leaveEvent?:         string;
+  leaveDelay?:         (panelId: string) => number;
   transitionDuration?: number;
   navCooldown?:        number;
 }
@@ -53,6 +54,7 @@ export function useSnapNavigation({
   panels,
   enterEvent = 'sectionenter',
   leaveEvent = 'sectionleave',
+  leaveDelay,
   transitionDuration = DEFAULT_TRANS_DUR,
   navCooldown = DEFAULT_NAV_COOL,
 }: SnapNavigationOptions) {
@@ -105,40 +107,46 @@ export function useSnapNavigation({
 
     window.dispatchEvent(new CustomEvent(leaveEvent, { detail: { id: from.id, direction } }));
 
-    fromEl.style.transition    = `transform ${transitionDuration}ms cubic-bezier(0.4,0,1,1), opacity ${transitionDuration * 0.75}ms ease`;
-    fromEl.style.transform     = `translateY(${exitY})`;
-    fromEl.style.opacity       = '0';
-    fromEl.style.pointerEvents = 'none';
+    const startTransition = () => {
+      fromEl.style.transition    = `transform ${transitionDuration}ms cubic-bezier(0.4,0,1,1), opacity ${transitionDuration * 0.75}ms ease`;
+      fromEl.style.transform     = `translateY(${exitY})`;
+      fromEl.style.opacity       = '0';
+      fromEl.style.pointerEvents = 'none';
 
-    toEl.style.transition    = 'none';
-    toEl.style.transform     = `translateY(${enterY})`;
-    toEl.style.opacity       = '0';
-    toEl.style.pointerEvents = 'none';
-    setPanelVisible(toEl, true);
+      toEl.style.transition    = 'none';
+      toEl.style.transform     = `translateY(${enterY})`;
+      toEl.style.opacity       = '0';
+      toEl.style.pointerEvents = 'none';
+      setPanelVisible(toEl, true);
 
-    if (to.scrollable) {
-      toEl.scrollTop = panelScrollPositions.current.get(to.id) ?? 0;
-    }
+      if (to.scrollable) {
+        toEl.scrollTop = panelScrollPositions.current.get(to.id) ?? 0;
+      }
 
-    void toEl.getBoundingClientRect(); // force reflow
+      void toEl.getBoundingClientRect(); // force reflow
 
-    toEl.style.transition = `transform ${transitionDuration}ms cubic-bezier(0.16,1,0.3,1), opacity ${transitionDuration}ms ease`;
-    toEl.style.transform  = 'translateY(0)';
-    toEl.style.opacity    = '1';
+      toEl.style.transition = `transform ${transitionDuration}ms cubic-bezier(0.16,1,0.3,1), opacity ${transitionDuration}ms ease`;
+      toEl.style.transform  = 'translateY(0)';
+      toEl.style.opacity    = '1';
 
-    currentIdxRef.current = toIdx;
-    setCurrentIdx(toIdx);
+      currentIdxRef.current = toIdx;
+      setCurrentIdx(toIdx);
 
-    window.dispatchEvent(new CustomEvent(enterEvent, { detail: { id: to.id, direction } }));
+      window.dispatchEvent(new CustomEvent(enterEvent, { detail: { id: to.id, direction } }));
 
-    setTimeout(() => {
-      setPanelVisible(fromEl, false);
-      fromEl.style.cssText     = '';
-      toEl.style.transition    = '';
-      toEl.style.pointerEvents = '';
-      isAnimating.current      = false;
-    }, transitionDuration + 60);
-  }, [getPanel, enterEvent, leaveEvent, transitionDuration, navCooldown]);
+      setTimeout(() => {
+        setPanelVisible(fromEl, false);
+        fromEl.style.cssText     = '';
+        toEl.style.transition    = '';
+        toEl.style.pointerEvents = '';
+        isAnimating.current      = false;
+      }, transitionDuration + 60);
+    };
+
+    const delay = Math.max(0, leaveDelay?.(from.id) ?? 0);
+    if (delay === 0) startTransition();
+    else window.setTimeout(startTransition, delay);
+  }, [getPanel, enterEvent, leaveEvent, leaveDelay, transitionDuration, navCooldown]);
 
   const next = useCallback(() => goTo(currentIdxRef.current + 1, 'next'), [goTo]);
   const prev = useCallback(() => goTo(currentIdxRef.current - 1, 'prev'), [goTo]);
