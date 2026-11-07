@@ -14,6 +14,28 @@ export function Hero({ scrollTo }: Props) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  const heroObjects = gsap.utils.toArray<HTMLElement>('.hero-object');
+  const pointerHandlers = heroObjects.map(object => {
+    const moveX = gsap.quickTo(object, 'x', { duration: 0.45, ease: 'power3.out' });
+    const moveY = gsap.quickTo(object, 'y', { duration: 0.45, ease: 'power3.out' });
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      const bounds = object.getBoundingClientRect();
+      moveX(((event.clientX - bounds.left - bounds.width / 2) / bounds.width) * 10);
+      moveY(((event.clientY - bounds.top - bounds.height / 2) / bounds.height) * 8);
+    };
+    const onPointerLeave = () => {
+      moveX(0);
+      moveY(0);
+    };
+
+    object.addEventListener('pointermove', onPointerMove);
+    object.addEventListener('pointerleave', onPointerLeave);
+    return () => {
+      object.removeEventListener('pointermove', onPointerMove);
+      object.removeEventListener('pointerleave', onPointerLeave);
+    };
+  });
 
   tl.from('.hero-scene-background', { opacity: 0, scale: 1.04, duration: 1.2, ease: 'power2.out' }, 0)
     .from('.hero-object--tablet', {
@@ -50,11 +72,13 @@ export function Hero({ scrollTo }: Props) {
 
   const onLeave = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
-    // Reverse timeline yang sama — bukan tween terpisah dengan overwrite:true.
-    // overwrite:true sebelumnya bisa kill child tween di dalam tl kalau exit
-    // terjadi saat intro masih jalan, dan tween yang sudah ke-kill lepas
-    // permanen dari tl sehingga play(0) berikutnya tidak bisa animasikan
-    // properti itu lagi — itu penyebab heading hilang selamanya.
+    heroObjects.forEach(object => gsap.to(object, {
+      x: 0,
+      y: 0,
+      duration: 0.2,
+      overwrite: 'auto',
+    }));
+    // Reverse the same timeline so its child tweens remain available on re-entry.
     tl.timeScale(2.4); // exit lebih cepat dari intro
     tl.reverse();
   };
@@ -73,6 +97,7 @@ export function Hero({ scrollTo }: Props) {
     window.cancelAnimationFrame(initialEnterFrame);
     window.removeEventListener('sectionenter', onEnter);
     window.removeEventListener('sectionleave', onLeave);
+    pointerHandlers.forEach(cleanup => cleanup());
   };
 }, { scope: heroRef });
 
