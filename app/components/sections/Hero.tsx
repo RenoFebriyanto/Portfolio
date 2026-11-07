@@ -78,8 +78,8 @@ export function Hero({ scrollTo }: Props) {
       duration: 0.2,
       overwrite: 'auto',
     }));
-    // Reverse the same timeline so its child tweens remain available on re-entry.
-    tl.timeScale(2.4); // exit lebih cepat dari intro
+    // Finish the reverse before snap navigation hides the outgoing panel.
+    tl.timeScale(tl.duration() / 0.42);
     tl.reverse();
   };
 
