@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { gsap, useGSAP } from '~/utils/gsap';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
-import { Hero3D }     from '~/components/ui/Hero3D';
 
 interface Props {
   scrollTo: (index: number) => void;
@@ -15,8 +14,14 @@ export function Hero({ scrollTo }: Props) {
 
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
 
-  tl.from('.hero-status', { y: 16, scale: 0.9, opacity: 0, duration: 0.6 })
-    .from('.hero-heading-line span', {
+  tl.from('.hero-scene-background', { opacity: 0, scale: 1.04, duration: 1.2, ease: 'power2.out' }, 0)
+    .from('.hero-object--tablet', { yPercent: 120, rotate: -5, opacity: 0, duration: 1.15, ease: 'power4.out' }, 0.12)
+    .from('.hero-object--pen', { xPercent: 115, yPercent: -18, rotate: 8, opacity: 0, duration: 0.95, ease: 'power3.out' }, 0.3)
+    .from('.hero-object--suzanne', { yPercent: -115, rotate: -8, opacity: 0, duration: 1, ease: 'power3.out' }, 0.38)
+    .from('.hero-object--cube', { xPercent: -125, rotate: -18, opacity: 0, duration: 0.95, ease: 'power3.out' }, 0.48)
+    .from('.hero-object--torus', { yPercent: 125, rotate: 18, opacity: 0, duration: 1, ease: 'power3.out' }, 0.58)
+    .from('.hero-status', { y: 16, scale: 0.9, opacity: 0, duration: 0.6 }, 0.25)
+    .from('.hero-heading-line > span', {
       yPercent: 105,
       scale: 0.82,
       opacity: 0,
@@ -45,10 +50,18 @@ export function Hero({ scrollTo }: Props) {
     tl.reverse();
   };
 
+  let initialEnterFrame = 0;
   window.addEventListener('sectionenter', onEnter);
   window.addEventListener('sectionleave', onLeave);
+  initialEnterFrame = window.requestAnimationFrame(() => {
+    const heroPanel = heroRef.current?.closest<HTMLElement>('[data-panel-id="hero"]');
+    if (heroPanel?.dataset.visible === 'true' && tl.paused() && tl.progress() === 0) {
+      tl.play(0);
+    }
+  });
 
   return () => {
+    window.cancelAnimationFrame(initialEnterFrame);
     window.removeEventListener('sectionenter', onEnter);
     window.removeEventListener('sectionleave', onLeave);
   };
@@ -92,7 +105,15 @@ export function Hero({ scrollTo }: Props) {
           </div>
         </div>
 
-        <Hero3D />
+      </div>
+
+      <div className="hero-scene" aria-hidden="true">
+        <img className="hero-scene-background" src="/Assets/images/hero-studio-bg.jpg" alt="" />
+        <img className="hero-object hero-object--tablet" src="/Assets/images/hero-objects/tablet.png" alt="" />
+        <img className="hero-object hero-object--pen" src="/Assets/images/hero-objects/pen.png" alt="" />
+        <img className="hero-object hero-object--suzanne" src="/Assets/images/hero-objects/suzanne.png" alt="" />
+        <img className="hero-object hero-object--cube" src="/Assets/images/hero-objects/cube.png" alt="" />
+        <img className="hero-object hero-object--torus" src="/Assets/images/hero-objects/torus.png" alt="" />
       </div>
 
       <span className="hero-number" aria-hidden="true">3D</span>

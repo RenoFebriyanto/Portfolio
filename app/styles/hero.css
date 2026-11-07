@@ -9,7 +9,7 @@
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  z-index: 0 !important;
+  z-index: 2 !important;
   pointer-events: none !important;
   opacity: 0.55;
 }
@@ -27,6 +27,73 @@
   overflow: hidden;
 }
 
+.hero-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4, 4, 10, 0.72) 0%, rgba(4, 4, 10, 0.3) 44%, transparent 76%),
+    linear-gradient(0deg, rgba(4, 4, 10, 0.42), transparent 38%);
+}
+
+.hero-scene-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.7) saturate(0.82);
+}
+
+.hero-object {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 22px 32px rgba(0, 0, 0, 0.38));
+}
+
+.hero-object--tablet {
+  width: min(48vw, 700px);
+  left: 49%;
+  bottom: 3%;
+}
+
+.hero-object--pen {
+  width: clamp(150px, 19vw, 270px);
+  right: 1%;
+  top: -1%;
+}
+
+.hero-object--suzanne {
+  width: clamp(150px, 19vw, 280px);
+  left: -2%;
+  top: 0;
+}
+
+.hero-object--cube {
+  width: clamp(130px, 17vw, 245px);
+  left: 3%;
+  bottom: 2%;
+}
+
+.hero-object--torus {
+  width: clamp(140px, 18vw, 260px);
+  left: 43%;
+  bottom: 0;
+}
+
 /* ── Hero inner — grid kolom kanan lebih besar untuk canvas 3D ── */
 .hero-inner {
   width: 100%;
@@ -34,7 +101,7 @@
   margin: 0 auto;
   padding: var(--nav-height) var(--space-xl) var(--space-xl);
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   grid-template-columns: 1.5fr 1.15fr;
   align-items: center;
@@ -49,71 +116,6 @@
   z-index: 1;
   overflow: visible;
 }
-
-/* ── 3D Canvas container ── */
-#hero-3d-canvas {
-  width: 100%;
-  height: min(80vh, 600px);
-  position: relative;
-  opacity: 0;
-  transition: opacity 1.2s var(--ease-smooth) 0.5s;
-  cursor: grab;
-}
-
-#hero-3d-canvas:active { cursor: grabbing; }
-#hero-3d-canvas.hero-3d-ready { opacity: 1; }
-
-/* Canvas Three.js — fill container */
-#hero-3d-canvas > canvas {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-}
-
-/* Glow behind sphere */
-#hero-3d-canvas::before {
-  content: '';
-  position: absolute;
-  inset: 5%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 107, 53, 0.08) 0%,
-    rgba(77, 140, 255, 0.05) 50%,
-    transparent 75%
-  );
-  pointer-events: none;
-  z-index: 0;
-  animation: sphere-glow-pulse 4s ease-in-out infinite;
-}
-
-@keyframes sphere-glow-pulse {
-    0%, 100% { opacity: 0.8; transform: scale(1); }
-    50%       { opacity: 1.2; transform: scale(1.06); }
-}
-
-/* "drag to rotate" hint */
-#hero-3d-canvas::after {
-    content: 'drag to rotate';
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    white-space: nowrap;
-    z-index: 10;
-}
-
-#hero-3d-canvas.hero-3d-ready:hover::after { opacity: 1; }
 
 /* Status Badge */
 .hero-status {
@@ -161,7 +163,7 @@
     overflow: hidden;
 }
 
-.hero-heading-line span {
+.hero-heading-line > span {
     display: block;
 }
 
@@ -279,6 +281,7 @@
     align-items: center;
     gap: var(--space-sm);
     cursor: pointer;
+    z-index: 4;
 }
 
 .hero-scroll span {
@@ -328,7 +331,6 @@
     padding-top: calc(var(--nav-height) + 8px);
     gap: var(--space-lg);
   }
-  #hero-3d-canvas { height: min(70vh, 520px); }
   .hero-status  { margin-bottom: var(--space-md); padding: 4px 12px; }
   .hero-heading { font-size: clamp(32px, 5.5vw, 80px); margin-bottom: var(--space-md); }
   .hero-desc    { font-size: 14px; margin-bottom: var(--space-md); line-height: 1.65; }
@@ -340,7 +342,6 @@
 
 @media (max-height: 700px) {
   .hero-inner { gap: var(--space-md) !important; }
-  #hero-3d-canvas { height: min(60vh, 400px); }
   .hero-status { display: none; }
   .hero-heading {
     font-size: clamp(28px, 4.5vw, 64px);
@@ -360,7 +361,6 @@
 
 @media (max-height: 580px) {
   .hero-tags { display: none; }
-  #hero-3d-canvas { height: min(55vh, 320px); }
 }
 
 /* ── Tablet ── */
@@ -374,12 +374,11 @@
     overflow-y: auto;
   }
 
-  #hero-3d-canvas {
-    width: min(70vw, 420px);
-    height: min(70vw, 420px);
-    margin: 0 auto;
-    order: -1;
-  }
+  .hero-object--tablet { width: 62vw; left: 37%; bottom: 5%; }
+  .hero-object--pen { width: 25vw; right: -3%; top: 4%; }
+  .hero-object--suzanne { width: 23vw; left: -5%; top: 1%; }
+  .hero-object--cube { width: 21vw; left: 1%; bottom: 2%; }
+  .hero-object--torus { width: 22vw; left: 48%; bottom: 0; }
 }
 
 /* ── Mobile ── */
@@ -397,11 +396,16 @@
 
   .hero-number { display: none; }
 
-  #hero-3d-canvas {
-    width: min(80vw, 300px);
-    height: min(80vw, 300px);
-    opacity: 0.9;
+  .hero-scene::after {
+    background:
+      linear-gradient(90deg, rgba(4, 4, 10, 0.78), rgba(4, 4, 10, 0.34) 72%, rgba(4, 4, 10, 0.16)),
+      linear-gradient(0deg, rgba(4, 4, 10, 0.6), transparent 55%);
   }
+  .hero-object--tablet { width: 82vw; left: 30%; bottom: 1%; }
+  .hero-object--pen { width: 31vw; right: -8%; top: 7%; }
+  .hero-object--suzanne { width: 30vw; left: -10%; top: 0; }
+  .hero-object--cube { width: 26vw; left: -5%; bottom: 2%; }
+  .hero-object--torus { width: 29vw; left: 48%; bottom: 0; }
 
   .hero-heading { font-size: clamp(38px, 12vw, 72px); }
   .hero-desc { font-size: 14px; }
@@ -414,8 +418,5 @@
 
 /* ── Extra small ── */
 @media (max-width: 380px) {
-  #hero-3d-canvas {
-    width: min(85vw, 240px);
-    height: min(85vw, 240px);
-  }
+  .hero-object--tablet { width: 88vw; left: 24%; }
 }
