@@ -71,10 +71,6 @@ export function useSectionAnimations() {
     function leaveProjects(sectionEl: HTMLElement, direction?: string) {
       leaveReveal(sectionEl, direction);
       undrawDivider(sectionEl);
-      sectionEl.querySelectorAll<HTMLElement>('.project-card').forEach(card => {
-        card.style.transform = '';
-        card.classList.remove('tilting');
-      });
     }
 
     /* ── SKILLS ── */

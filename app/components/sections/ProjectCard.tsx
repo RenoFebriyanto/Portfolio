@@ -9,7 +9,6 @@ interface ProjectCardProps {
   hidden?: boolean;
 }
 
-const MAX_TILT       = 7;
 const FADE_DURATION  = 350;
 const HOVER_DELAY    = 120;
 const AUTO_ROT_SPEED = 0.004;
@@ -26,31 +25,7 @@ export function ProjectCard({ project, index, hidden = false }: ProjectCardProps
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
 
-  /* ── 3D Tilt ── */
-  const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const cx   = rect.left + rect.width  / 2;
-    const cy   = rect.top  + rect.height / 2;
-    const dx   = (e.clientX - cx) / (rect.width  / 2);
-    const dy   = (e.clientY - cy) / (rect.height / 2);
-    card.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg)`;
-    card.classList.add('tilting');
-    const glow = card.querySelector<HTMLElement>('.card-tilt-glow');
-    if (glow) {
-      const gx = ((e.clientX - rect.left) / rect.width)  * 100;
-      const gy = ((e.clientY - rect.top)  / rect.height) * 100;
-      glow.style.setProperty('--glow-x', `${gx}%`);
-      glow.style.setProperty('--glow-y', `${gy}%`);
-    }
-  }, []);
-
   const onMouseLeave = useCallback(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.transform = '';
-    card.classList.remove('tilting');
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
@@ -438,7 +413,6 @@ function frameObject(THREE: any, camera: any, object: any, fitOffset = 1.5) {
   data-category={project.category}
   data-project-id={project.id}
   data-has-video={String(hasVideo && !project.modelPath)}
-  onMouseMove={onMouseMove}
   onMouseLeave={onMouseLeave}
   onMouseEnter={onMouseEnterVideo}
 >

@@ -153,11 +153,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transform-style: preserve-3d;
-    perspective: 800px;
     transition:
         border-color  0.3s ease,
-        transform     0.3s var(--ease-smooth),
         box-shadow    0.3s ease;
     cursor: default;
     flex: 0 0 clamp(300px, 34vw, 480px);
@@ -195,11 +192,6 @@
 /* Hidden (filtered out) */
 .project-card[data-hidden="true"] {
     display: none;
-}
-
-/* Tilting state */
-.project-card.tilting {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-accent);
 }
 
 /* ── PREVIEW BLOCK ── */
@@ -386,7 +378,7 @@
 }
 
 .project-card:hover .project-card-body,
-.project-card.tilting .project-card-body {
+.project-card:focus-within .project-card-body {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;

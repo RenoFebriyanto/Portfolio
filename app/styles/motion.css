@@ -44,20 +44,6 @@
 
 
 
-/* Project card tilt */
-.project-card {
-    transform-style: preserve-3d;
-    perspective: 800px;
-    transition:
-        border-color  0.3s ease,
-        transform     0.5s var(--ease-smooth),
-        box-shadow    0.3s ease;
-}
-
-.project-card.tilting {
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px var(--border-accent);
-}
-
 /* Skill level label */
 .skill-level-label { transition: opacity 0.4s ease 0.8s; }
 .skill-group:not(.visible) .skill-level-label { opacity: 0; }
