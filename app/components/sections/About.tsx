@@ -61,12 +61,12 @@ export function About() {
 
     if (!reduced) {
       tl.from('.section-label',          { y: 16, opacity: 0, duration: 0.5 })
-        .from('.about-heading',          { y: 28, opacity: 0 }, '-=0.2')
-        .from('.about-bio',              { y: 22, opacity: 0, stagger: 0.12 }, '-=0.4')
-        .from('.about-doing',            { y: 16, opacity: 0 }, '-=0.3')
-        .from('.about-identity',         { y: 24, opacity: 0 }, '-=0.5')
-        .from('.about-stats .stat-card', { y: 20, opacity: 0, stagger: 0.08 }, '-=0.45')
-        .from('.about-status',           { y: 16, opacity: 0 }, '-=0.3');
+        .from('.about-heading',          { y: 28, scale: 0.88, opacity: 0 }, '-=0.2')
+        .from('.about-bio',              { y: 22, scale: 0.94, opacity: 0, stagger: 0.12 }, '-=0.4')
+        .from('.about-doing',            { y: 16, scale: 0.94, opacity: 0 }, '-=0.3')
+        .from('.about-identity',         { y: 24, scale: 0.92, opacity: 0 }, '-=0.5')
+        .from('.about-stats .stat-card', { y: 20, scale: 0.92, opacity: 0, stagger: 0.08 }, '-=0.45')
+        .from('.about-status',           { y: 16, scale: 0.94, opacity: 0 }, '-=0.3');
     }
 
     function onEnter(e: Event) {

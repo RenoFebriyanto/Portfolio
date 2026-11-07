@@ -36,10 +36,13 @@ export function Hero3D() {
     let camera: any    = null;
     let ro: ResizeObserver | null = null;
     let isHovered      = false;
+    let isSectionActive = true;
     let isDragging     = false;
+    let sectionStopTimer: ReturnType<typeof setTimeout> | null = null;
     let prevMouse      = { x: 0, y: 0 };
     let rotVel         = { x: 0, y: 0 };
     let destroyed      = false;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     async function init() {
       if (destroyed) return;
@@ -139,6 +142,14 @@ export function Hero3D() {
         if (destroyed) return;
         animFrameId = requestAnimationFrame(tick);
         const t = (performance.now() - t0) * 0.001;
+        if (camera) {
+          const targetZ = prefersReducedMotion
+            ? 15.5
+            : isSectionActive
+              ? (isHovered ? 13.5 : 15.5)
+              : 19;
+          camera.position.z += (targetZ - camera.position.z) * 0.035;
+        }
         if (mesh) {
           if (!isDragging) {
             rotVel.x *= DRAG_DAMP;
@@ -205,10 +216,21 @@ export function Hero3D() {
       // Section lifecycle
       const onLeaveSection = (e: Event) => {
         if ((e as CustomEvent).detail?.id !== 'hero') return;
-        if (animFrameId !== null) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+        isSectionActive = false;
+        if (sectionStopTimer) clearTimeout(sectionStopTimer);
+        sectionStopTimer = setTimeout(() => {
+          if (isSectionActive || animFrameId === null) return;
+          cancelAnimationFrame(animFrameId);
+          animFrameId = null;
+        }, 800);
       };
       const onEnterSection = (e: Event) => {
         if ((e as CustomEvent).detail?.id !== 'hero') return;
+        isSectionActive = true;
+        if (sectionStopTimer) {
+          clearTimeout(sectionStopTimer);
+          sectionStopTimer = null;
+        }
         if (animFrameId !== null || destroyed) return;
         tick();
       };
@@ -237,6 +259,7 @@ export function Hero3D() {
       initializedRef.current = false;
 
       if (animFrameId !== null) cancelAnimationFrame(animFrameId);
+      if (sectionStopTimer) clearTimeout(sectionStopTimer);
       if (ro) ro.disconnect();
 
       const el = containerRef.current;

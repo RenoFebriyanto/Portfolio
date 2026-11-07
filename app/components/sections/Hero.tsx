@@ -15,16 +15,17 @@ export function Hero({ scrollTo }: Props) {
 
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
 
-  tl.from('.hero-status', { y: 16, opacity: 0, duration: 0.6 })
+  tl.from('.hero-status', { y: 16, scale: 0.9, opacity: 0, duration: 0.6 })
     .from('.hero-heading-line span', {
       yPercent: 105,
+      scale: 0.82,
       opacity: 0,
       duration: 0.7,
       stagger: 0.12,
     }, '-=0.25')
-    .from('.hero-desc',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.35')
-    .from('.hero-tags',   { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
-    .from('.hero-cta',    { y: 20, opacity: 0, duration: 0.6 }, '-=0.45')
+    .from('.hero-desc',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.35')
+    .from('.hero-tags',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
+    .from('.hero-cta',    { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
     .from('.hero-scroll', { y: 12, opacity: 0, duration: 0.5 }, '-=0.2');
 
   const onEnter = (e: Event) => {
