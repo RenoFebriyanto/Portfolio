@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { gsap, useGSAP } from '~/utils/gsap';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
 import { Hero3D } from '~/components/ui/Hero3D';
+import { SWARM_REBUILD_EVENT } from '~/components/ui/SwarmRebuild';
 
 interface Props {
   scrollTo: (index: number) => void;
@@ -65,6 +66,7 @@ export function Hero({ scrollTo }: Props) {
     .from('.hero-desc',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.35')
     .from('.hero-tags',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
     .from('.hero-cta',    { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
+    .from('.hero-swarm-trigger', { y: 12, opacity: 0, duration: 0.45 }, '-=0.3')
     .from('.hero-scroll', { y: 12, opacity: 0, duration: 0.5 }, '-=0.2');
 
   const onEnter = (e: Event) => {
@@ -144,6 +146,13 @@ export function Hero({ scrollTo }: Props) {
               About Me <span className="btn-arrow">→</span>
             </a>
           </div>
+          <button
+            type="button"
+            className="hero-swarm-trigger"
+            onClick={() => window.dispatchEvent(new Event(SWARM_REBUILD_EVENT))}
+          >
+            <span aria-hidden="true">↻</span> Watch site rebuild
+          </button>
         </div>
 
         <Hero3D />
