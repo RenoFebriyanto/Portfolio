@@ -11,6 +11,11 @@ export function useSectionAnimations() {
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const pendingEnters = new Map<string, { section: HTMLElement; direction?: string }>();
+    const waitForSwarm =
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     /* ── Helpers ── */
     const EXIT_STAGGER = [
       'exit-stagger-1', 'exit-stagger-2', 'exit-stagger-3',
@@ -23,6 +28,7 @@ export function useSectionAnimations() {
 
     function enterReveal(sectionEl: HTMLElement) {
       sectionEl.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
+        if (el.classList.contains('swarm-built')) return;
         clearExitClasses(el);
         el.classList.remove('visible');
         void el.offsetWidth; // force reflow
@@ -140,7 +146,21 @@ const LEAVE: Record<string, (el: HTMLElement, dir?: string) => void> = {
       const id        = detail?.id;
       const direction = detail?.direction;
       const sec       = id ? document.getElementById(id) : null;
-      if (sec && id) ENTER[id]?.(sec, direction);
+      if (!sec || !id || !ENTER[id]) return;
+      if (waitForSwarm) {
+        pendingEnters.set(id, { section: sec, direction });
+        return;
+      }
+      ENTER[id](sec, direction);
+    };
+
+    const onSectionBuilt = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      if (!id) return;
+      const pending = pendingEnters.get(id);
+      if (!pending) return;
+      pendingEnters.delete(id);
+      ENTER[id]?.(pending.section, pending.direction);
     };
 
     const onLeave = (e: Event) => {
@@ -148,10 +168,12 @@ const LEAVE: Record<string, (el: HTMLElement, dir?: string) => void> = {
       const id        = detail?.id;
       const direction = detail?.direction;
       const sec       = id ? document.getElementById(id) : null;
+      if (id) pendingEnters.delete(id);
       if (sec && id) LEAVE[id]?.(sec, direction);
     };
 
     window.addEventListener('sectionenter', onEnter);
+    window.addEventListener('swarm:sectionbuilt', onSectionBuilt);
     window.addEventListener('sectionleave', onLeave);
 
     // Trigger hero entrance on mount
@@ -161,6 +183,7 @@ const LEAVE: Record<string, (el: HTMLElement, dir?: string) => void> = {
 
     return () => {
       window.removeEventListener('sectionenter', onEnter);
+      window.removeEventListener('swarm:sectionbuilt', onSectionBuilt);
       window.removeEventListener('sectionleave', onLeave);
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     };

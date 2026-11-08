@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import { gsap, useGSAP } from '~/utils/gsap';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
 import { Hero3D } from '~/components/ui/Hero3D';
-import { SWARM_REBUILD_EVENT } from '~/components/ui/SwarmRebuild';
 
 interface Props {
   scrollTo: (index: number) => void;
@@ -13,9 +12,17 @@ export function Hero({ scrollTo }: Props) {
 
   useGSAP(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const waitForSwarm = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let pendingEnter = false;
 
-  const sceneTl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
-  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  const sceneTl = gsap.timeline({
+    paused: true,
+    defaults: { ease: 'power3.out', immediateRender: false },
+  });
+  const tl = gsap.timeline({
+    paused: true,
+    defaults: { ease: 'power3.out', immediateRender: false },
+  });
   const heroObjects = gsap.utils.toArray<HTMLElement>('.hero-object');
   const pointerHandlers = heroObjects.map(object => {
     const moveX = gsap.quickTo(object, 'x', { duration: 0.45, ease: 'power3.out' });
@@ -66,11 +73,28 @@ export function Hero({ scrollTo }: Props) {
     .from('.hero-desc',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.35')
     .from('.hero-tags',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
     .from('.hero-cta',    { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
-    .from('.hero-swarm-trigger', { y: 12, opacity: 0, duration: 0.45 }, '-=0.3')
     .from('.hero-scroll', { y: 12, opacity: 0, duration: 0.5 }, '-=0.2');
 
   const onEnter = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
+    requestEnter();
+  };
+
+  const requestEnter = () => {
+    if (waitForSwarm) {
+      pendingEnter = true;
+      return;
+    }
+    playEnter();
+  };
+
+  const onSectionBuilt = (e: Event) => {
+    if ((e as CustomEvent<{ id?: string }>).detail?.id !== 'hero' || !pendingEnter) return;
+    pendingEnter = false;
+    playEnter();
+  };
+
+  const playEnter = () => {
     sceneTl.timeScale(1);
     sceneTl.play(0);
     tl.timeScale(1);
@@ -79,6 +103,7 @@ export function Hero({ scrollTo }: Props) {
 
   const onLeave = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
+    pendingEnter = false;
     heroObjects.forEach(object => gsap.to(object, {
       x: 0,
       y: 0,
@@ -93,18 +118,19 @@ export function Hero({ scrollTo }: Props) {
 
   let initialEnterFrame = 0;
   window.addEventListener('sectionenter', onEnter);
+  window.addEventListener('swarm:sectionbuilt', onSectionBuilt);
   window.addEventListener('sectionleave', onLeave);
   initialEnterFrame = window.requestAnimationFrame(() => {
     const heroPanel = heroRef.current?.closest<HTMLElement>('[data-panel-id="hero"]');
     if (heroPanel?.dataset.visible === 'true' && tl.paused() && tl.progress() === 0) {
-      sceneTl.play(0);
-      tl.play(0);
+      requestEnter();
     }
   });
 
   return () => {
     window.cancelAnimationFrame(initialEnterFrame);
     window.removeEventListener('sectionenter', onEnter);
+    window.removeEventListener('swarm:sectionbuilt', onSectionBuilt);
     window.removeEventListener('sectionleave', onLeave);
     pointerHandlers.forEach(cleanup => cleanup());
   };
@@ -146,13 +172,6 @@ export function Hero({ scrollTo }: Props) {
               About Me <span className="btn-arrow">→</span>
             </a>
           </div>
-          <button
-            type="button"
-            className="hero-swarm-trigger"
-            onClick={() => window.dispatchEvent(new Event(SWARM_REBUILD_EVENT))}
-          >
-            <span aria-hidden="true">↻</span> Watch site rebuild
-          </button>
         </div>
 
         <Hero3D />

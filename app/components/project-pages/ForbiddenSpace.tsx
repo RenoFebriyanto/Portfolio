@@ -11,15 +11,6 @@ function useFSCursor() {
         background: #00c8ff !important;
         box-shadow: 0 0 8px #00c8ff, 0 0 16px rgba(0,200,255,0.4) !important;
       }
-      body.fs-page-active .cursor-ring {
-        border-color: #00c8ff !important;
-      }
-      body.fs-page-active.cursor-hover .cursor-ring {
-        border-color: #00c8ff !important;
-        background: rgba(0,200,255,0.08) !important;
-        width: 56px !important;
-        height: 56px !important;
-      }
       body.fs-page-active .cursor-dot { background: #00c8ff !important; }
     `;
     document.head.appendChild(style);
@@ -117,17 +108,39 @@ function useRevealOnScroll() {
   useEffect(() => {
     const items = document.querySelectorAll<HTMLElement>('.fs-reveal');
     if (!items.length) return;
+    const waitForSwarm =
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pendingReveals = new Map<HTMLElement, (event: Event) => void>();
     const obs = new IntersectionObserver(
       entries => entries.forEach(e => {
         if (e.isIntersecting) {
-          (e.target as HTMLElement).classList.add('fs-revealed');
+          const element = e.target as HTMLElement;
+          if (!waitForSwarm) {
+            element.classList.add('fs-revealed');
+          } else {
+            const onBuilt = (event: Event) => {
+              if (event.target !== element) return;
+              element.classList.add('fs-revealed');
+              element.removeEventListener('swarm:built', onBuilt);
+              pendingReveals.delete(element);
+            };
+            pendingReveals.set(element, onBuilt);
+            element.addEventListener('swarm:built', onBuilt);
+          }
           obs.unobserve(e.target);
         }
       }),
       { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
     );
     items.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      pendingReveals.forEach((listener, element) => {
+        element.removeEventListener('swarm:built', listener);
+      });
+      pendingReveals.clear();
+    };
   }, []);
 }
 

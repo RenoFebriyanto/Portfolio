@@ -24,6 +24,7 @@ export function Projects() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
+  const isInitialFilterRender = useRef(true);
 
   const handleFilter = useCallback((key: string) => {
     setActiveFilter(key);
@@ -40,15 +41,60 @@ export function Projects() {
     const section = sectionRef.current;
     if (!viewport || !grid || !section) return;
 
+    let onSwarmBuildComplete: ((event: Event) => void) | null = null;
+    let onSwarmBuildCancelled: ((event: Event) => void) | null = null;
     offsetRef.current = 0;
     gsap.killTweensOf(grid);
     gsap.set(grid, { x: 0 });
 
-    const cards = grid.querySelectorAll<HTMLElement>('[data-project-card]');
-    gsap.fromTo(cards,
-      { x: 90, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.65, stagger: 0.08, ease: 'power3.out' },
-    );
+    if (isInitialFilterRender.current) {
+      isInitialFilterRender.current = false;
+    } else {
+      const cards = grid.querySelectorAll<HTMLElement>('[data-project-card]');
+      const animateCards = () => {
+        gsap.fromTo(cards,
+          { x: 90, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: 'power3.out',
+            onComplete: () => gsap.set(cards, { clearProps: 'transform,opacity' }),
+          },
+        );
+      };
+      const waitForSwarm =
+        window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (waitForSwarm) {
+        const handleSwarmBuildComplete = (event: Event) => {
+          if ((event as CustomEvent<{ id?: string }>).detail?.id !== 'projects') return;
+          window.removeEventListener('swarm:buildcomplete', handleSwarmBuildComplete);
+          onSwarmBuildComplete = null;
+          animateCards();
+        };
+        onSwarmBuildComplete = handleSwarmBuildComplete;
+        window.addEventListener('swarm:buildcomplete', handleSwarmBuildComplete);
+        const handleSwarmBuildCancelled = (event: Event) => {
+          if ((event as CustomEvent<{ id?: string }>).detail?.id !== 'projects') return;
+          if (onSwarmBuildComplete) {
+            window.removeEventListener('swarm:buildcomplete', onSwarmBuildComplete);
+            onSwarmBuildComplete = null;
+          }
+          window.removeEventListener('swarm:buildcancelled', handleSwarmBuildCancelled);
+          onSwarmBuildCancelled = null;
+        };
+        onSwarmBuildCancelled = handleSwarmBuildCancelled;
+        window.addEventListener('swarm:buildcancelled', handleSwarmBuildCancelled);
+        window.dispatchEvent(new CustomEvent('swarm:contentchange', {
+          detail: { id: 'projects' },
+        }));
+      } else {
+        animateCards();
+      }
+    }
 
     const onResize = () => {
       offsetRef.current = Math.min(offsetRef.current, Math.max(0, grid.scrollWidth - viewport.clientWidth));
@@ -114,6 +160,12 @@ export function Projects() {
       section.removeEventListener('touchstart', onTouchStart, { capture: true });
       section.removeEventListener('touchend', onTouchEnd, { capture: true });
       window.removeEventListener('resize', onResize);
+      if (onSwarmBuildComplete) {
+        window.removeEventListener('swarm:buildcomplete', onSwarmBuildComplete);
+      }
+      if (onSwarmBuildCancelled) {
+        window.removeEventListener('swarm:buildcancelled', onSwarmBuildCancelled);
+      }
       gsap.killTweensOf(grid);
     };
   }, [activeFilter]);

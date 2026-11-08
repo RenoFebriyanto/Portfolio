@@ -56,8 +56,14 @@ export function About() {
 
   useGSAP(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const waitForSwarm =
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduced;
+    let pendingEnter = false;
 
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 0.7 } });
+    const tl = gsap.timeline({
+      paused: true,
+      defaults: { ease: 'power3.out', duration: 0.7, immediateRender: false },
+    });
 
     if (!reduced) {
       tl.from('.section-label',          { y: 16, opacity: 0, duration: 0.5 })
@@ -71,7 +77,20 @@ export function About() {
 
     function onEnter(e: Event) {
       if ((e as CustomEvent).detail?.id !== 'about') return;
+      if (waitForSwarm) {
+        pendingEnter = true;
+        return;
+      }
+      runEnter();
+    }
 
+    function onSectionBuilt(e: Event) {
+      if ((e as CustomEvent<{ id?: string }>).detail?.id !== 'about' || !pendingEnter) return;
+      pendingEnter = false;
+      runEnter();
+    }
+
+    function runEnter() {
       tl.play(0);
       // Underline kecil di bawah "01 About" itu CSS biasa (.section-label.visible),
       // gak perlu dikonversi ke GSAP, cukup tambah class-nya manual:
@@ -132,15 +151,17 @@ export function About() {
 
     function onLeave(e: Event) {
       if ((e as CustomEvent).detail?.id !== 'about') return;
+      pendingEnter = false;
       document.getElementById('avatar-wrap')?.classList.remove('photo-ready');
       document.querySelector('.about-identity')?.classList.remove('shimmer-ready');
     }
 
     window.addEventListener('sectionenter', onEnter);
+    window.addEventListener('swarm:sectionbuilt', onSectionBuilt);
     window.addEventListener('sectionleave', onLeave);
-
     return () => {
       window.removeEventListener('sectionenter', onEnter);
+      window.removeEventListener('swarm:sectionbuilt', onSectionBuilt);
       window.removeEventListener('sectionleave', onLeave);
     };
   }, { scope: sectionRef });

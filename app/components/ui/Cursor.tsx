@@ -1,13 +1,6 @@
-/* ================================================
-   CURSOR.TSX — Direct DOM lerp cursor (no React state)
-   Mirrors vanilla cursor.js exactly:
-   - dot follows mouse instantly
-   - ring lerps behind mouse (LERP = 0.12)
-   - body class toggles for hover/click/card/hidden states
-================================================ */
+/* Direct DOM cursor dot; the swarm trail is rendered by SwarmRebuild. */
 import { useEffect } from 'react';
 
-const LERP = 0.12;
 const INTERACTIVE = 'a, button, .filter-btn, .nav-cta, .nav-links a, .social-link, .footer-back-top, label, input, textarea, .tag';
 const CARDS = '.project-card, .skill-group, .stat-card, .about-doing-chip';
 
@@ -18,21 +11,13 @@ export default function Cursor() {
 
     // Create elements
     const dot  = document.createElement('div');
-    const ring = document.createElement('div');
     dot.className  = 'cursor-dot';
-    ring.className = 'cursor-ring';
+    dot.style.transform = `translate(${window.innerWidth / 2}px, ${window.innerHeight / 2}px) translate(-50%, -50%)`;
     document.body.appendChild(dot);
-    document.body.appendChild(ring);
+    document.body.classList.remove('cursor-hidden');
 
-    let mouseX = -100, mouseY = -100;
-    let ringX  = -100, ringY  = -100;
-    let rafId: number;
-
-    // Track raw mouse — dot follows instantly
     const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
       document.body.classList.remove('cursor-hidden');
     };
 
@@ -46,16 +31,6 @@ export default function Cursor() {
     document.addEventListener('mouseenter', onEnter);
     document.addEventListener('mousedown',  onDown);
     document.addEventListener('mouseup',    onUp);
-
-    // RAF lerp loop for ring
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const tick = () => {
-      ringX = lerp(ringX, mouseX, LERP);
-      ringY = lerp(ringY, mouseY, LERP);
-      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
 
     // Hover state helpers
     const addHover = (selector: string, bodyClass: string) => {
@@ -80,18 +55,16 @@ export default function Cursor() {
     });
 
     return () => {
-      cancelAnimationFrame(rafId);
       document.removeEventListener('mousemove',  onMove);
       document.removeEventListener('mouseleave', onLeave);
       document.removeEventListener('mouseenter', onEnter);
       document.removeEventListener('mousedown',  onDown);
       document.removeEventListener('mouseup',    onUp);
       dot.remove();
-      ring.remove();
       document.body.classList.remove('cursor-hover', 'cursor-card', 'cursor-click', 'cursor-hidden');
     };
   }, []);
 
-  // Render nothing — elements injected directly into body
+  // Render nothing — cursor elements are injected directly into body.
   return null;
 }

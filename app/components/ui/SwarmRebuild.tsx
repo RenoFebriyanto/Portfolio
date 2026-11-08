@@ -1,383 +1,617 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from "react";
 
-export const SWARM_REBUILD_EVENT = 'portfolio:swarm-rebuild';
-
-const AGENT_COUNT = 14;
-const ORBIT_DURATION = 1150;
-const FAN_DURATION = 850;
-const BUILD_STEP = 420;
-const BUILD_FADE = 600;
-const COLORS = ['#ff6b35', '#f4eee8', '#ff9b69', '#e7a14a'];
-
-interface Point {
-  x: number;
-  y: number;
-}
+type TargetKind = "text" | "box" | "object";
 
 interface BuildTarget {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  type: 'text' | 'image' | 'control';
+  element: HTMLElement;
+  kind: TargetKind;
 }
 
-interface Agent {
-  x: number;
-  y: number;
-  previous: Point;
-  targets: BuildTarget[];
+interface BuildTask {
+  target: BuildTarget;
+  startsAt: number;
+  duration: number;
+  released: boolean;
 }
 
-function collectTargets(width: number, height: number): BuildTarget[] {
-  const activePanel = document.querySelector<HTMLElement>('#snap-root [data-visible="true"]');
-  const root = activePanel ?? document.querySelector<HTMLElement>('main') ?? document.body;
-  const candidates = root.querySelectorAll<HTMLElement>(
-    'h1, h2, h3, p, a, button, img, svg, video, .tag, .project-card, .hero-status, #hero-3d-canvas',
-  );
-  const targets: BuildTarget[] = [];
+interface SwarmAgent {
+  x: number;
+  y: number;
+  angle: number;
+  speed: number;
+  radius: number;
+  tasks: BuildTask[];
+}
 
-  candidates.forEach(element => {
-    const bounds = element.getBoundingClientRect();
-    const style = window.getComputedStyle(element);
-    if (
-      style.display === 'none'
-      || style.visibility === 'hidden'
-      || Number(style.opacity) < 0.05
-      || bounds.width < 5
-      || bounds.height < 5
-      || bounds.bottom < 0
-      || bounds.top > height
-      || bounds.right < 0
-      || bounds.left > width
-    ) return;
+const AGENT_COUNT = 12;
+const TASK_DURATION = 820;
+const TASK_STAGGER = 42;
+const TEXT_SELECTOR = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "p",
+  "li",
+  "blockquote",
+  "figcaption",
+  ".about-identity-name",
+  ".about-identity-role",
+  ".about-identity-meta-label",
+  ".about-identity-meta-val",
+  ".stat-num",
+  ".stat-label",
+  ".about-status-text",
+  ".about-status-tag",
+  ".hero-status-text",
+  ".section-label-text",
+  ".contact-eyebrow",
+  ".fs-eyebrow",
+  ".fs-story__heading",
+  ".fs-story__p",
+  ".fs-video-caption",
+  ".fs-contrib-card__title",
+  ".fs-contrib-card__desc",
+  ".fs-team-card__name",
+  ".fs-team-card__role",
+].join(",");
+const INLINE_TEXT_SELECTOR = "span,strong,em,small,label";
+const BOX_SELECTOR = [
+  "a",
+  "button",
+  "img",
+  "svg",
+  "video",
+  "canvas#hero-3d-canvas",
+  ".hero-object",
+  ".hero-scene-background",
+  ".reveal",
+  ".hero-status",
+  ".section-label",
+  ".reveal",
+  ".tag",
+  ".project-card",
+  ".stat-card",
+  ".skill-group",
+  ".about-identity",
+  ".about-doing-chip",
+  ".about-status",
+  ".contact-form-wrap",
+  ".fs-reveal",
+  ".fs-contrib-card",
+  ".fs-team-grid",
+].join(",");
+const TARGET_SELECTOR = `${TEXT_SELECTOR},${BOX_SELECTOR}`;
+const BUILD_CONTAINER_SELECTOR = [
+  ".hero-status",
+  ".section-label",
+  ".tag",
+  ".project-card",
+  ".stat-card",
+  ".skill-group",
+  ".about-identity",
+  ".about-doing-chip",
+  ".about-status",
+  ".contact-form-wrap",
+  ".fs-reveal",
+  ".fs-contrib-card",
+  ".fs-team-grid",
+  "a",
+  "button",
+].join(",");
 
-    const isImage = element.matches('img, svg, video, #hero-3d-canvas');
-    const isControl = element.matches('a, button, .tag, .hero-status');
-    targets.push({
-      x: Math.max(0, Math.min(width, bounds.left)),
-      y: Math.max(0, Math.min(height, bounds.top)),
-      width: Math.min(bounds.width, width),
-      height: Math.min(bounds.height, height),
-      type: isImage ? 'image' : isControl ? 'control' : 'text',
-    });
-  });
+const getPanel = (panelId: string | null) =>
+  panelId ? document.getElementById(panelId) : null;
 
-  if (!targets.length) {
-    for (let row = 1; row <= 5; row += 1) {
-      for (let column = 1; column <= 6; column += 1) {
-        targets.push({
-          x: (width * column) / 7 - 24,
-          y: (height * row) / 6 - 20,
-          width: 48,
-          height: 40,
-          type: 'text',
-        });
-      }
-    }
+const getTargetKind = (element: HTMLElement): TargetKind => {
+  if (element.matches(TEXT_SELECTOR)) return "text";
+  if (
+    element.matches(
+      "img,svg,video,canvas,.hero-object,.hero-scene-background",
+    )
+  ) {
+    return "object";
   }
+  if (element.matches(BOX_SELECTOR)) return "box";
+  return "object";
+};
 
-  return targets.sort((a, b) => a.y - b.y || a.x - b.x);
-}
+const collectTargets = (
+  panelId: string | null,
+  builtElements: WeakSet<HTMLElement>,
+  force: boolean,
+) => {
+  const root = getPanel(panelId) ?? document.body;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const candidates = Array.from(root.querySelectorAll<HTMLElement>(TARGET_SELECTOR));
+  const candidateSet = new Set(candidates);
 
-function drawAgent(
-  context: CanvasRenderingContext2D,
-  position: Point,
-  previous: Point,
-  color: string,
-  index: number,
-  alpha: number,
-) {
-  const angle = Math.atan2(position.y - previous.y, position.x - previous.x);
-  const direction = Number.isFinite(angle) ? angle : -Math.PI / 3;
+  return candidates
+    .filter((element) => {
+      if (builtElements.has(element) && !force) return false;
+      if (element.closest("[hidden], [aria-hidden='true']")) return false;
+      if (
+        element.matches(TEXT_SELECTOR) &&
+        element.querySelector(TEXT_SELECTOR)
+      ) {
+        return false;
+      }
 
-  context.save();
-  context.translate(position.x, position.y);
-  context.rotate(direction);
-  context.globalAlpha = alpha;
-  context.shadowColor = color;
-  context.shadowBlur = 12;
-  context.strokeStyle = color;
-  context.lineWidth = 1;
-  context.beginPath();
-  context.moveTo(-7, 0);
-  context.lineTo(7, 0);
-  context.moveTo(0, -7);
-  context.lineTo(0, 7);
-  context.stroke();
-  context.fillStyle = color;
-  context.beginPath();
-  context.moveTo(1, -6);
-  context.lineTo(8, 8);
-  context.lineTo(2, 6);
-  context.lineTo(-1, 10);
-  context.closePath();
-  context.fill();
-  context.shadowBlur = 0;
-  context.font = '10px monospace';
-  context.fillText(String(index + 1).padStart(2, '0'), 9, -8);
-  context.restore();
-}
+      const buildContainer = element.parentElement?.closest(BUILD_CONTAINER_SELECTOR);
+      if (buildContainer instanceof HTMLElement && candidateSet.has(buildContainer)) return false;
+
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+      return (
+        rect.width > 2 &&
+        rect.height > 2 &&
+        rect.right > 0 &&
+        rect.bottom > 0 &&
+        rect.left < viewportWidth &&
+        rect.top < viewportHeight &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    })
+    .map((element) => ({ element, kind: getTargetKind(element) }))
+    .sort((left, right) => {
+      const priority = (target: BuildTarget) =>
+        target.kind === "box" ? 0 : target.kind === "object" ? 1 : 2;
+      return priority(left) - priority(right);
+    });
+};
 
 export function SwarmRebuild() {
-  useEffect(() => {
-    const revealCanvas = document.createElement('canvas');
-    const agentCanvas = document.createElement('canvas');
-    revealCanvas.className = 'swarm-rebuild-canvas';
-    agentCanvas.className = 'swarm-rebuild-agents';
-    revealCanvas.setAttribute('aria-hidden', 'true');
-    agentCanvas.setAttribute('aria-hidden', 'true');
-    document.body.append(revealCanvas, agentCanvas);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const context = revealCanvas.getContext('2d');
-    const agentContext = agentCanvas.getContext('2d');
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!finePointer.matches || reducedMotion.matches) return;
+
     let width = window.innerWidth;
     let height = window.innerHeight;
     let pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    let animationFrame = 0;
-    let startedAt = 0;
-    let running = false;
-    let targets: BuildTarget[] = [];
-    let agents: Agent[] = [];
-    let logoCenter: Point = { x: width / 2, y: height / 2 };
-    let lastTimestamp = 0;
+    let frameId = 0;
+    let pointerInside = true;
+    let pointerX = width / 2;
+    let pointerY = height / 2;
+    let panelId =
+      document.querySelector<HTMLElement>("[data-panel-id][data-visible='true']")
+        ?.dataset.panelId ?? "hero";
+    let scrollTimer = 0;
+    let sectionTimer = 0;
+    let initialTimer = 0;
+    let runEndsAt = 0;
+    let activeRun = false;
+    let runNotifiesSection = false;
+    const builtElements = new WeakSet<HTMLElement>();
+    const pendingElements = new Set<HTMLElement>();
+    const pendingVisibility = new Map<HTMLElement, boolean>();
+    const typingListeners = new Map<HTMLElement, (event: AnimationEvent) => void>();
+    const agents: SwarmAgent[] = Array.from({ length: AGENT_COUNT }, (_, index) => ({
+      x: pointerX,
+      y: pointerY,
+      angle: (Math.PI * 2 * index) / AGENT_COUNT,
+      speed: 0.00055 + Math.random() * 0.00018,
+      radius: 25 + Math.random() * 26,
+      tasks: [],
+    }));
 
-    const resizeCanvas = () => {
+    const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
       pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      [revealCanvas, agentCanvas].forEach(canvas => {
-        canvas.width = Math.round(width * pixelRatio);
-        canvas.height = Math.round(height * pixelRatio);
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
+      canvas.width = width * pixelRatio;
+      canvas.height = height * pixelRatio;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    };
+
+    const animateTypedText = (element: HTMLElement, delay = 0) => {
+      const textLength = (element.textContent ?? "").trim().length;
+      if (!textLength) return;
+
+      const previousListener = typingListeners.get(element);
+      if (previousListener) element.removeEventListener("animationend", previousListener);
+      element.style.setProperty("--swarm-type-steps", String(textLength));
+      element.style.setProperty(
+        "--swarm-type-duration",
+        `${Math.min(1200, Math.max(280, textLength * 22))}ms`,
+      );
+      element.style.animationDelay = `${delay}ms`;
+      const onTypeEnd = (event: AnimationEvent) => {
+        if (event.target !== element || event.animationName !== "swarm-text-type") return;
+        element.classList.remove("swarm-type-text");
+        element.style.removeProperty("--swarm-type-steps");
+        element.style.removeProperty("--swarm-type-duration");
+        element.style.animationDelay = "";
+        element.removeEventListener("animationend", onTypeEnd);
+        typingListeners.delete(element);
+      };
+      typingListeners.set(element, onTypeEnd);
+      element.addEventListener("animationend", onTypeEnd);
+      element.classList.remove("swarm-type-text");
+      void element.offsetWidth;
+      element.classList.add("swarm-type-text");
+    };
+
+    const animateBoxText = (element: HTMLElement) => {
+      const blockText = Array.from(
+        element.querySelectorAll<HTMLElement>(TEXT_SELECTOR),
+      );
+      blockText.forEach((text, index) => {
+        animateTypedText(text, Math.min(index * 28, 180));
       });
-      context?.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      agentContext?.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-    };
 
-    const findLogoCenter = (): Point => {
-      const logo = document.querySelector<HTMLElement>('.nav-logo, .fs-nav-logo, header img');
-      const bounds = logo?.getBoundingClientRect();
-      if (!bounds || bounds.width === 0 || bounds.height === 0) {
-        return { x: width / 2, y: Math.min(height * 0.32, 260) };
+      const inlineText = Array.from(
+        element.querySelectorAll<HTMLElement>(INLINE_TEXT_SELECTOR),
+      ).filter(
+        (text) =>
+          !text.parentElement?.closest(INLINE_TEXT_SELECTOR) &&
+          !text.closest(TEXT_SELECTOR),
+      );
+      if (blockText.length === 0 && inlineText.length === 0) {
+        animateTypedText(element);
+        return;
       }
-      return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+      inlineText.forEach((text, index) => {
+        animateTypedText(text, Math.min((blockText.length + index) * 28, 180));
+      });
     };
 
-    const begin = () => {
-      if (!context || running || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      resizeCanvas();
-      targets = collectTargets(width, height);
-      logoCenter = findLogoCenter();
-      const initialAgentPositions = Array.from({ length: AGENT_COUNT }, (_, index) => {
-        const angle = (index / AGENT_COUNT) * Math.PI * 2;
-        return {
-          x: logoCenter.x + Math.cos(angle) * 4,
-          y: logoCenter.y + Math.sin(angle) * 4,
-        };
+    const finishTarget = (target: BuildTarget) => {
+      const { element, kind } = target;
+      element.classList.remove("swarm-build-pending");
+      pendingElements.delete(element);
+      pendingVisibility.delete(element);
+      builtElements.add(element);
+      element.classList.add("swarm-built");
+      if (element.matches(".reveal")) element.classList.add("visible");
+      element.querySelectorAll<HTMLElement>(".reveal").forEach((child) => {
+        child.classList.add("swarm-built", "visible");
       });
 
-      agents = initialAgentPositions.map((position, index) => ({
-        ...position,
-        previous: { ...position },
-        targets: targets.filter((_, targetIndex) => targetIndex % AGENT_COUNT === index),
-      }));
-      startedAt = performance.now();
-      lastTimestamp = startedAt;
-      running = true;
-      drawVeil();
-      revealCanvas.classList.add('is-active');
-      agentCanvas.classList.add('is-active');
-      window.addEventListener('keydown', onKeyDown, true);
-      window.addEventListener('wheel', preventNavigation, { capture: true, passive: false });
-      window.addEventListener('touchmove', preventNavigation, { capture: true, passive: false });
-      animationFrame = window.requestAnimationFrame(tick);
-    };
-
-    const stop = () => {
-      running = false;
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      context?.clearRect(0, 0, width, height);
-      agentContext?.clearRect(0, 0, width, height);
-      revealCanvas.classList.remove('is-active');
-      agentCanvas.classList.remove('is-active');
-      window.removeEventListener('keydown', onKeyDown, true);
-      window.removeEventListener('wheel', preventNavigation, true);
-      window.removeEventListener('touchmove', preventNavigation, true);
-    };
-
-    function preventNavigation(event: Event) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') stop();
-      else if ([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
-        preventNavigation(event);
-      }
-    }
-
-    const drawVeil = () => {
-      if (!context) return;
-      const background = window.getComputedStyle(document.body).backgroundColor;
-      context.globalCompositeOperation = 'source-over';
-      context.globalAlpha = 0.985;
-      context.fillStyle = background === 'rgba(0, 0, 0, 0)' ? '#05050a' : background;
-      context.fillRect(0, 0, width, height);
-      context.globalAlpha = 1;
-    };
-
-    const revealTarget = (target: BuildTarget, progress: number) => {
-      if (!context) return;
-      const eased = 1 - (1 - progress) ** 3;
-      const revealWidth = target.type === 'image'
-        ? target.width
-        : Math.max(2, target.width * eased);
-      const revealHeight = target.type === 'text'
-        ? target.height
-        : Math.max(2, target.height * eased);
-      const left = target.type === 'image'
-        ? target.x
-        : target.x + (target.width - revealWidth) / 2;
-      const top = target.type !== 'control'
-        ? target.y
-        : target.y + (target.height - revealHeight) / 2;
-
-      context.globalCompositeOperation = 'destination-out';
-      context.globalAlpha = 0.94;
-      context.beginPath();
-      context.roundRect(left, top, revealWidth, revealHeight, Math.min(12, revealHeight / 3));
-      context.fill();
-      context.globalAlpha = 1;
-
-      if (target.type === 'text' && progress < 0.96) {
-        context.globalCompositeOperation = 'source-over';
-        context.save();
-        context.fillStyle = COLORS[0];
-        context.globalAlpha = progress > 0.45 ? 0.85 : 0.45 + progress;
-        context.fillRect(left + revealWidth, top, 2, target.height);
-        context.restore();
-      }
-
-      if (progress < 0.9) {
-        context.globalCompositeOperation = 'source-over';
-        context.save();
-        context.strokeStyle = COLORS[Math.round(target.x + target.y) % COLORS.length];
-        context.globalAlpha = 0.68 * (1 - progress * 0.65);
-        context.lineWidth = 1;
-        context.setLineDash([4, 4]);
-        context.strokeRect(left, top, revealWidth, revealHeight);
-        context.setLineDash([]);
-        context.restore();
-      }
-    };
-
-    function tick(now: number) {
-      if (!context || !running) return;
-      animationFrame = 0;
-      const elapsed = now - startedAt;
-      const delta = Math.min(48, now - lastTimestamp);
-      lastTimestamp = now;
-      agentContext?.clearRect(0, 0, width, height);
-
-      if (elapsed < ORBIT_DURATION) {
-        const radius = 22 + Math.sin(elapsed * 0.009) * 5;
-        agents.forEach((agent, index) => {
-          agent.previous = { x: agent.x, y: agent.y };
-          const angle = elapsed * 0.006 + (index / AGENT_COUNT) * Math.PI * 2;
-          agent.x = logoCenter.x + Math.cos(angle) * radius;
-          agent.y = logoCenter.y + Math.sin(angle) * radius * 0.7;
-        });
+      if (kind === "text") {
+        animateTypedText(element);
       } else {
-        const buildElapsed = elapsed - ORBIT_DURATION - FAN_DURATION;
-        const fanProgress = Math.min(1, (elapsed - ORBIT_DURATION) / FAN_DURATION);
-        const fanEase = 1 - (1 - fanProgress) ** 3;
+        animateBoxText(element);
+      }
+      element.dispatchEvent(new CustomEvent("swarm:built", { bubbles: true }));
+    };
 
-        agents.forEach((agent, index) => {
-          agent.previous = { x: agent.x, y: agent.y };
-          const firstTarget = agent.targets[0];
-          const fanAngle = (index / AGENT_COUNT) * Math.PI * 2;
-          const fanTarget = firstTarget
-            ? { x: firstTarget.x + firstTarget.width / 2, y: firstTarget.y + firstTarget.height / 2 }
-            : { x: width / 2 + Math.cos(fanAngle) * width * 0.4, y: height / 2 + Math.sin(fanAngle) * height * 0.4 };
-          const orbitAngle = elapsed * 0.006 + fanAngle;
-          const orbitPosition = {
-            x: logoCenter.x + Math.cos(orbitAngle) * 22,
-            y: logoCenter.y + Math.sin(orbitAngle) * 16,
-          };
-          agent.x = orbitPosition.x + (fanTarget.x - orbitPosition.x) * fanEase;
-          agent.y = orbitPosition.y + (fanTarget.y - orbitPosition.y) * fanEase;
+    const clearPending = () => {
+      pendingElements.forEach((element) => {
+        element.classList.remove("swarm-build-pending");
+        element.classList.remove("swarm-built");
+        if (pendingVisibility.get(element)) element.classList.add("visible");
+      });
+      pendingElements.clear();
+      pendingVisibility.clear();
+      agents.forEach((agent) => {
+        agent.tasks = [];
+      });
+    };
 
-          if (buildElapsed >= 0) {
-            const step = Math.floor(buildElapsed / BUILD_STEP);
-            const localProgress = (buildElapsed % BUILD_STEP) / BUILD_STEP;
-            const target = agent.targets[step];
-            if (target) {
-              revealTarget(target, localProgress);
-              agent.x += (target.x + target.width / 2 - agent.x) * 0.16;
-              agent.y += (target.y + target.height / 2 - agent.y) * 0.16;
-            }
-          }
-        });
+    const startBuild = (
+      nextPanelId: string | null,
+      force: boolean,
+      notifySection: boolean,
+    ) => {
+      panelId = nextPanelId ?? panelId;
+      clearPending();
+      const targets = collectTargets(panelId, builtElements, force);
+      runNotifiesSection = notifySection;
+      if (!targets.length) {
+        activeRun = false;
+        window.dispatchEvent(
+          new CustomEvent("swarm:buildcomplete", { detail: { id: panelId } }),
+        );
+        if (notifySection) {
+          window.dispatchEvent(
+            new CustomEvent("swarm:sectionbuilt", { detail: { id: panelId } }),
+          );
+        }
+        return;
       }
 
-      agents.forEach((agent, index) => {
-        const alpha = elapsed < ORBIT_DURATION + FAN_DURATION
-          ? 0.9
-          : Math.max(0, 1 - Math.max(0, elapsed - ORBIT_DURATION - FAN_DURATION - 2000) / BUILD_FADE);
-        if (agentContext) {
-          const targetStep = Math.floor(Math.max(0, elapsed - ORBIT_DURATION - FAN_DURATION) / BUILD_STEP);
-          const targetType = agent.targets[targetStep]?.type;
-          if (targetType) {
-            const label = targetType === 'image' ? 'IMG' : targetType === 'control' ? 'UI' : 'TYPE';
-            agentContext.save();
-            agentContext.font = '9px monospace';
-            agentContext.fillStyle = COLORS[index % COLORS.length];
-            agentContext.globalAlpha = alpha * 0.8;
-            agentContext.fillText(label, agent.x + 14, agent.y + 13);
-            agentContext.restore();
-          }
-          drawAgent(agentContext, agent, agent.previous, COLORS[index % COLORS.length], index, alpha);
-        }
+      const now = performance.now();
+      activeRun = true;
+      targets.forEach((target, index) => {
+        const agentIndex = index % AGENT_COUNT;
+        const round = Math.floor(index / AGENT_COUNT);
+        agents[agentIndex].tasks.push({
+          target,
+          startsAt: now + 90 + round * (TASK_DURATION + 80) + agentIndex * TASK_STAGGER,
+          duration: TASK_DURATION,
+          released: false,
+        });
       });
 
-      const taskCount = Math.max(...agents.map(agent => agent.targets.length), 0);
-      const buildDuration = taskCount * BUILD_STEP;
-      const fadeStart = ORBIT_DURATION + FAN_DURATION + buildDuration + 400;
-      if (elapsed >= fadeStart) {
-        context.globalCompositeOperation = 'destination-out';
-        context.globalAlpha = Math.min(1, delta / (BUILD_FADE * 0.2));
-        context.fillRect(0, 0, width, height);
-        context.globalAlpha = 1;
-        if (elapsed >= fadeStart + BUILD_FADE) {
-          stop();
+      const latestTaskStart = Math.max(
+        ...agents.flatMap((agent) => agent.tasks.map((task) => task.startsAt)),
+      );
+      runEndsAt = latestTaskStart + TASK_DURATION + 1400;
+      requestFrame();
+    };
+
+    const easeInOut = (value: number) =>
+      value < 0.5
+        ? 4 * value * value * value
+        : 1 - Math.pow(-2 * value + 2, 3) / 2;
+
+    const drawRoundedRect = (rect: DOMRect, radius: number) => {
+      const r = Math.min(radius, rect.width / 2, rect.height / 2);
+      context.beginPath();
+      context.moveTo(rect.left + r, rect.top);
+      context.lineTo(rect.right - r, rect.top);
+      context.quadraticCurveTo(rect.right, rect.top, rect.right, rect.top + r);
+      context.lineTo(rect.right, rect.bottom - r);
+      context.quadraticCurveTo(rect.right, rect.bottom, rect.right - r, rect.bottom);
+      context.lineTo(rect.left + r, rect.bottom);
+      context.quadraticCurveTo(rect.left, rect.bottom, rect.left, rect.bottom - r);
+      context.lineTo(rect.left, rect.top + r);
+      context.quadraticCurveTo(rect.left, rect.top, rect.left + r, rect.top);
+      context.closePath();
+    };
+
+    const drawAgent = (agent: SwarmAgent, time: number) => {
+      context.save();
+      context.translate(agent.x, agent.y);
+      context.rotate(agent.angle + Math.PI / 2);
+      context.strokeStyle = "rgba(255, 138, 76, 0.86)";
+      context.fillStyle = "rgba(255, 183, 132, 0.98)";
+      context.lineWidth = 1.15;
+      context.beginPath();
+      context.moveTo(0, -5.5);
+      context.lineTo(3.3, 4);
+      context.lineTo(0, 2.1);
+      context.lineTo(-3.3, 4);
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.restore();
+
+      const task = agent.tasks.find(
+        (candidate) =>
+          !candidate.released &&
+          time >= candidate.startsAt &&
+          time <= candidate.startsAt + candidate.duration,
+      );
+      if (!task) return;
+
+      const progress = Math.min((time - task.startsAt) / task.duration, 1);
+      const travelProgress = easeInOut(Math.min(progress / 0.54, 1));
+      const rect = task.target.element.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2;
+      const targetY = rect.top + rect.height / 2;
+      const orbitX = pointerX + Math.cos(agent.angle) * agent.radius;
+      const orbitY = pointerY + Math.sin(agent.angle) * agent.radius;
+      agent.x = orbitX + (targetX - orbitX) * travelProgress;
+      agent.y = orbitY + (targetY - orbitY) * travelProgress;
+
+      if (progress >= 0.54) {
+        const scanProgress = Math.min((progress - 0.54) / 0.46, 1);
+        const scanY = rect.top + rect.height * scanProgress;
+        const styles = window.getComputedStyle(task.target.element);
+        const parsedRadius = Number.parseFloat(styles.borderTopLeftRadius) || 0;
+        const shapeRect = rect;
+        const perimeter = Math.max(1, (shapeRect.width + shapeRect.height) * 2);
+        const revealLength = perimeter * scanProgress;
+
+        context.save();
+        context.strokeStyle = `rgba(255, 170, 113, ${0.88 - scanProgress * 0.32})`;
+        context.lineWidth = task.target.kind === "text" ? 1 : 1.5;
+        context.setLineDash([revealLength, perimeter]);
+        context.lineDashOffset = 0;
+        drawRoundedRect(shapeRect, parsedRadius);
+        context.stroke();
+        context.setLineDash([]);
+
+        context.strokeStyle = `rgba(255, 193, 145, ${0.82 * (1 - scanProgress * 0.4)})`;
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(rect.left, scanY);
+        context.lineTo(rect.right, scanY);
+        context.stroke();
+        context.restore();
+      }
+
+      if (progress >= 1 && !task.released) {
+        task.released = true;
+        task.target.element.classList.remove("swarm-build-pending");
+        pendingElements.delete(task.target.element);
+        finishTarget(task.target);
+      }
+    };
+
+    const tick = (time: number) => {
+      context.clearRect(0, 0, width, height);
+      agents.forEach((agent) => {
+        agent.angle += agent.speed * 16;
+        agent.tasks.forEach((task) => {
+          if (!task.released && time >= task.startsAt + task.duration) {
+            task.released = true;
+            finishTarget(task.target);
+          }
+        });
+        const activeTask = agent.tasks.find(
+          (task) =>
+            !task.released &&
+            time >= task.startsAt &&
+            time <= task.startsAt + task.duration,
+        );
+        if (!activeTask) {
+          const orbitX = pointerX + Math.cos(agent.angle) * agent.radius;
+          const orbitY = pointerY + Math.sin(agent.angle) * agent.radius;
+          agent.x += (orbitX - agent.x) * 0.1;
+          agent.y += (orbitY - agent.y) * 0.1;
+        } else if (!pendingElements.has(activeTask.target.element)) {
+          pendingVisibility.set(
+            activeTask.target.element,
+            activeTask.target.element.classList.contains("visible"),
+          );
+          activeTask.target.element.classList.remove("visible", "swarm-built");
+          activeTask.target.element.querySelectorAll<HTMLElement>(".reveal").forEach((child) => {
+            child.classList.remove("visible", "swarm-built");
+          });
+          activeTask.target.element.classList.add("swarm-build-pending");
+          pendingElements.add(activeTask.target.element);
+        }
+        drawAgent(agent, time);
+      });
+
+      if (activeRun && time >= runEndsAt) {
+        activeRun = false;
+        pendingElements.forEach((element) => {
+          element.classList.remove("swarm-build-pending");
+        });
+        pendingElements.clear();
+        agents.forEach((agent) => {
+          agent.tasks = [];
+        });
+        window.dispatchEvent(
+          new CustomEvent("swarm:buildcomplete", { detail: { id: panelId } }),
+        );
+        if (runNotifiesSection) {
+          window.dispatchEvent(
+            new CustomEvent("swarm:sectionbuilt", { detail: { id: panelId } }),
+          );
+        }
+      }
+
+      if (activeRun || pointerInside) {
+        frameId = window.requestAnimationFrame(tick);
+      } else {
+        context.clearRect(0, 0, width, height);
+        frameId = 0;
+      }
+    };
+
+    function requestFrame() {
+      if (!frameId) frameId = window.requestAnimationFrame(tick);
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      pointerInside = true;
+      requestFrame();
+    };
+    const handlePointerEnter = () => {
+      pointerInside = true;
+      requestFrame();
+    };
+    const handlePointerLeave = () => {
+      pointerInside = false;
+      if (!activeRun && frameId) {
+        window.cancelAnimationFrame(frameId);
+        frameId = 0;
+        context.clearRect(0, 0, width, height);
+      }
+    };
+
+    const handleSectionEnter = (event: Event) => {
+      const detail = (event as CustomEvent<{ id?: string }>).detail;
+      const nextPanelId = detail?.id ?? null;
+      window.clearTimeout(initialTimer);
+      window.clearTimeout(sectionTimer);
+      sectionTimer = window.setTimeout(
+        () => startBuild(nextPanelId, true, true),
+        80,
+      );
+    };
+
+    const handleSectionLeave = () => {
+      window.clearTimeout(sectionTimer);
+      if (activeRun) {
+        window.dispatchEvent(
+          new CustomEvent("swarm:buildcancelled", { detail: { id: panelId } }),
+        );
+      }
+      clearPending();
+      activeRun = false;
+      runNotifiesSection = false;
+    };
+
+    const handleContentChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ id?: string }>).detail;
+      if (!detail?.id) return;
+      startBuild(detail.id, false, false);
+    };
+
+    const triggerScrollBuild = () => {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        if (activeRun) {
+          scrollTimer = window.setTimeout(
+            () => triggerScrollBuild(),
+            Math.max(100, runEndsAt - performance.now() + 80),
+          );
           return;
         }
-      }
-
-      animationFrame = window.requestAnimationFrame(tick);
-    }
-
-    const onRebuild = () => begin();
-    const onResize = () => {
-      if (running) stop();
-      resizeCanvas();
+        startBuild(panelId, false, false);
+      }, 140);
     };
-    resizeCanvas();
-    window.addEventListener(SWARM_REBUILD_EVENT, onRebuild);
-    window.addEventListener('resize', onResize);
+
+    const onVisibilityChange = () => {
+      if (!document.hidden && pointerInside) requestFrame();
+    };
+
+    resize();
+    agents.forEach((agent) => {
+      agent.x = pointerX;
+      agent.y = pointerY;
+    });
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerenter", handlePointerEnter, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+    window.addEventListener("scroll", triggerScrollBuild, { passive: true, capture: true });
+    window.addEventListener("wheel", triggerScrollBuild, { passive: true });
+    window.addEventListener("sectionenter", handleSectionEnter);
+    window.addEventListener("projectenter", handleSectionEnter);
+    window.addEventListener("sectionleave", handleSectionLeave);
+    window.addEventListener("projectleave", handleSectionLeave);
+    window.addEventListener("swarm:contentchange", handleContentChange);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    initialTimer = window.setTimeout(
+      () => startBuild(panelId, true, true),
+      260,
+    );
 
     return () => {
-      stop();
-      window.removeEventListener(SWARM_REBUILD_EVENT, onRebuild);
-      window.removeEventListener('resize', onResize);
-      revealCanvas.remove();
-      agentCanvas.remove();
+      window.clearTimeout(initialTimer);
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(sectionTimer);
+      window.cancelAnimationFrame(frameId);
+      clearPending();
+      typingListeners.forEach((listener, element) => {
+        element.removeEventListener("animationend", listener);
+      });
+      typingListeners.clear();
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerenter", handlePointerEnter);
+      window.removeEventListener("pointerleave", handlePointerLeave);
+      window.removeEventListener("scroll", triggerScrollBuild, true);
+      window.removeEventListener("wheel", triggerScrollBuild);
+      window.removeEventListener("sectionenter", handleSectionEnter);
+      window.removeEventListener("projectenter", handleSectionEnter);
+      window.removeEventListener("sectionleave", handleSectionLeave);
+      window.removeEventListener("projectleave", handleSectionLeave);
+      window.removeEventListener("swarm:contentchange", handleContentChange);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      context.clearRect(0, 0, width, height);
     };
   }, []);
 
-  return null;
+  return <canvas aria-hidden="true" className="swarm-cursor-canvas" ref={canvasRef} />;
 }
