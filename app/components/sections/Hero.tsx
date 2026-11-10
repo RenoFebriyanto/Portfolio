@@ -117,6 +117,7 @@ export function Hero({ scrollTo }: Props) {
         duration: 0.42,
         ease: 'none',
       }, 0.05)
+      .to('.hero-scene-transition', { opacity: 1, duration: 0.14, ease: 'none' }, 0)
       .to('.hero-scene-background', { scale: 1.12, ease: 'none' }, 0)
       .to('.hero-object', { yPercent: -8, scale: 1.04, stagger: 0.025, ease: 'none' }, 0)
       .to('.hero-scroll', { autoAlpha: 0, duration: 0.16, ease: 'none' }, 0);
@@ -175,6 +176,7 @@ export function Hero({ scrollTo }: Props) {
 
       <div className="hero-scene" aria-hidden="true">
         <img className="hero-scene-background" src="/Assets/images/hero-studio-bg.jpg" alt="" />
+        <div className="hero-scene-transition" />
         <img className="hero-object hero-object--tablet" src="/Assets/images/hero-objects/tablet.png" alt="" />
         <img className="hero-object hero-object--pen" src="/Assets/images/hero-objects/pen.png" alt="" />
         <img className="hero-object hero-object--suzanne" src="/Assets/images/hero-objects/suzanne.png" alt="" />

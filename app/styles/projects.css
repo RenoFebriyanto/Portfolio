@@ -134,6 +134,13 @@
     scrollbar-color: var(--border-dim) transparent;
 }
 
+@media (min-width: 901px) {
+    .projects-grid-viewport {
+        overflow: hidden;
+        cursor: default;
+    }
+}
+
 .projects-grid {
     display: flex;
     flex: 0 0 max-content;

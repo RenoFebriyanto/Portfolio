@@ -1,8 +1,8 @@
-// SESUDAH
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ProjectCard } from '~/components/sections/ProjectCard';
 import { projects as PROJECTS } from '~/data/projects';
 import type { Project } from '~/data/projects';
+import { gsap, useGSAP } from '~/utils/gsap';
 
 export type { Project };
 
@@ -19,17 +19,50 @@ const CATEGORIES = [
 /* ── Section Component ── */
 export function Projects() {
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const sectionRef = useRef<HTMLElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const handleFilter = useCallback((key: string) => {
     setActiveFilter(key);
   }, []);
+
+  useGSAP(() => {
+    const section = sectionRef.current;
+    const viewport = viewportRef.current;
+    const grid = gridRef.current;
+    if (!section || !viewport || !grid) return;
+
+    const media = gsap.matchMedia();
+    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+      const getDistance = () => Math.max(0, grid.scrollWidth - viewport.clientWidth);
+      if (getDistance() <= 0) return;
+
+      gsap.to(grid, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${Math.max(window.innerHeight * 0.8, getDistance() * 0.65)}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.6,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    });
+
+    return () => media.revert();
+  }, { scope: sectionRef, dependencies: [activeFilter], revertOnUpdate: true });
 
   const visibleProjects = activeFilter === 'all'
     ? PROJECTS
     : PROJECTS.filter(p => p.category === activeFilter);
 
   return (
-    <section className="projects" id="projects">
+    <section className="projects" id="projects" ref={sectionRef}>
       <div className="container" data-horizontal-projects>
 
         {/* Section divider — animated line draw via useSectionAnimations */}
@@ -71,8 +104,8 @@ export function Projects() {
         </div>
 
         {/* Project grid — identical to vanilla #projects-grid */}
-        <div className="projects-grid-viewport">
-          <div className="projects-grid" id="projects-grid">
+        <div className="projects-grid-viewport" ref={viewportRef}>
+          <div className="projects-grid" id="projects-grid" ref={gridRef}>
             {visibleProjects.map((proj, index) => (
               <ProjectCard
                 key={proj.id}

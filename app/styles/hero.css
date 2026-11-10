@@ -55,6 +55,16 @@
   filter: brightness(0.7) saturate(0.82);
 }
 
+.hero-scene-transition {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  height: 34%;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--bg-primary) 88%);
+}
+
 .hero-object {
   position: absolute;
   z-index: 1;
