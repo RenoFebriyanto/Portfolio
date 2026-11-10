@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap, useGSAP } from '~/utils/gsap';
 import { HeroCanvas } from '~/components/three/HeroCanvas';
 import { Hero3D } from '~/components/ui/Hero3D';
@@ -7,8 +7,21 @@ interface Props {
   scrollTo: (index: number) => void;
 }
 
+const ROLES = ['Game Developer', '3D Artist', 'Designer', '2D Artist', 'Programmer'];
+
 export function Hero({ scrollTo }: Props) {
   const heroRef = useRef<HTMLElement>(null);
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const interval = window.setInterval(() => {
+      setRoleIndex(index => (index + 1) % ROLES.length);
+    }, 2600);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   useGSAP(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -62,6 +75,7 @@ export function Hero({ scrollTo }: Props) {
       duration: 0.7,
       stagger: 0.12,
     }, '-=0.25')
+    .from('.hero-role', { y: 18, opacity: 0, duration: 0.55 }, '-=0.15')
     .from('.hero-desc',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.35')
     .from('.hero-tags',   { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
     .from('.hero-cta',    { y: 20, scale: 0.94, opacity: 0, duration: 0.6 }, '-=0.45')
@@ -120,10 +134,13 @@ export function Hero({ scrollTo }: Props) {
           </div>
 
           <h1 className="hero-heading">
-            <span className="hero-heading-line"><span>Game Tech</span></span>
-            <span className="hero-heading-line"><span>& <span className="accent">3D</span></span></span>
-            <span className="hero-heading-line"><span>Creator.</span></span>
+            <span className="hero-heading-line"><span>I'm Reno</span></span>
+            <span className="hero-heading-line"><span>Febriyanto.</span></span>
           </h1>
+
+          <p className="hero-role" aria-label={`I'm a ${ROLES[roleIndex]}`}>
+            I'm a <span key={ROLES[roleIndex]} className="hero-role-word">{ROLES[roleIndex]}</span>
+          </p>
 
           <p className="hero-desc">
             Building immersive experiences at the intersection of game technology,
@@ -131,7 +148,7 @@ export function Hero({ scrollTo }: Props) {
           </p>
 
           <div className="hero-tags">
-            {['Game Dev', '3D Artist', '2D Artist', 'Designer', 'Programmer', 'Web 3'].map(tag => (
+            {['Unity', 'Blender', 'Real-time 3D', 'Interactive Web', 'Visual Effects', 'Game Systems'].map(tag => (
               <span key={tag} className="tag">{tag}</span>
             ))}
           </div>
