@@ -11,6 +11,7 @@ const MODEL_PATH = '/models/3dSphere.glb';
 const AUTO_SPEED = 0.0025;
 const DRAG_SPEED = 0.007;
 const DRAG_DAMP  = 0.88;
+const EXIT_DURATION = 1100;
 
 export function Hero3D() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,10 +40,59 @@ export function Hero3D() {
     let isSectionActive = true;
     let isDragging     = false;
     let sectionStopTimer: ReturnType<typeof setTimeout> | null = null;
+    let exitStartTime: number | null = null;
+    let exitStartCameraZ = 15.5;
+    let exitStartRotation = { x: 0, y: 0 };
+    let exitOverlayAnimation: Animation | null = null;
     let prevMouse      = { x: 0, y: 0 };
     let rotVel         = { x: 0, y: 0 };
     let destroyed      = false;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const exitOverlay = document.createElement('div');
+    exitOverlay.className = 'hero-zoom-transition';
+    exitOverlay.setAttribute('aria-hidden', 'true');
+    exitOverlay.style.display = 'none';
+    document.body.appendChild(exitOverlay);
+
+    function showExitTransition(el: HTMLElement) {
+      if (prefersReducedMotion) return;
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const radius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+      exitOverlay.style.display = 'block';
+      exitOverlay.style.clipPath = `circle(0px at ${x}px ${y}px)`;
+      exitOverlay.style.opacity = '1';
+      exitOverlayAnimation?.cancel();
+      exitOverlayAnimation = exitOverlay.animate(
+        [
+          { clipPath: `circle(0px at ${x}px ${y}px)` },
+          { clipPath: `circle(${radius}px at ${x}px ${y}px)` },
+        ],
+        { duration: EXIT_DURATION, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'forwards' }
+      );
+      exitOverlayAnimation.onfinish = () => {
+        exitOverlay.style.clipPath = `circle(${radius}px at ${x}px ${y}px)`;
+      };
+    }
+
+    function hideExitTransition() {
+      if (exitOverlay.style.display === 'none') return;
+      exitOverlayAnimation?.cancel();
+      exitOverlayAnimation = exitOverlay.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 480, easing: 'ease-out', fill: 'forwards' }
+      );
+      exitOverlayAnimation.onfinish = () => {
+        exitOverlay.style.display = 'none';
+        exitOverlay.style.clipPath = '';
+        exitOverlay.style.opacity = '';
+        exitOverlayAnimation = null;
+      };
+    }
 
     async function init() {
       if (destroyed) return;
@@ -143,15 +193,25 @@ export function Hero3D() {
         animFrameId = requestAnimationFrame(tick);
         const t = (performance.now() - t0) * 0.001;
         if (camera) {
-          const targetZ = prefersReducedMotion
-            ? 15.5
-            : isSectionActive
-              ? (isHovered ? 13.5 : 15.5)
-              : 19;
-          camera.position.z += (targetZ - camera.position.z) * 0.035;
+          if (exitStartTime !== null) {
+            const progress = Math.min((performance.now() - exitStartTime) / EXIT_DURATION, 1);
+            const eased = progress * progress * progress;
+            camera.position.z = exitStartCameraZ + (5.2 - exitStartCameraZ) * eased;
+            if (mesh) {
+              mesh.rotation.y = exitStartRotation.y + Math.PI * 3 * eased;
+              mesh.rotation.x = exitStartRotation.x + 0.35 * eased;
+            }
+          } else {
+            const targetZ = prefersReducedMotion
+              ? 15.5
+              : isSectionActive
+                ? (isHovered ? 13.5 : 15.5)
+                : 19;
+            camera.position.z += (targetZ - camera.position.z) * 0.035;
+          }
         }
         if (mesh) {
-          if (!isDragging) {
+          if (exitStartTime === null && !isDragging) {
             rotVel.x *= DRAG_DAMP;
             rotVel.y *= DRAG_DAMP;
             if (Math.abs(rotVel.y) < 0.0005) {
@@ -161,8 +221,10 @@ export function Hero3D() {
               mesh.rotation.x += rotVel.x;
             }
           }
-          const targetY = isHovered ? Math.sin(t * 1.6) * 0.05 : 0;
-          mesh.position.y += (targetY - mesh.position.y) * 0.04;
+          if (exitStartTime === null) {
+            const targetY = isHovered ? Math.sin(t * 1.6) * 0.05 : 0;
+            mesh.position.y += (targetY - mesh.position.y) * 0.04;
+          }
         }
         renderer.render(scene, camera);
       }
@@ -217,16 +279,29 @@ export function Hero3D() {
       const onLeaveSection = (e: Event) => {
         if ((e as CustomEvent).detail?.id !== 'hero') return;
         isSectionActive = false;
+        if (mesh && camera && !prefersReducedMotion) {
+          exitStartTime = performance.now();
+          exitStartCameraZ = camera.position.z;
+          exitStartRotation = { x: mesh.rotation.x, y: mesh.rotation.y };
+          isDragging = false;
+          showExitTransition(el);
+        }
         if (sectionStopTimer) clearTimeout(sectionStopTimer);
         sectionStopTimer = setTimeout(() => {
           if (isSectionActive || animFrameId === null) return;
           cancelAnimationFrame(animFrameId);
           animFrameId = null;
-        }, 800);
+        }, EXIT_DURATION + 250);
       };
       const onEnterSection = (e: Event) => {
-        if ((e as CustomEvent).detail?.id !== 'hero') return;
+        const id = (e as CustomEvent).detail?.id;
+        if (id !== 'hero') {
+          hideExitTransition();
+          return;
+        }
         isSectionActive = true;
+        exitStartTime = null;
+        hideExitTransition();
         if (sectionStopTimer) {
           clearTimeout(sectionStopTimer);
           sectionStopTimer = null;
@@ -261,6 +336,8 @@ export function Hero3D() {
       if (animFrameId !== null) cancelAnimationFrame(animFrameId);
       if (sectionStopTimer) clearTimeout(sectionStopTimer);
       if (ro) ro.disconnect();
+      exitOverlayAnimation?.cancel();
+      exitOverlay.remove();
 
       const el = containerRef.current;
       if (el) {

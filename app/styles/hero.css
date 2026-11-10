@@ -136,6 +136,15 @@
   display: block !important;
 }
 
+.hero-zoom-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  pointer-events: none;
+  clip-path: circle(0 at 50% 50%);
+}
+
 /* ── Hero content (left column) ── */
 .hero-content {
   position: relative;

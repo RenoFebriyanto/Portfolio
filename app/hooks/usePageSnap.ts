@@ -13,7 +13,10 @@ const SECTIONS: SectionDef[] = [
 export function usePageSnap() {
   const snap = useSnapNavigation({
     panels: SECTIONS,
-    leaveDelay: panelId => panelId === 'hero' ? 180 : 0,
+    leaveDelay: panelId =>
+      panelId === 'hero' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 1100
+        : 0,
   });
   return { ...snap, sections: SECTIONS };
 }
