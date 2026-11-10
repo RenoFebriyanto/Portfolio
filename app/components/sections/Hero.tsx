@@ -148,7 +148,7 @@ export function Hero({ scrollTo }: Props) {
           </p>
 
           <div className="hero-tags">
-            {['Unity', 'Blender', 'Real-time 3D', 'Interactive Web', 'Visual Effects', 'Game Systems'].map(tag => (
+            {['Unity', 'Blender', 'VFX Graph', '2D Art', 'Shader Graph', 'UI/UX Design'].map(tag => (
               <span key={tag} className="tag">{tag}</span>
             ))}
           </div>
