@@ -12,8 +12,6 @@ export function Hero({ scrollTo }: Props) {
 
   useGSAP(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const waitForSwarm = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  let pendingEnter = false;
 
   const sceneTl = gsap.timeline({
     paused: true,
@@ -77,20 +75,6 @@ export function Hero({ scrollTo }: Props) {
 
   const onEnter = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
-    requestEnter();
-  };
-
-  const requestEnter = () => {
-    if (waitForSwarm) {
-      pendingEnter = true;
-      return;
-    }
-    playEnter();
-  };
-
-  const onSectionBuilt = (e: Event) => {
-    if ((e as CustomEvent<{ id?: string }>).detail?.id !== 'hero' || !pendingEnter) return;
-    pendingEnter = false;
     playEnter();
   };
 
@@ -103,7 +87,6 @@ export function Hero({ scrollTo }: Props) {
 
   const onLeave = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
-    pendingEnter = false;
     heroObjects.forEach(object => gsap.to(object, {
       x: 0,
       y: 0,
@@ -118,19 +101,17 @@ export function Hero({ scrollTo }: Props) {
 
   let initialEnterFrame = 0;
   window.addEventListener('sectionenter', onEnter);
-  window.addEventListener('swarm:sectionbuilt', onSectionBuilt);
   window.addEventListener('sectionleave', onLeave);
   initialEnterFrame = window.requestAnimationFrame(() => {
     const heroPanel = heroRef.current?.closest<HTMLElement>('[data-panel-id="hero"]');
     if (heroPanel?.dataset.visible === 'true' && tl.paused() && tl.progress() === 0) {
-      requestEnter();
+      playEnter();
     }
   });
 
   return () => {
     window.cancelAnimationFrame(initialEnterFrame);
     window.removeEventListener('sectionenter', onEnter);
-    window.removeEventListener('swarm:sectionbuilt', onSectionBuilt);
     window.removeEventListener('sectionleave', onLeave);
     pointerHandlers.forEach(cleanup => cleanup());
   };

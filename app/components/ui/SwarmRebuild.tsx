@@ -24,8 +24,9 @@ interface SwarmAgent {
 }
 
 const AGENT_COUNT = 12;
-const TASK_DURATION = 820;
-const TASK_STAGGER = 42;
+const TASK_DURATION = 460;
+const TASK_STAGGER = 55;
+const TASK_GAP = 70;
 const TEXT_SELECTOR = [
   "h1",
   "h2",
@@ -68,7 +69,6 @@ const BOX_SELECTOR = [
   ".reveal",
   ".hero-status",
   ".section-label",
-  ".reveal",
   ".tag",
   ".project-card",
   ".stat-card",
@@ -83,6 +83,7 @@ const BOX_SELECTOR = [
 ].join(",");
 const TARGET_SELECTOR = `${TEXT_SELECTOR},${BOX_SELECTOR}`;
 const BUILD_CONTAINER_SELECTOR = [
+  ".reveal",
   ".hero-status",
   ".section-label",
   ".tag",
@@ -116,6 +117,15 @@ const getTargetKind = (element: HTMLElement): TargetKind => {
   return "object";
 };
 
+const getBuildRoots = (root: HTMLElement) => {
+  const candidates = Array.from(root.querySelectorAll<HTMLElement>(TARGET_SELECTOR));
+  const candidateSet = new Set(candidates);
+  return candidates.filter((element) => {
+    const buildContainer = element.parentElement?.closest(BUILD_CONTAINER_SELECTOR);
+    return !(buildContainer instanceof HTMLElement && candidateSet.has(buildContainer));
+  });
+};
+
 const collectTargets = (
   panelId: string | null,
   builtElements: WeakSet<HTMLElement>,
@@ -124,25 +134,17 @@ const collectTargets = (
   const root = getPanel(panelId) ?? document.body;
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  const candidates = Array.from(root.querySelectorAll<HTMLElement>(TARGET_SELECTOR));
-  const candidateSet = new Set(candidates);
-
-  return candidates
+  return getBuildRoots(root)
     .filter((element) => {
       if (builtElements.has(element) && !force) return false;
       if (element.closest("[hidden], [aria-hidden='true']")) return false;
-      if (
-        element.matches(TEXT_SELECTOR) &&
-        element.querySelector(TEXT_SELECTOR)
-      ) {
-        return false;
-      }
-
-      const buildContainer = element.parentElement?.closest(BUILD_CONTAINER_SELECTOR);
-      if (buildContainer instanceof HTMLElement && candidateSet.has(buildContainer)) return false;
 
       const rect = element.getBoundingClientRect();
       const style = window.getComputedStyle(element);
+      const opacity = Number.parseFloat(style.opacity);
+      const waitingForReveal =
+        element.matches(".reveal, .fs-reveal") ||
+        element.classList.contains("swarm-unbuilt");
       return (
         rect.width > 2 &&
         rect.height > 2 &&
@@ -151,14 +153,15 @@ const collectTargets = (
         rect.left < viewportWidth &&
         rect.top < viewportHeight &&
         style.display !== "none" &&
-        style.visibility !== "hidden"
+        (style.visibility !== "hidden" || element.classList.contains("swarm-unbuilt")) &&
+        (waitingForReveal || opacity > 0.02)
       );
     })
     .map((element) => ({ element, kind: getTargetKind(element) }))
     .sort((left, right) => {
-      const priority = (target: BuildTarget) =>
-        target.kind === "box" ? 0 : target.kind === "object" ? 1 : 2;
-      return priority(left) - priority(right);
+      const leftRect = left.element.getBoundingClientRect();
+      const rightRect = right.element.getBoundingClientRect();
+      return leftRect.top - rightRect.top || leftRect.left - rightRect.left;
     });
 };
 
@@ -223,7 +226,7 @@ export function SwarmRebuild() {
       element.style.setProperty("--swarm-type-steps", String(textLength));
       element.style.setProperty(
         "--swarm-type-duration",
-        `${Math.min(1200, Math.max(280, textLength * 22))}ms`,
+        `${Math.min(900, Math.max(220, textLength * 15))}ms`,
       );
       element.style.animationDelay = `${delay}ms`;
       const onTypeEnd = (event: AnimationEvent) => {
@@ -269,6 +272,7 @@ export function SwarmRebuild() {
     const finishTarget = (target: BuildTarget) => {
       const { element, kind } = target;
       element.classList.remove("swarm-build-pending");
+      element.classList.remove("swarm-unbuilt");
       pendingElements.delete(element);
       pendingVisibility.delete(element);
       builtElements.add(element);
@@ -304,16 +308,41 @@ export function SwarmRebuild() {
       force: boolean,
       notifySection: boolean,
     ) => {
+      const shouldNotifySection =
+        notifySection ||
+        (activeRun && runNotifiesSection && (!nextPanelId || nextPanelId === panelId));
       panelId = nextPanelId ?? panelId;
       clearPending();
-      const targets = collectTargets(panelId, builtElements, force);
-      runNotifiesSection = notifySection;
-      if (!targets.length) {
-        activeRun = false;
+      activeRun = false;
+
+      if (panelId === "hero") {
+        runNotifiesSection = false;
         window.dispatchEvent(
           new CustomEvent("swarm:buildcomplete", { detail: { id: panelId } }),
         );
-        if (notifySection) {
+        if (shouldNotifySection) {
+          window.dispatchEvent(
+            new CustomEvent("swarm:sectionbuilt", { detail: { id: panelId } }),
+          );
+        }
+        return;
+      }
+
+      const panel = getPanel(panelId);
+      if (force && panel) {
+        getBuildRoots(panel).forEach((element) => {
+          element.classList.add("swarm-unbuilt");
+          element.classList.remove("swarm-built");
+        });
+      }
+
+      const targets = collectTargets(panelId, builtElements, force);
+      runNotifiesSection = shouldNotifySection;
+      if (!targets.length) {
+        window.dispatchEvent(
+          new CustomEvent("swarm:buildcomplete", { detail: { id: panelId } }),
+        );
+        if (shouldNotifySection) {
           window.dispatchEvent(
             new CustomEvent("swarm:sectionbuilt", { detail: { id: panelId } }),
           );
@@ -326,9 +355,16 @@ export function SwarmRebuild() {
       targets.forEach((target, index) => {
         const agentIndex = index % AGENT_COUNT;
         const round = Math.floor(index / AGENT_COUNT);
+        pendingVisibility.set(
+          target.element,
+          target.element.classList.contains("visible"),
+        );
+        target.element.classList.remove("visible", "swarm-built");
+        pendingElements.add(target.element);
+        target.element.classList.add("swarm-build-pending");
         agents[agentIndex].tasks.push({
           target,
-          startsAt: now + 90 + round * (TASK_DURATION + 80) + agentIndex * TASK_STAGGER,
+          startsAt: now + 90 + round * (TASK_DURATION + TASK_GAP) + agentIndex * TASK_STAGGER,
           duration: TASK_DURATION,
           released: false,
         });
@@ -337,7 +373,7 @@ export function SwarmRebuild() {
       const latestTaskStart = Math.max(
         ...agents.flatMap((agent) => agent.tasks.map((task) => task.startsAt)),
       );
-      runEndsAt = latestTaskStart + TASK_DURATION + 1400;
+      runEndsAt = latestTaskStart + TASK_DURATION + 260;
       requestFrame();
     };
 
@@ -458,9 +494,6 @@ export function SwarmRebuild() {
             activeTask.target.element.classList.contains("visible"),
           );
           activeTask.target.element.classList.remove("visible", "swarm-built");
-          activeTask.target.element.querySelectorAll<HTMLElement>(".reveal").forEach((child) => {
-            child.classList.remove("visible", "swarm-built");
-          });
           activeTask.target.element.classList.add("swarm-build-pending");
           pendingElements.add(activeTask.target.element);
         }
@@ -549,13 +582,6 @@ export function SwarmRebuild() {
     const triggerScrollBuild = () => {
       window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(() => {
-        if (activeRun) {
-          scrollTimer = window.setTimeout(
-            () => triggerScrollBuild(),
-            Math.max(100, runEndsAt - performance.now() + 80),
-          );
-          return;
-        }
         startBuild(panelId, false, false);
       }, 140);
     };

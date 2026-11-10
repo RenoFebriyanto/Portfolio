@@ -29,6 +29,10 @@ export function useSectionAnimations() {
     function enterReveal(sectionEl: HTMLElement) {
       sectionEl.querySelectorAll<HTMLElement>('.reveal').forEach(el => {
         if (el.classList.contains('swarm-built')) return;
+        if (waitForSwarm) {
+          el.classList.remove('visible');
+          return;
+        }
         clearExitClasses(el);
         el.classList.remove('visible');
         void el.offsetWidth; // force reflow

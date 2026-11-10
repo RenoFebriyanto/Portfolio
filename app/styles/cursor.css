@@ -38,7 +38,8 @@ body.cursor-hidden .cursor-dot {
     opacity: 0;
 }
 
-.swarm-build-pending {
+.swarm-build-pending,
+.swarm-unbuilt {
     visibility: hidden !important;
 }
 
