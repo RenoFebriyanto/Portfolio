@@ -8,7 +8,6 @@ import {
 } from "react-router";
 import Nav    from "~/components/layout/Nav";
 import Cursor from "~/components/ui/Cursor";
-import { SwarmRebuild } from "~/components/ui/SwarmRebuild";
 
 /* ── Core styles — URUTAN PENTING ── */
 import "~/styles/variables.css";
@@ -77,7 +76,6 @@ export default function App() {
   return (
     <>
       <Cursor />
-      <SwarmRebuild />
       {/* Nav global hanya untuk home page.
           Project detail page (ForbiddenSpace, dll) sudah punya nav sendiri (.fs-nav),
           jadi tidak perlu Nav global yang akan numpuk di atasnya. */}

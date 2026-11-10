@@ -6,7 +6,8 @@
     cursor: none !important;
 }
 
-.cursor-dot {
+.cursor-dot,
+.cursor-ring {
     position: fixed;
     top: 0;
     left: 0;
@@ -17,54 +18,74 @@
 }
 
 .cursor-dot {
-    width: 7px;
-    height: 7px;
+    width: 5px;
+    height: 5px;
     background: var(--accent-primary);
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.65);
     transition:
+        width     0.18s var(--ease-smooth),
+        height    0.18s var(--ease-smooth),
         opacity   0.18s ease,
         background 0.18s ease;
 }
 
+.cursor-ring {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-primary);
+    background: transparent;
+    opacity: 0.55;
+    transition:
+        width     0.35s var(--ease-smooth),
+        height    0.35s var(--ease-smooth),
+        opacity   0.25s ease,
+        border-color 0.25s ease,
+        background   0.3s ease;
+}
+
+body.cursor-hover .cursor-ring {
+    width: 48px;
+    height: 48px;
+    opacity: 0.8;
+    border-color: var(--accent-bright);
+    background: var(--accent-glow);
+}
 body.cursor-hover .cursor-dot {
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.95);
+    width: 3px;
+    height: 3px;
+    opacity: 0.6;
+}
+
+body.cursor-click .cursor-ring {
+    width: 22px;
+    height: 22px;
+    opacity: 1;
+    border-color: var(--accent-primary);
+    background: rgba(255, 107, 53, 0.2);
 }
 body.cursor-click .cursor-dot {
+    width: 7px;
+    height: 7px;
+}
+
+body.cursor-card .cursor-ring {
+    width: 56px;
+    height: 56px;
+    opacity: 0.28;
+    border-color: var(--text-muted);
+    background: transparent;
+}
+body.cursor-card .cursor-dot {
     background: var(--accent-bright);
 }
 
+body.cursor-hidden .cursor-ring,
 body.cursor-hidden .cursor-dot {
     opacity: 0;
 }
 
-.swarm-build-pending,
-.swarm-unbuilt {
-    visibility: hidden !important;
-}
-
-.swarm-type-text {
-    animation: swarm-text-type var(--swarm-type-duration, 720ms)
-        steps(var(--swarm-type-steps, 24), end) both;
-    animation-delay: var(--swarm-type-delay, 0ms);
-}
-
-@keyframes swarm-text-type {
-    from { clip-path: inset(0 100% 0 0); }
-    to { clip-path: inset(0 0 0 0); }
-}
-
-.swarm-cursor-canvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: calc(var(--z-cursor, 9999) - 1);
-    pointer-events: none;
-    will-change: transform;
-}
-
 @media (hover: none), (pointer: coarse) {
-    .cursor-dot, .swarm-cursor-canvas { display: none; }
+    .cursor-dot, .cursor-ring { display: none; }
     *, *::before, *::after { cursor: auto !important; }
 }

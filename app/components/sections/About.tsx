@@ -56,15 +56,8 @@ export function About() {
 
   useGSAP(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const waitForSwarm =
-      window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduced;
-    let pendingEnter = false;
-    let hasEntered = false;
 
-    const tl = gsap.timeline({
-      paused: true,
-      defaults: { ease: 'power3.out', duration: 0.7, immediateRender: false },
-    });
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 0.7 } });
 
     if (!reduced) {
       tl.from('.section-label',          { y: 16, opacity: 0, duration: 0.5 })
@@ -78,21 +71,7 @@ export function About() {
 
     function onEnter(e: Event) {
       if ((e as CustomEvent).detail?.id !== 'about') return;
-      if (waitForSwarm) {
-        pendingEnter = true;
-        return;
-      }
-      runEnter();
-    }
 
-    function onSectionBuilt(e: Event) {
-      if ((e as CustomEvent<{ id?: string }>).detail?.id !== 'about' || !pendingEnter) return;
-      pendingEnter = false;
-      runEnter();
-    }
-
-    function runEnter() {
-      hasEntered = true;
       tl.play(0);
       // Underline kecil di bawah "01 About" itu CSS biasa (.section-label.visible),
       // gak perlu dikonversi ke GSAP, cukup tambah class-nya manual:
@@ -151,48 +130,17 @@ export function About() {
       });
     }
 
-    function onElementBuilt(e: Event) {
-      if (!hasEntered || !(e.target instanceof HTMLElement)) return;
-      const element = e.target;
-      if (!sectionRef.current?.contains(element)) return;
-
-      let from: { y: number; scale?: number; opacity: number } | null = null;
-      if (element.matches('.about-heading')) from = { y: 28, scale: 0.88, opacity: 0 };
-      else if (element.matches('.about-bio')) from = { y: 22, scale: 0.94, opacity: 0 };
-      else if (element.matches('.about-doing')) from = { y: 16, scale: 0.94, opacity: 0 };
-      else if (element.matches('.about-identity')) from = { y: 24, scale: 0.92, opacity: 0 };
-      else if (element.matches('.stat-card')) from = { y: 20, scale: 0.92, opacity: 0 };
-      else if (element.matches('.about-status')) from = { y: 16, scale: 0.94, opacity: 0 };
-      else if (element.matches('.section-label')) from = { y: 16, opacity: 0 };
-
-      if (from) {
-        gsap.fromTo(element, from, {
-          y: 0,
-          scale: 1,
-          opacity: 1,
-          duration: 0.7,
-          ease: 'power3.out',
-          overwrite: 'auto',
-        });
-      }
-    }
-
     function onLeave(e: Event) {
       if ((e as CustomEvent).detail?.id !== 'about') return;
-      pendingEnter = false;
-      hasEntered = false;
       document.getElementById('avatar-wrap')?.classList.remove('photo-ready');
       document.querySelector('.about-identity')?.classList.remove('shimmer-ready');
     }
 
     window.addEventListener('sectionenter', onEnter);
-    window.addEventListener('swarm:sectionbuilt', onSectionBuilt);
-    window.addEventListener('swarm:built', onElementBuilt);
     window.addEventListener('sectionleave', onLeave);
+
     return () => {
       window.removeEventListener('sectionenter', onEnter);
-      window.removeEventListener('swarm:sectionbuilt', onSectionBuilt);
-      window.removeEventListener('swarm:built', onElementBuilt);
       window.removeEventListener('sectionleave', onLeave);
     };
   }, { scope: sectionRef });

@@ -13,14 +13,8 @@ export function Hero({ scrollTo }: Props) {
   useGSAP(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const sceneTl = gsap.timeline({
-    paused: true,
-    defaults: { ease: 'power3.out', immediateRender: false },
-  });
-  const tl = gsap.timeline({
-    paused: true,
-    defaults: { ease: 'power3.out', immediateRender: false },
-  });
+  const sceneTl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
   const heroObjects = gsap.utils.toArray<HTMLElement>('.hero-object');
   const pointerHandlers = heroObjects.map(object => {
     const moveX = gsap.quickTo(object, 'x', { duration: 0.45, ease: 'power3.out' });
@@ -75,10 +69,6 @@ export function Hero({ scrollTo }: Props) {
 
   const onEnter = (e: Event) => {
     if ((e as CustomEvent).detail?.id !== 'hero') return;
-    playEnter();
-  };
-
-  const playEnter = () => {
     sceneTl.timeScale(1);
     sceneTl.play(0);
     tl.timeScale(1);
@@ -105,7 +95,8 @@ export function Hero({ scrollTo }: Props) {
   initialEnterFrame = window.requestAnimationFrame(() => {
     const heroPanel = heroRef.current?.closest<HTMLElement>('[data-panel-id="hero"]');
     if (heroPanel?.dataset.visible === 'true' && tl.paused() && tl.progress() === 0) {
-      playEnter();
+      sceneTl.play(0);
+      tl.play(0);
     }
   });
 
