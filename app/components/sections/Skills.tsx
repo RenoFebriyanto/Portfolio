@@ -71,7 +71,6 @@ export function Skills() {
           {SKILLS_DATA.map((group, i) => (
             <div
               key={group.key}
-              /* NOTE: DO NOT add 'visible' here — it's toggled by sectionenter event */
               className={`skill-group ${group.key} reveal reveal-delay-${Math.min(i + 1, 4)}`}
             >
               <div className="skill-group-icon">

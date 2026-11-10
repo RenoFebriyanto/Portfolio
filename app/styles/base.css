@@ -26,10 +26,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Home page — snap-panel system butuh body dikunci full-viewport */
+/* Home page uses native document scrolling; project detail has its own layout. */
 body.route-home {
-    height: 100%;
-    overflow: hidden;
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Project detail page (/projects/:slug) — scroll halaman normal */

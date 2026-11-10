@@ -1,6 +1,3 @@
-import { useRef } from 'react';
-import { gsap, useGSAP } from '~/utils/gsap';
-
 const startYear  = 2023;
 const startMonth = 1;
 
@@ -52,104 +49,11 @@ function resolveStatNum(num: string): string {
 }
 
 export function About() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 0.7 } });
-
-    if (!reduced) {
-      tl.from('.section-label',          { y: 16, opacity: 0, duration: 0.5 })
-        .from('.about-heading',          { y: 28, scale: 0.88, opacity: 0 }, '-=0.2')
-        .from('.about-bio',              { y: 22, scale: 0.94, opacity: 0, stagger: 0.12 }, '-=0.4')
-        .from('.about-doing',            { y: 16, scale: 0.94, opacity: 0 }, '-=0.3')
-        .from('.about-identity',         { y: 24, scale: 0.92, opacity: 0 }, '-=0.5')
-        .from('.about-stats .stat-card', { y: 20, scale: 0.92, opacity: 0, stagger: 0.08 }, '-=0.45')
-        .from('.about-status',           { y: 16, scale: 0.94, opacity: 0 }, '-=0.3');
-    }
-
-    function onEnter(e: Event) {
-      if ((e as CustomEvent).detail?.id !== 'about') return;
-
-      tl.play(0);
-      // Underline kecil di bawah "01 About" itu CSS biasa (.section-label.visible),
-      // gak perlu dikonversi ke GSAP, cukup tambah class-nya manual:
-      sectionRef.current?.querySelector('.section-label')?.classList.add('visible');
-
-      // Avatar photo reveal
-      const avatarWrap = document.getElementById('avatar-wrap');
-      if (avatarWrap) {
-        avatarWrap.classList.remove('photo-ready');
-        void avatarWrap.offsetWidth;
-        setTimeout(() => avatarWrap.classList.add('photo-ready'), 200);
-      }
-
-      // Identity card shimmer
-      const identity = document.querySelector<HTMLElement>('.about-identity');
-      if (identity) {
-        identity.classList.remove('shimmer-ready');
-        void identity.offsetWidth;
-        identity.classList.add('shimmer-ready');
-      }
-
-      // Stat count-up — logic lama, tetap dipakai
-      document.querySelectorAll<HTMLElement>('.stat-num').forEach(el => {
-        const card   = el.closest('.stat-card');
-        const rawKey = el.dataset.raw ?? '';
-        card?.classList.remove('counted');
-
-        let resolvedNum: string;
-        if (rawKey === 'YEARS_ACTIVE')       resolvedNum = resolveYearsActive();
-        else if (rawKey === 'PROJECT_COUNT') resolvedNum = '6';
-        else resolvedNum = el.textContent?.replace(/[^0-9.]/g, '') ?? '';
-
-        const accentEl = el.querySelector('.stat-accent');
-        const suffix   = accentEl ? accentEl.outerHTML : '';
-
-        if (!resolvedNum || isNaN(parseFloat(resolvedNum))) {
-          card?.classList.add('counted');
-          return;
-        }
-
-        const isDecimal = resolvedNum.includes('.');
-        const end       = parseFloat(resolvedNum);
-        const decimals  = isDecimal ? (resolvedNum.split('.')[1]?.length ?? 1) : 0;
-        el.innerHTML    = `${(0).toFixed(decimals)}${suffix}`;
-
-        const duration = 900;
-        const t0       = performance.now();
-        function tick(now: number) {
-          const progress = Math.min((now - t0) / duration, 1);
-          const eased    = 1 - Math.pow(1 - progress, 2);
-          el.innerHTML   = `${(eased * end).toFixed(decimals)}${suffix}`;
-          if (progress < 1) requestAnimationFrame(tick);
-          else { el.innerHTML = `${end.toFixed(decimals)}${suffix}`; card?.classList.add('counted'); }
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-
-    function onLeave(e: Event) {
-      if ((e as CustomEvent).detail?.id !== 'about') return;
-      document.getElementById('avatar-wrap')?.classList.remove('photo-ready');
-      document.querySelector('.about-identity')?.classList.remove('shimmer-ready');
-    }
-
-    window.addEventListener('sectionenter', onEnter);
-    window.addEventListener('sectionleave', onLeave);
-
-    return () => {
-      window.removeEventListener('sectionenter', onEnter);
-      window.removeEventListener('sectionleave', onLeave);
-    };
-  }, { scope: sectionRef });
-
   return (
-    <section className="about" id="about" ref={sectionRef}>
+    <section className="about" id="about">
       <div className="container">
 
-        <div className="section-label">
+        <div className="section-label reveal">
           <span className="section-label-num">01</span>
           <span className="section-label-line"></span>
           <span className="section-label-text">About</span>
@@ -157,13 +61,13 @@ export function About() {
 
         <div className="about-grid">
           <div className="about-left">
-            <h2 className="about-heading" dangerouslySetInnerHTML={{ __html: ABOUT.headingHTML }} />
+            <h2 className="about-heading reveal" dangerouslySetInnerHTML={{ __html: ABOUT.headingHTML }} />
             <div className="about-bio-container">
               {ABOUT.bio.map((text, i) => (
-                <p key={i} className="about-bio" dangerouslySetInnerHTML={{ __html: text }} />
+                <p key={i} className="about-bio reveal" dangerouslySetInnerHTML={{ __html: text }} />
               ))}
             </div>
-            <div className="about-doing">
+            <div className="about-doing reveal">
               {ABOUT.chips.map(chip => (
                 <div key={chip} className="about-doing-chip">
                   <span className="about-doing-chip-dot"></span>
@@ -174,7 +78,7 @@ export function About() {
           </div>
 
           <div className="about-panel">
-            <div className="about-identity">
+            <div className="about-identity reveal">
               <div className="about-identity-avatar" id="avatar-wrap">
                 <img src={ABOUT.photo} alt={ABOUT.name} className="avatar-photo"
                      draggable={false}
@@ -198,7 +102,7 @@ export function About() {
 
             <div className="about-stats">
               {ABOUT.stats.map(s => (
-                <div key={s.label} className="stat-card">
+                <div key={s.label} className="stat-card reveal">
                   <div className="stat-num" data-raw={s.num}>
                     {resolveStatNum(s.num)}
                     {s.accent && <span className="stat-accent">{s.accent}</span>}
@@ -208,7 +112,7 @@ export function About() {
               ))}
             </div>
 
-            <div className="about-status">
+            <div className="about-status reveal">
               <div className="about-status-left">
                 <span className="about-status-dot"></span>
                 <span className="about-status-text">{ABOUT.statusText}</span>

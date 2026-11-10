@@ -5,15 +5,14 @@
 ================================================ */
 
 .projects {
-    height: 100%;
-    min-height: 100%;
+    min-height: 100vh;
     padding: clamp(16px, 3.5vh, 48px) 0 clamp(16px, 3vh, 40px);
     position: relative;
     overflow: visible;
+    box-sizing: border-box;
 }
 
 .projects > .container {
-    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -123,24 +122,28 @@
 
 /* ── PROJECT CAROUSEL ── */
 .projects-grid-viewport {
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
     width: 100%;
     min-height: 0;
-    flex: 1;
+    flex: none;
     display: flex;
     padding-bottom: clamp(24px, 4vh, 48px);
     cursor: ew-resize;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-dim) transparent;
 }
 
 .projects-grid {
     display: flex;
-    flex: 1 0 max-content;
+    flex: 0 0 max-content;
     min-height: 0;
     align-items: stretch;
     gap: var(--space-md);
     width: max-content;
     min-width: 100%;
-    will-change: transform;
+    height: min(58vh, 560px);
+    min-height: 340px;
 }
 
 /* ── PROJECT CARD ── */

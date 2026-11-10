@@ -10,7 +10,7 @@ export default function Nav() {
   const [scrolled, setScrolled]     = useState(false);
   const [currentId, setCurrentId]   = useState("hero");
 
-  // Listen to sectionenter events from usePageSnap
+  // The home page updates these events as the native scroll crosses sections.
   useEffect(() => {
     const onEnter = (e: Event) => {
       const id = (e as CustomEvent).detail?.id as string;
@@ -24,9 +24,6 @@ export default function Nav() {
   const SECTION_IDS = ["hero", "about", "projects", "skills", "contact"];
 
   const navigateTo = (id: string) => {
-  // Langsung pakai window.PageNav (di-expose oleh _index.tsx) —
-  // tidak perlu lagi cari & klik ulang anchor (rawan rekursi
-  // karena anchor Nav sendiri bisa ke-match oleh querySelector).
   const nav = (window as unknown as Record<string, { goTo?: (i: number) => void }>).PageNav;
   const idx = SECTION_IDS.indexOf(id);
   if (nav?.goTo && idx !== -1) nav.goTo(idx);
@@ -56,7 +53,6 @@ export default function Nav() {
       <ul className="nav-links">
         {NAV_SECTIONS.map(sec => (
           <li key={sec.id}>
-            {/* Real anchor so usePageSnap's querySelector can find it */}
             <a
               href={`#${sec.id}`}
               onClick={e => { e.preventDefault(); navigateTo(sec.id); }}

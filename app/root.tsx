@@ -27,8 +27,7 @@ import "~/styles/contact.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  // Home page pakai snap-panel system (body harus dikunci full-viewport).
-  // Project detail page (/projects/:slug) butuh scroll halaman normal.
+  // Home uses native document scrolling; project details keep their own layout.
   const isProjectPage = location.pathname.startsWith("/projects/");
 
   return (

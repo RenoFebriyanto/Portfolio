@@ -4,6 +4,7 @@
 ================================================ */
 
 .skills {
+    min-height: 100vh;
     padding: var(--space-3xl) 0;
     position: relative;
 }
@@ -157,15 +158,14 @@
     position: relative;
 }
 
-/* Skill bar fill — width diset via inline CSS var --skill-level (lihat Skills.tsx) */
+/* Skill bars scale with scroll progress via ScrollTrigger. */
 .skill-bar-fill {
     height: 100%;
     border-radius: 2px;
-    width: 0%;
-    transition: width 1.1s var(--ease-smooth);
+    width: var(--skill-level, 0%);
+    transform: scaleX(0);
+    transform-origin: left center;
 }
-
-.skill-group.visible .skill-bar-fill { width: var(--skill-level, 0%); }
 
 .skill-group.game  .skill-bar-fill { background: linear-gradient(90deg, var(--accent-primary), var(--accent-bright)); }
 .skill-group.art   .skill-bar-fill { background: linear-gradient(90deg, #a78bfa, #c4b5fd); }

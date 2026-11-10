@@ -76,6 +76,11 @@
     transform 0.75s var(--ease-smooth);
 }
 
+.reveal.scroll-reveal-driven {
+  transition: none !important;
+  will-change: opacity, transform;
+}
+
 /* ── Visible state — primary (matches vanilla .reveal.visible) ── */
 .reveal.visible {
   opacity: 1;
